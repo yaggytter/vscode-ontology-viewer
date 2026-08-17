@@ -1,0 +1,6 @@
+{
+  "name": "JSON-LD",
+  "scopeName": "source.jsonld",
+  "fileTypes": ["jsonld"],
+  "patterns": [{ "include": "source.json" }]
+}

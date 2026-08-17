@@ -1,0 +1,44 @@
+# Neighborhood Garden — small class hierarchy and inverse relations.
+# まちの共同菜園 — 小規模なクラス階層と逆関係のサンプルです。
+#
+# This fictional ontology was created from scratch for Ontology Viewer.
+# It contains no copied vocabulary, records, or third-party sample data.
+
+@prefix : <https://example.org/ontology/neighborhood-garden#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/ontology/neighborhood-garden> a owl:Ontology ;
+  rdfs:label "まちの共同菜園"@ja, "Neighborhood Garden"@en ;
+  rdfs:comment "A compact fictional model of shared garden plots, plants, and volunteers."@en .
+
+:GardenEntity a owl:Class ; rdfs:label "Garden Entity"@en .
+:Place a owl:Class ; rdfs:label "Place"@en ; rdfs:subClassOf :GardenEntity .
+:LivingThing a owl:Class ; rdfs:label "Living Thing"@en ; rdfs:subClassOf :GardenEntity .
+:Garden a owl:Class ; rdfs:label "Garden"@en ; rdfs:subClassOf :Place .
+:Plot a owl:Class ; rdfs:label "Plot"@en ; rdfs:subClassOf :Place .
+:Plant a owl:Class ; rdfs:label "Plant"@en ; rdfs:subClassOf :LivingThing .
+:Herb a owl:Class ; rdfs:label "Herb"@en ; rdfs:subClassOf :Plant .
+:Vegetable a owl:Class ; rdfs:label "Vegetable"@en ; rdfs:subClassOf :Plant .
+:Volunteer a owl:Class ; rdfs:label "Volunteer"@en .
+
+:containsPlot a owl:ObjectProperty ;
+  rdfs:label "contains plot"@en ; rdfs:domain :Garden ; rdfs:range :Plot .
+:plotOf a owl:ObjectProperty ;
+  rdfs:label "plot of"@en ; owl:inverseOf :containsPlot .
+:growsIn a owl:ObjectProperty ;
+  rdfs:label "grows in"@en ; rdfs:domain :Plant ; rdfs:range :Plot .
+:tends a owl:ObjectProperty ;
+  rdfs:label "tends"@en ; rdfs:domain :Volunteer ; rdfs:range :Plot .
+
+:plotCode a owl:DatatypeProperty ;
+  rdfs:label "plot code"@en ; rdfs:domain :Plot ; rdfs:range xsd:string .
+:areaSquareMetres a owl:DatatypeProperty ;
+  rdfs:label "area (m²)"@en ; rdfs:domain :Plot ; rdfs:range xsd:decimal .
+
+:riversideGarden a :Garden ; rdfs:label "Riverside Garden"@en ; :containsPlot :sunnyPlot .
+:sunnyPlot a :Plot ; rdfs:label "Sunny Plot"@en ; :plotCode "P-01" ; :areaSquareMetres 12.5 .
+:lemonBalm a :Herb ; rdfs:label "Lemon Balm"@en ; :growsIn :sunnyPlot .
+:greenBean a :Vegetable ; rdfs:label "Green Bean"@en ; :growsIn :sunnyPlot .
+:aoi a :Volunteer ; rdfs:label "Aoi"@en ; :tends :sunnyPlot .

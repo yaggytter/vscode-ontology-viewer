@@ -1,0 +1,308 @@
+{
+  "name": "ontology-viewer",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
+  "version": "0.2.0",
+  "publisher": "AkihiroYAGASAKI",
+  "author": {
+    "name": "yaggytter",
+    "url": "https://github.com/yaggytter"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Visualization",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "ontology",
+    "owl",
+    "rdf",
+    "rdfs",
+    "turtle",
+    "semantic web",
+    "knowledge graph",
+    "skos",
+    "json-ld",
+    "rdf/xml",
+    "diagram",
+    "visual editor"
+  ],
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#172033",
+    "theme": "dark"
+  },
+  "preview": true,
+  "pricing": "Free",
+  "markdown": "github",
+  "qna": "https://github.com/yaggytter/vscode-ontology-viewer/issues",
+  "badges": [
+    {
+      "url": "https://github.com/yaggytter/vscode-ontology-viewer/actions/workflows/ci.yml/badge.svg",
+      "href": "https://github.com/yaggytter/vscode-ontology-viewer/actions/workflows/ci.yml",
+      "description": "Continuous integration status"
+    }
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": false
+  },
+  "l10n": "./l10n",
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "languages": [
+      {
+        "id": "turtle",
+        "aliases": [
+          "Turtle",
+          "turtle"
+        ],
+        "extensions": [
+          ".ttl",
+          ".turtle"
+        ],
+        "configuration": "./language-configuration/turtle-language-configuration.json",
+        "icon": {
+          "light": "./media/file-icon-light.svg",
+          "dark": "./media/file-icon-dark.svg"
+        }
+      },
+      {
+        "id": "trig",
+        "aliases": [
+          "TriG"
+        ],
+        "extensions": [
+          ".trig"
+        ],
+        "configuration": "./language-configuration/turtle-language-configuration.json"
+      },
+      {
+        "id": "ntriples",
+        "aliases": [
+          "N-Triples"
+        ],
+        "extensions": [
+          ".nt"
+        ],
+        "configuration": "./language-configuration/turtle-language-configuration.json"
+      },
+      {
+        "id": "notation3",
+        "aliases": [
+          "Notation3",
+          "N3"
+        ],
+        "extensions": [
+          ".n3"
+        ],
+        "configuration": "./language-configuration/turtle-language-configuration.json"
+      },
+      {
+        "id": "rdfxml",
+        "aliases": [
+          "RDF/XML",
+          "OWL/XML"
+        ],
+        "extensions": [
+          ".rdf",
+          ".owl"
+        ]
+      },
+      {
+        "id": "jsonld",
+        "aliases": [
+          "JSON-LD"
+        ],
+        "extensions": [
+          ".jsonld"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "turtle",
+        "scopeName": "source.turtle",
+        "path": "./syntaxes/turtle.tmLanguage.json"
+      },
+      {
+        "language": "trig",
+        "scopeName": "source.turtle",
+        "path": "./syntaxes/turtle.tmLanguage.json"
+      },
+      {
+        "language": "ntriples",
+        "scopeName": "source.turtle",
+        "path": "./syntaxes/turtle.tmLanguage.json"
+      },
+      {
+        "language": "notation3",
+        "scopeName": "source.turtle",
+        "path": "./syntaxes/turtle.tmLanguage.json"
+      },
+      {
+        "language": "rdfxml",
+        "scopeName": "source.rdfxml",
+        "path": "./syntaxes/rdfxml.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.xml": "xml"
+        }
+      },
+      {
+        "language": "jsonld",
+        "scopeName": "source.jsonld",
+        "path": "./syntaxes/jsonld.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.json": "json"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "ontologyViewer.openPreview",
+        "title": "%command.openPreview.title%",
+        "category": "%extension.category%",
+        "icon": "$(type-hierarchy-sub)"
+      },
+      {
+        "command": "ontologyViewer.convertToTurtle",
+        "title": "%command.convertToTurtle.title%",
+        "category": "%extension.category%"
+      },
+      {
+        "command": "ontologyViewer.exportLayout",
+        "title": "%command.exportLayout.title%",
+        "category": "%extension.category%"
+      },
+      {
+        "command": "ontologyViewer.newSample",
+        "title": "%command.newSample.title%",
+        "category": "%extension.category%"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ontologyViewer.openPreview",
+        "key": "ctrl+alt+o",
+        "mac": "cmd+alt+o",
+        "when": "editorLangId in ontologyViewer.viewableLanguages"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ontologyViewer.openPreview",
+          "when": "editorLangId in ontologyViewer.viewableLanguages",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "ontologyViewer.openPreview",
+          "when": "editorLangId in ontologyViewer.viewableLanguages"
+        },
+        {
+          "command": "ontologyViewer.convertToTurtle",
+          "when": "editorLangId in ontologyViewer.viewOnlyLanguages"
+        },
+        {
+          "command": "ontologyViewer.exportLayout",
+          "when": "editorLangId in ontologyViewer.viewableLanguages"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "%extension.category%",
+      "properties": {
+        "ontologyViewer.preview.autoRefreshDebounceMs": {
+          "type": "number",
+          "default": 300,
+          "minimum": 50,
+          "maximum": 5000,
+          "description": "%config.autoRefreshDebounceMs.description%"
+        },
+        "ontologyViewer.preview.defaultView": {
+          "type": "string",
+          "enum": [
+            "schema",
+            "triples"
+          ],
+          "default": "schema",
+          "description": "%config.defaultView.description%"
+        },
+        "ontologyViewer.preview.layout": {
+          "type": "string",
+          "enum": [
+            "fcose",
+            "dagre"
+          ],
+          "default": "fcose",
+          "description": "%config.layout.description%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile:production",
+    "compile": "node esbuild.mjs",
+    "compile:production": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p ./",
+    "lint": "eslint src webview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "npm run compile && vscode-test",
+    "pretest:integration": "tsc -p ./src/test/tsconfig.json",
+    "validate:release": "node scripts/validate-release.mjs",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run validate:release",
+    "package": "npm run validate:release && vsce package --no-dependencies",
+    "publish:marketplace": "npm run validate:release && vsce publish --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.96.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vscode/l10n-dev": "^0.0.35",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "eslint": "^9.16.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@vscode/l10n": "^0.0.18",
+    "cytoscape": "^3.34.0",
+    "cytoscape-dagre": "^4.0.0",
+    "cytoscape-fcose": "^2.2.0",
+    "jsonld-streaming-parser": "^5.0.1",
+    "n3": "^2.1.1",
+    "rdfxml-streaming-parser": "^3.2.0"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yaggytter/vscode-ontology-viewer"
+  },
+  "homepage": "https://github.com/yaggytter/vscode-ontology-viewer/blob/main/README.md",
+  "bugs": {
+    "url": "https://github.com/yaggytter/vscode-ontology-viewer/issues"
+  }
+}

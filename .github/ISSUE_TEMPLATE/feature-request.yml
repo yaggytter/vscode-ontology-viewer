@@ -1,0 +1,37 @@
+name: Feature request / 機能提案
+description: Propose a focused user-facing improvement / 利用者向けの具体的な改善を提案する
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve / 解決したい問題
+      description: Describe the workflow that is difficult today. / 現在難しい作業を説明してください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed experience / 望ましい体験
+      description: Explain behavior from the user's perspective. / 利用者から見た動作を説明してください。
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered / 検討した代替案
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / 対象
+      options:
+        - Diagram and Inspector / 図とInspector
+        - Turtle editing / Turtle編集
+        - Format support / 対応形式
+        - Language features / 言語機能
+        - Accessibility / アクセシビリティ
+        - Documentation or localization / ドキュメント・翻訳
+        - Other / その他
+    validations:
+      required: true

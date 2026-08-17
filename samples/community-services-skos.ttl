@@ -1,0 +1,27 @@
+# Community Services Vocabulary — a compact SKOS concept scheme.
+# 地域サービス語彙 — 小規模なSKOS概念体系のサンプルです。
+#
+# The vocabulary structure and labels are original to this repository.
+
+@prefix : <https://example.org/vocabulary/community-services#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:scheme a skos:ConceptScheme ;
+  rdfs:label "Community Services Vocabulary"@en ;
+  skos:prefLabel "地域サービス"@ja, "Community Services"@en .
+
+:support a skos:Concept ;
+  skos:prefLabel "支援"@ja, "Support"@en ; skos:inScheme :scheme .
+:dailyLife a skos:Concept ;
+  skos:prefLabel "日常生活"@ja, "Daily Life"@en ; skos:broader :support ; skos:inScheme :scheme .
+:learning a skos:Concept ;
+  skos:prefLabel "学習"@ja, "Learning"@en ; skos:broader :support ; skos:inScheme :scheme .
+:mealDelivery a skos:Concept ;
+  skos:prefLabel "食事配達"@ja, "Meal Delivery"@en ; skos:broader :dailyLife ; skos:related :homeVisit ; skos:inScheme :scheme .
+:homeVisit a skos:Concept ;
+  skos:prefLabel "訪問支援"@ja, "Home Visit"@en ; skos:broader :dailyLife ; skos:inScheme :scheme .
+:digitalWorkshop a skos:Concept ;
+  skos:prefLabel "デジタル講座"@ja, "Digital Workshop"@en ; skos:broader :learning ; skos:inScheme :scheme .
+:languageExchange a skos:Concept ;
+  skos:prefLabel "言語交流"@ja, "Language Exchange"@en ; skos:broader :learning ; skos:related :digitalWorkshop ; skos:inScheme :scheme .

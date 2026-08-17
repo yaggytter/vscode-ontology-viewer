@@ -1,0 +1,44 @@
+# Tool Lending Circle — relationship characteristics and instance data.
+# 道具の貸し借り — 関係の特性とインスタンスデータのサンプルです。
+#
+# All names and records are fictional and original to this repository.
+
+@prefix : <https://example.org/ontology/tool-lending#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/ontology/tool-lending> a owl:Ontology ;
+  rdfs:label "Tool Lending Circle"@en, "道具の貸し借り"@ja .
+
+:Member a owl:Class ; rdfs:label "Member"@en .
+:Tool a owl:Class ; rdfs:label "Tool"@en .
+:Loan a owl:Class ; rdfs:label "Loan"@en .
+
+:lendsTo a owl:ObjectProperty ;
+  rdfs:label "lends to"@en ; rdfs:domain :Member ; rdfs:range :Member .
+:borrowsFrom a owl:ObjectProperty ;
+  rdfs:label "borrows from"@en ; owl:inverseOf :lendsTo .
+:canReachThrough a owl:ObjectProperty, owl:TransitiveProperty ;
+  rdfs:label "can reach through"@en .
+:collaboratesWith a owl:ObjectProperty, owl:SymmetricProperty ;
+  rdfs:label "collaborates with"@en .
+:loanedTool a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:label "loaned tool"@en ; rdfs:domain :Loan ; rdfs:range :Tool .
+:borrower a owl:ObjectProperty, owl:FunctionalProperty ;
+  rdfs:label "borrower"@en ; rdfs:domain :Loan ; rdfs:range :Member .
+
+:dueDate a owl:DatatypeProperty ;
+  rdfs:label "due date"@en ; rdfs:domain :Loan ; rdfs:range xsd:date .
+:toolName a owl:DatatypeProperty ;
+  rdfs:label "tool name"@en ; rdfs:domain :Tool ; rdfs:range xsd:string .
+
+:mina a :Member ; rdfs:label "Mina"@en ; :lendsTo :ren ; :collaboratesWith :sora .
+:ren a :Member ; rdfs:label "Ren"@en ; :lendsTo :sora .
+:sora a :Member ; rdfs:label "Sora"@en .
+:kai a :Member ; rdfs:label "Kai"@en ; :borrowsFrom :mina .
+:yui a :Member ; rdfs:label "Yui"@en .
+:mina :canReachThrough :ren .
+:ren :canReachThrough :sora .
+:cordlessDrill a :Tool ; rdfs:label "Cordless Drill"@en ; :toolName "Cordless Drill" .
+:loan2026A a :Loan ; rdfs:label "Loan 2026-A"@en ; :loanedTool :cordlessDrill ; :borrower :ren ; :dueDate "2026-09-01"^^xsd:date .

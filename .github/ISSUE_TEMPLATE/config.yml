@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report / セキュリティ報告
+    url: https://github.com/yaggytter/vscode-ontology-viewer/security/advisories/new
+    about: Report vulnerabilities privately. / 脆弱性は非公開で報告してください。
+  - name: Support guide / サポートガイド
+    url: https://github.com/yaggytter/vscode-ontology-viewer/blob/main/SUPPORT.md
+    about: Check support scope and diagnostic information. / サポート範囲と必要な情報を確認します。

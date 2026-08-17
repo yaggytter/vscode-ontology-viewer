@@ -1,0 +1,43 @@
+# Harbor Market — appearance and relationship-shape extensions.
+# 港の朝市 — 表示と関係形状の拡張機能を試すサンプルです。
+#
+# This fictional ontology was designed from scratch for Ontology Viewer.
+# The local predicates below are optional display hints recognized by local name.
+
+@prefix : <https://example.org/ontology/harbor-market#> .
+@prefix view: <https://example.org/ontology/harbor-market#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/ontology/harbor-market> a owl:Ontology ;
+  rdfs:label "Harbor Market"@en, "港の朝市"@ja ;
+  rdfs:comment "A fictional marketplace model demonstrating diagram appearance hints."@en .
+
+:Vendor a owl:Class ; rdfs:label "Vendor"@en ; view:icon "⛺" ; view:color "#2563EB" .
+:Stall a owl:Class ; rdfs:label "Stall"@en ; view:icon "🏪" ; view:color "#C2410C" .
+:Product a owl:Class ; rdfs:label "Product"@en ; view:icon "📦" ; view:color "#15803D" .
+:MarketDay a owl:Class ; rdfs:label "Market Day"@en ; view:icon "📅" ; view:color "#7E22CE" .
+
+:vendorCode a owl:DatatypeProperty ;
+  rdfs:label "vendor code"@en ; rdfs:domain :Vendor ; rdfs:range xsd:string ; view:isIdentifier true .
+:stallNumber a owl:DatatypeProperty ;
+  rdfs:label "stall number"@en ; rdfs:domain :Stall ; rdfs:range xsd:string .
+:productName a owl:DatatypeProperty ;
+  rdfs:label "product name"@en ; rdfs:domain :Product ; rdfs:range xsd:string .
+:unitPrice a owl:DatatypeProperty ;
+  rdfs:label "unit price"@en ; rdfs:domain :Product ; rdfs:range xsd:decimal .
+
+:operates a owl:ObjectProperty ;
+  rdfs:label "operates"@en ; view:fromEntityId "vendor" ; view:toEntityId "stall" ; view:cardinality "one-to-many" .
+:offers a owl:ObjectProperty ;
+  rdfs:label "offers"@en ; rdfs:domain :Stall ; rdfs:range :Product .
+:opensOn a owl:ObjectProperty ;
+  rdfs:label "opens on"@en ; rdfs:domain :Stall ; rdfs:range :MarketDay .
+:stockCount a owl:DatatypeProperty ;
+  rdfs:label "stock count"@en ; view:relationshipAttributeOf "offers" ; view:attributeType "integer" .
+
+:blueSailFoods a :Vendor ; rdfs:label "Blue Sail Foods"@en ; :vendorCode "V-104" ; :operates :pierStall .
+:pierStall a :Stall ; rdfs:label "Pier Stall"@en ; :stallNumber "C-12" ; :offers :seaSaltCrackers ; :opensOn :autumnSaturday .
+:seaSaltCrackers a :Product ; rdfs:label "Sea Salt Crackers"@en ; :productName "Sea Salt Crackers" ; :unitPrice 480 .
+:autumnSaturday a :MarketDay ; rdfs:label "Autumn Saturday Market"@en .

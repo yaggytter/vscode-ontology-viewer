@@ -1,0 +1,46 @@
+# Field Research Notes — common catalog-style instance data.
+# フィールド調査ノート — カタログ型のインスタンスデータ例です。
+#
+# This sample and its fictional observations were authored for this extension.
+
+@prefix : <https://example.org/ontology/field-research#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/ontology/field-research> a owl:Ontology ;
+  rdfs:label "Field Research Notes"@en, "フィールド調査ノート"@ja .
+
+:Researcher a owl:Class ; rdfs:label "Researcher"@en .
+:Site a owl:Class ; rdfs:label "Survey Site"@en .
+:Observation a owl:Class ; rdfs:label "Observation"@en .
+:SpeciesGroup a owl:Class ; rdfs:label "Species Group"@en .
+
+:recordedBy a owl:ObjectProperty ;
+  rdfs:label "recorded by"@en ; rdfs:domain :Observation ; rdfs:range :Researcher .
+:recordedAt a owl:ObjectProperty ;
+  rdfs:label "recorded at"@en ; rdfs:domain :Observation ; rdfs:range :Site .
+:classifiedAs a owl:ObjectProperty ;
+  rdfs:label "classified as"@en ; rdfs:domain :Observation ; rdfs:range :SpeciesGroup .
+
+:observedOn a owl:DatatypeProperty ;
+  rdfs:label "observed on"@en ; rdfs:domain :Observation ; rdfs:range xsd:date .
+:count a owl:DatatypeProperty ;
+  rdfs:label "count"@en ; rdfs:domain :Observation ; rdfs:range xsd:integer .
+:note a owl:DatatypeProperty ;
+  rdfs:label "note"@en ; rdfs:domain :Observation ; rdfs:range xsd:string .
+:latitude a owl:DatatypeProperty ;
+  rdfs:label "latitude"@en ; rdfs:domain :Site ; rdfs:range xsd:decimal .
+:longitude a owl:DatatypeProperty ;
+  rdfs:label "longitude"@en ; rdfs:domain :Site ; rdfs:range xsd:decimal .
+
+:haru a :Researcher ; rdfs:label "Haru"@en .
+:wetlandEast a :Site ; rdfs:label "East Wetland"@en ; :latitude 35.120 ; :longitude 139.540 .
+:pollinator a :SpeciesGroup ; rdfs:label "Pollinator"@en .
+:waterBird a :SpeciesGroup ; rdfs:label "Water Bird"@en .
+:observationA a :Observation ; rdfs:label "Morning pollinator survey"@en ;
+  :recordedBy :haru ; :recordedAt :wetlandEast ; :classifiedAs :pollinator ;
+  :observedOn "2026-05-18"^^xsd:date ; :count 14 ; :note "Active near the southern flowers." .
+:observationB a :Observation ; rdfs:label "Shoreline bird survey"@en ;
+  :recordedBy :haru ; :recordedAt :wetlandEast ; :classifiedAs :waterBird ;
+  :observedOn "2026-05-18"^^xsd:date ; :count 6 .

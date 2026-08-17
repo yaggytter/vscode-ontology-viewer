@@ -1,0 +1,6 @@
+{
+  "name": "RDF/XML",
+  "scopeName": "source.rdfxml",
+  "fileTypes": ["rdf", "owl"],
+  "patterns": [{ "include": "text.xml" }]
+}

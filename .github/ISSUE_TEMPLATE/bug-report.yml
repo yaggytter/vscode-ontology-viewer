@@ -1,0 +1,72 @@
+name: Bug report / 不具合報告
+description: Report reproducible incorrect behavior / 再現可能な不具合を報告する
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem. Remove confidential ontology data before submitting.
+
+        ご報告ありがとうございます。機密性のあるオントロジーデータは投稿前に削除してください。
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version / 拡張機能バージョン
+      placeholder: 0.2.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: VS Code and OS / VS CodeとOS
+      placeholder: VS Code 1.96.0, macOS 15.0
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Ontology format / オントロジー形式
+      options:
+        - Turtle
+        - TriG
+        - N-Triples
+        - Notation3
+        - RDF/XML or OWL/XML
+        - JSON-LD
+        - Not format-specific / 形式に依存しない
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps / 再現手順
+      description: Include a minimal, non-confidential ontology when possible. / 可能であれば、機密情報を含まない最小のオントロジーを添えてください。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 期待した動作
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and logs / 実際の動作とログ
+    validations:
+      required: true
+  - type: input
+    id: theme-width
+    attributes:
+      label: Theme, zoom, and editor width / テーマ、表示倍率、エディタ幅
+      description: Required only for visual issues. / 表示上の問題の場合のみ記載してください。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks / 確認事項
+      options:
+        - label: I tested the latest release and searched existing issues. / 最新版で確認し、既存Issueを検索しました。
+          required: true
+        - label: This report contains no confidential or personal data. / 機密情報や個人情報を含めていません。
+          required: true

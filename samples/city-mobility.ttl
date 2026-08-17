@@ -1,0 +1,57 @@
+# City Mobility Hub — medium-sized operational ontology.
+# 都市モビリティ拠点 — 中規模の運用系オントロジーです。
+#
+# All organizations, routes, identifiers, and records are fictional.
+
+@prefix : <https://example.org/ontology/city-mobility#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/ontology/city-mobility> a owl:Ontology ;
+  rdfs:label "City Mobility Hub"@en, "都市モビリティ拠点"@ja ;
+  rdfs:comment "A fictional model connecting routes, stops, vehicles, trips, operators, and maintenance."@en .
+
+:MobilityEntity a owl:Class ; rdfs:label "Mobility Entity"@en .
+:Infrastructure a owl:Class ; rdfs:label "Infrastructure"@en ; rdfs:subClassOf :MobilityEntity .
+:Service a owl:Class ; rdfs:label "Service"@en ; rdfs:subClassOf :MobilityEntity .
+:Organization a owl:Class ; rdfs:label "Organization"@en ; rdfs:subClassOf :MobilityEntity .
+:Asset a owl:Class ; rdfs:label "Asset"@en ; rdfs:subClassOf :MobilityEntity .
+:Event a owl:Class ; rdfs:label "Event"@en ; rdfs:subClassOf :MobilityEntity .
+:Stop a owl:Class ; rdfs:label "Stop"@en ; rdfs:subClassOf :Infrastructure .
+:Hub a owl:Class ; rdfs:label "Hub"@en ; rdfs:subClassOf :Stop .
+:Route a owl:Class ; rdfs:label "Route"@en ; rdfs:subClassOf :Service .
+:Trip a owl:Class ; rdfs:label "Trip"@en ; rdfs:subClassOf :Service .
+:Operator a owl:Class ; rdfs:label "Operator"@en ; rdfs:subClassOf :Organization .
+:Vehicle a owl:Class ; rdfs:label "Vehicle"@en ; rdfs:subClassOf :Asset .
+:Bus a owl:Class ; rdfs:label "Bus"@en ; rdfs:subClassOf :Vehicle .
+:SharedBicycle a owl:Class ; rdfs:label "Shared Bicycle"@en ; rdfs:subClassOf :Vehicle .
+:MaintenanceEvent a owl:Class ; rdfs:label "Maintenance Event"@en ; rdfs:subClassOf :Event .
+:AccessibilityFeature a owl:Class ; rdfs:label "Accessibility Feature"@en ; rdfs:subClassOf :Asset .
+
+:servesStop a owl:ObjectProperty ; rdfs:label "serves stop"@en ; rdfs:domain :Route ; rdfs:range :Stop .
+:tripOnRoute a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "trip on route"@en ; rdfs:domain :Trip ; rdfs:range :Route .
+:operatedBy a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "operated by"@en ; rdfs:domain :Service ; rdfs:range :Operator .
+:usesVehicle a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "uses vehicle"@en ; rdfs:domain :Trip ; rdfs:range :Vehicle .
+:startsAt a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "starts at"@en ; rdfs:domain :Trip ; rdfs:range :Stop .
+:endsAt a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "ends at"@en ; rdfs:domain :Trip ; rdfs:range :Stop .
+:hasFeature a owl:ObjectProperty ; rdfs:label "has feature"@en ; rdfs:domain :Infrastructure ; rdfs:range :AccessibilityFeature .
+:maintainsVehicle a owl:ObjectProperty ; rdfs:label "maintains vehicle"@en ; rdfs:domain :MaintenanceEvent ; rdfs:range :Vehicle .
+:performedBy a owl:ObjectProperty ; rdfs:label "performed by"@en ; rdfs:domain :MaintenanceEvent ; rdfs:range :Operator .
+
+:identifier a owl:DatatypeProperty ; rdfs:label "identifier"@en ; rdfs:domain :MobilityEntity ; rdfs:range xsd:string .
+:displayName a owl:DatatypeProperty ; rdfs:label "display name"@en ; rdfs:domain :MobilityEntity ; rdfs:range xsd:string .
+:scheduledDeparture a owl:DatatypeProperty ; rdfs:label "scheduled departure"@en ; rdfs:domain :Trip ; rdfs:range xsd:dateTime .
+:capacity a owl:DatatypeProperty ; rdfs:label "capacity"@en ; rdfs:domain :Vehicle ; rdfs:range xsd:integer .
+:completedOn a owl:DatatypeProperty ; rdfs:label "completed on"@en ; rdfs:domain :MaintenanceEvent ; rdfs:range xsd:date .
+:latitude a owl:DatatypeProperty ; rdfs:label "latitude"@en ; rdfs:domain :Stop ; rdfs:range xsd:decimal .
+:longitude a owl:DatatypeProperty ; rdfs:label "longitude"@en ; rdfs:domain :Stop ; rdfs:range xsd:decimal .
+
+:loopLine a :Route ; rdfs:label "Loop Line"@en ; :identifier "R-08" ; :servesStop :mapleHub, :museumStop ; :operatedBy :civicTransit .
+:civicTransit a :Operator ; rdfs:label "Civic Transit Cooperative"@en ; :identifier "OP-02" .
+:mapleHub a :Hub ; rdfs:label "Maple Hub"@en ; :identifier "ST-11" ; :latitude 35.681 ; :longitude 139.772 ; :hasFeature :tactileGuide .
+:museumStop a :Stop ; rdfs:label "Museum Stop"@en ; :identifier "ST-12" ; :latitude 35.684 ; :longitude 139.779 .
+:tactileGuide a :AccessibilityFeature ; rdfs:label "Tactile Guide Path"@en .
+:bus42 a :Bus ; rdfs:label "Bus 42"@en ; :identifier "BUS-42" ; :capacity 48 .
+:morningTrip a :Trip ; rdfs:label "Morning Loop Trip"@en ; :identifier "T-081" ; :tripOnRoute :loopLine ; :operatedBy :civicTransit ; :usesVehicle :bus42 ; :startsAt :mapleHub ; :endsAt :museumStop ; :scheduledDeparture "2026-08-11T08:15:00+09:00"^^xsd:dateTime .
+:inspection42 a :MaintenanceEvent ; rdfs:label "Bus 42 Safety Inspection"@en ; :maintainsVehicle :bus42 ; :performedBy :civicTransit ; :completedOn "2026-08-01"^^xsd:date .

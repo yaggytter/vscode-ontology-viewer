@@ -1,0 +1,27 @@
+settings.local.json
+tmp
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+out-test/
+*.vsix
+
+# Test/coverage
+coverage/
+.vscode-test/
+
+# OS/editor
+.DS_Store
+*.log
+
+# Local AI coding-tool configuration (not part of the extension)
+.claude/
+.codex/
+.entire/
+.serena/
+
+pub-repo/

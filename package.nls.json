@@ -1,0 +1,12 @@
+{
+  "extension.displayName": "Ontology Viewer — OWL & RDF Visual Editor",
+  "extension.description": "Visualize and safely edit OWL, RDF, RDFS, and SKOS ontologies in VS Code with an interactive schema diagram.",
+  "extension.category": "Ontology Viewer",
+  "command.openPreview.title": "Open Diagram Preview",
+  "command.convertToTurtle.title": "Convert to Turtle for Editing...",
+  "command.exportLayout.title": "Export Diagram Layout as JSON...",
+  "command.newSample.title": "Create Sample Ontology...",
+  "config.autoRefreshDebounceMs.description": "Delay (in milliseconds) before the diagram preview refreshes after you edit the source file.",
+  "config.defaultView.description": "Which diagram view opens by default: 'schema' (class-centric ER diagram) or 'triples' (raw triple graph).",
+  "config.layout.description": "Automatic layout algorithm used to arrange diagram nodes."
+}

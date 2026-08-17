@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Community Event (RDF/XML) — a view-only format in this extension.
+  地域イベント（RDF/XML）— この拡張機能では「表示専用」の形式です。
+
+  This fictional vocabulary and all records were authored from scratch for
+  Ontology Viewer. Open the diagram preview to explore participants, activities,
+  and venues. Use "Ontology Viewer: Convert to Turtle for Editing..." to create
+  an editable Turtle copy without overwriting this source document.
+-->
+<rdf:RDF
+    xml:base="https://example.org/data/community-event/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:event="https://example.org/ontology/community-event#">
+
+  <event:Participant rdf:about="participants/nagi">
+    <rdfs:label>Nagi</rdfs:label>
+    <event:displayName>Nagi</event:displayName>
+    <event:joins rdf:resource="activities/map-making"/>
+  </event:Participant>
+
+  <event:Participant rdf:about="participants/riku">
+    <rdfs:label>Riku</rdfs:label>
+    <event:displayName>Riku</event:displayName>
+    <event:joins rdf:resource="activities/map-making"/>
+    <event:joins rdf:resource="activities/seed-swap"/>
+  </event:Participant>
+
+  <event:Activity rdf:about="activities/map-making">
+    <rdfs:label>Neighborhood Map Making</rdfs:label>
+    <event:heldAt rdf:resource="venues/hall-a"/>
+    <event:startTime>10:00</event:startTime>
+  </event:Activity>
+
+  <event:Activity rdf:about="activities/seed-swap">
+    <rdfs:label>Seed Swap Table</rdfs:label>
+    <event:heldAt rdf:resource="venues/courtyard"/>
+    <event:startTime>13:30</event:startTime>
+  </event:Activity>
+
+  <event:Venue rdf:about="venues/hall-a">
+    <rdfs:label>Hall A</rdfs:label>
+    <event:accessibleEntrance>true</event:accessibleEntrance>
+  </event:Venue>
+
+  <event:Venue rdf:about="venues/courtyard">
+    <rdfs:label>Garden Courtyard</rdfs:label>
+    <event:accessibleEntrance>true</event:accessibleEntrance>
+  </event:Venue>
+
+</rdf:RDF>
