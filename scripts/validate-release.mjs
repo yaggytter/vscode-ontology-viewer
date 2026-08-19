@@ -103,8 +103,6 @@ const bilingualDocumentBases = [
 requireFiles([
   "LICENSE",
   "THIRD_PARTY_NOTICES.md",
-  "docs/en/publishing.md",
-  "docs/ja/publishing.md",
   ".github/workflows/ci.yml",
   ".github/workflows/release.yml",
   ".github/ISSUE_TEMPLATE/bug-report.yml",
