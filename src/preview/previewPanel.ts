@@ -139,7 +139,7 @@ export async function openPreview(
     {
       enableScripts: true,
       retainContextWhenHidden: false,
-      localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "dist"), vscode.Uri.joinPath(context.extensionUri, "webview")],
+      localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "dist")],
     },
   );
 
@@ -400,7 +400,7 @@ function buildHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   const nonce = randomBytes(16).toString("base64");
   const documentLanguage = vscode.env.language.toLowerCase().startsWith("ja") ? "ja" : "en";
   const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "webview.js"));
-  const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "webview", "style.css"));
+  const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, "dist", "style.css"));
   const csp = [
     "default-src 'none'",
     `style-src ${webview.cspSource} 'unsafe-inline'`,

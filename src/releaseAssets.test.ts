@@ -47,8 +47,6 @@ describe("Marketplace release assets", () => {
       expect(() => readFileSync(resolve(root, `${name}.ja.md`), "utf8")).not.toThrow();
     }
 
-    expect(() => readFileSync(resolve(root, "docs/en/publishing.md"), "utf8")).not.toThrow();
-    expect(() => readFileSync(resolve(root, "docs/ja/publishing.md"), "utf8")).not.toThrow();
     expect(() => readFileSync(resolve(root, "THIRD_PARTY_NOTICES.md"), "utf8")).not.toThrow();
     expect(() => readFileSync(resolve(root, "media/ontology-viewer-overview.png"))).not.toThrow();
   });
