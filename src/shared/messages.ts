@@ -6,6 +6,18 @@ import type { SparqlResult } from "../sparql/resultModel";
 export type ViewMode = "schema" | "triples";
 
 /**
+ * A ready-to-run example query offered by the SPARQL panel's picker. Built
+ * host-side (see src/preview/sparqlSamples.ts) so its name/description can be
+ * localized; `query` is language-neutral SPARQL.
+ */
+export interface SparqlSample {
+  id: string;
+  name: string;
+  description: string;
+  query: string;
+}
+
+/**
  * Wire protocol between the extension host (src/preview/previewPanel.ts)
  * and the webview UI (webview/main.ts). Type-only on both sides so it costs
  * nothing at runtime in either bundle — each esbuild target tree-shakes the
@@ -94,6 +106,8 @@ export interface UiStrings {
   sparqlResultCount: string;
   sparqlNoResults: string;
   sparqlConstructHeading: string;
+  sparqlSamplesLabel: string;
+  sparqlSamplesPlaceholder: string;
 }
 
 export interface HostToWebviewInit {
@@ -109,6 +123,8 @@ export interface HostToWebviewInit {
   defaultLayoutAlgorithm: "fcose" | "dagre";
   defaultViewMode: ViewMode;
   strings: UiStrings;
+  /** Ready-to-run example queries for the SPARQL panel's picker. */
+  sparqlSamples: SparqlSample[];
   parseErrorMessage?: string;
 }
 

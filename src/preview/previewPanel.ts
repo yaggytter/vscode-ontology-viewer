@@ -21,6 +21,7 @@ import {
   handleUpdatePropertyType,
 } from "./editHandlers";
 import { handleRunSparql } from "./sparqlHandler";
+import { sparqlSampleQueries } from "./sparqlSamples";
 
 interface PanelState {
   panel: vscode.WebviewPanel;
@@ -124,6 +125,8 @@ function uiStrings(): UiStrings {
     sparqlResultCount: vscode.l10n.t("{0} rows"),
     sparqlNoResults: vscode.l10n.t("No results."),
     sparqlConstructHeading: vscode.l10n.t("Constructed triples"),
+    sparqlSamplesLabel: vscode.l10n.t("Examples:"),
+    sparqlSamplesPlaceholder: vscode.l10n.t("Pick an example query..."),
   };
 }
 
@@ -338,6 +341,7 @@ async function sendInit(context: vscode.ExtensionContext, state: PanelState): Pr
     defaultLayoutAlgorithm: state.algorithm,
     defaultViewMode: state.defaultViewMode,
     strings: uiStrings(),
+    sparqlSamples: sparqlSampleQueries(),
     parseErrorMessage: parsed.errors[0]?.message,
   };
   await state.panel.webview.postMessage(message);

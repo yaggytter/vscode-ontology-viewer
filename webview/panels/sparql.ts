@@ -1,5 +1,5 @@
 import { h, clear } from "../dom";
-import type { UiStrings } from "../../src/shared/messages";
+import type { SparqlSample, UiStrings } from "../../src/shared/messages";
 import type { SparqlResult, SparqlTerm } from "../../src/sparql/resultModel";
 import type { SparqlGraphMode } from "../graph/sparqlHighlight";
 
@@ -115,11 +115,16 @@ export function renderSparqlResultTable(result: SparqlResult, strings: UiStrings
 }
 
 /**
- * The SPARQL query workbench: a textarea, Run/Clear buttons, a graph-effect
- * mode selector, and a results region. It owns no RDF logic — it posts the
- * query text out via `onRun` and renders whatever result the host returns.
+ * The SPARQL query workbench: an example picker, a textarea, Run/Clear
+ * buttons, a graph-effect mode selector, and a results region. It owns no RDF
+ * logic — it posts the query text out via `onRun` and renders whatever result
+ * the host returns.
  */
-export function createSparqlPanel(strings: UiStrings, callbacks: SparqlPanelCallbacks): SparqlPanel {
+export function createSparqlPanel(
+  strings: UiStrings,
+  samples: readonly SparqlSample[],
+  callbacks: SparqlPanelCallbacks,
+): SparqlPanel {
   let visible = false;
   let mode: SparqlGraphMode = "highlight";
 
@@ -158,6 +163,36 @@ export function createSparqlPanel(strings: UiStrings, callbacks: SparqlPanelCall
       "aria-label": strings.sparqlPanelTitle,
     },
   });
+
+  // Example picker sits above the editor: for a first-time user the fastest
+  // path to a working query is choosing one, not writing one. Selecting an
+  // example replaces the editor contents and shows what it demonstrates.
+  const sampleWrap = h("div", { className: "sparql-samples" });
+  const sampleHint = h("p", { className: "sparql-sample-hint" });
+  if (samples.length > 0) {
+    sampleWrap.appendChild(
+      h("label", { className: "sparql-samples-label", text: strings.sparqlSamplesLabel, attrs: { for: "sparql-sample-select" } }),
+    );
+    const sampleSelect = h("select", { className: "sparql-sample-select", attrs: { id: "sparql-sample-select" } });
+    sampleSelect.appendChild(h("option", { text: strings.sparqlSamplesPlaceholder, attrs: { value: "" } }));
+    for (const item of samples) {
+      sampleSelect.appendChild(h("option", { text: item.name, attrs: { value: item.id } }));
+    }
+    sampleSelect.addEventListener("change", () => {
+      const chosen = samples.find((s) => s.id === sampleSelect.value);
+      if (!chosen) {
+        sampleHint.textContent = "";
+        return;
+      }
+      input.value = chosen.query;
+      sampleHint.textContent = chosen.description;
+      input.focus();
+    });
+    sampleWrap.appendChild(sampleSelect);
+    element.appendChild(sampleWrap);
+    element.appendChild(sampleHint);
+  }
+
   element.appendChild(input);
 
   const actions = h("div", { className: "sparql-actions" });

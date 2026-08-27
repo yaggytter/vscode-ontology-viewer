@@ -1293,6 +1293,40 @@ summary:focus-visible {
   font-size: 11px;
 }
 
+.sparql-samples {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sparql-samples-label {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  flex: 0 0 auto;
+}
+
+.sparql-sample-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 26px;
+  border: 1px solid var(--ov-border);
+  border-radius: var(--ov-radius-sm);
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, var(--vscode-foreground));
+  font-size: 11px;
+}
+
+.sparql-sample-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--vscode-descriptionForeground);
+}
+
+.sparql-sample-hint:empty {
+  display: none;
+}
+
 .sparql-input {
   width: 100%;
   box-sizing: border-box;

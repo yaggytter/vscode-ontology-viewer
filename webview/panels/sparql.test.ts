@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
-import { renderSparqlResultTable } from "./sparql";
+import { createSparqlPanel, renderSparqlResultTable } from "./sparql";
 import type { SparqlResult } from "../../src/sparql/resultModel";
 import type { UiStrings } from "../../src/shared/messages";
 
@@ -71,5 +71,48 @@ describe("renderSparqlResultTable", () => {
     // The malicious literal must appear as text, not as a live <img> element.
     expect(el.querySelector("img")).toBeNull();
     expect(el.textContent).toContain("<img src=x onerror=alert(1)>");
+  });
+});
+
+describe("createSparqlPanel example picker", () => {
+  const samples = [
+    { id: "a", name: "First example", description: "Does the simplest thing.", query: "SELECT * WHERE { ?s ?p ?o }" },
+    { id: "b", name: "Second example", description: "Does another thing.", query: "ASK { ?s ?p ?o }" },
+  ];
+
+  it("offers every sample plus a placeholder option", () => {
+    const panel = createSparqlPanel(strings, samples, { onRun: () => {}, onModeChange: () => {} });
+    const options = Array.from(panel.element.querySelectorAll(".sparql-sample-select option"));
+    expect(options.map((o) => o.textContent)).toEqual([
+      strings.sparqlSamplesPlaceholder,
+      "First example",
+      "Second example",
+    ]);
+  });
+
+  it("fills the editor and shows the description when a sample is chosen", () => {
+    const panel = createSparqlPanel(strings, samples, { onRun: () => {}, onModeChange: () => {} });
+    const select = panel.element.querySelector(".sparql-sample-select") as HTMLSelectElement;
+    select.value = "b";
+    select.dispatchEvent(new Event("change"));
+
+    const textarea = panel.element.querySelector(".sparql-input") as HTMLTextAreaElement;
+    expect(textarea.value).toBe("ASK { ?s ?p ?o }");
+    expect(panel.element.querySelector(".sparql-sample-hint")?.textContent).toBe("Does another thing.");
+  });
+
+  it("runs the chosen sample through onRun", () => {
+    const run: string[] = [];
+    const panel = createSparqlPanel(strings, samples, { onRun: (q) => run.push(q), onModeChange: () => {} });
+    const select = panel.element.querySelector(".sparql-sample-select") as HTMLSelectElement;
+    select.value = "a";
+    select.dispatchEvent(new Event("change"));
+    (panel.element.querySelector(".sparql-run-btn") as HTMLButtonElement).click();
+    expect(run).toEqual(["SELECT * WHERE { ?s ?p ?o }"]);
+  });
+
+  it("omits the picker entirely when the host supplied no samples", () => {
+    const panel = createSparqlPanel(strings, [], { onRun: () => {}, onModeChange: () => {} });
+    expect(panel.element.querySelector(".sparql-sample-select")).toBeNull();
   });
 });

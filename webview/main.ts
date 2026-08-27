@@ -1,6 +1,7 @@
 import type cytoscape from "cytoscape";
 import type {
   HostToWebviewMessage,
+  SparqlSample,
   UiStrings,
   ViewMode,
   WebviewToHostMessage,
@@ -32,9 +33,10 @@ import { DEFAULT_ZOOM, readableFitZoom, zoomLabel, zoomStep } from "./viewportMo
  * try/catch around the cache fast-path below. Bumped 2->3 for the schema
  * view (viewMode/schema fields, and layout keys now namespaced per view);
  * 3->4 for commentEditableNodeIds (Phase 5 comment editing); 4->5 for the
- * resetZoomLabel chrome string; 5->6 for persisted layout restoration.
+ * resetZoomLabel chrome string; 5->6 for persisted layout restoration;
+ * 6->7 for the SPARQL panel's cached example queries.
  */
-const STATE_VERSION = 6;
+const STATE_VERSION = 7;
 
 interface WebviewState {
   stateVersion: number;
@@ -48,6 +50,7 @@ interface WebviewState {
   algorithm: "fcose" | "dagre";
   viewMode: ViewMode;
   strings: UiStrings;
+  sparqlSamples: SparqlSample[];
 }
 
 function saveState(state: Omit<WebviewState, "stateVersion">): void {
@@ -187,6 +190,8 @@ let sparqlPanel: SparqlPanel | undefined;
 let pendingSparqlRequestId: string | undefined;
 /** The most recent successful SPARQL result, reduced to what the graph reacts to. */
 let lastSparqlEffect: SparqlGraphEffect = { matchedIris: [], typeFallback: {} };
+/** Example queries offered by the SPARQL panel's picker, supplied by the host. */
+let sparqlSamples: SparqlSample[] = [];
 let editableIds = new Set<string>();
 let commentEditableIds = new Set<string>();
 let strings: UiStrings | undefined;
@@ -299,7 +304,7 @@ function applySparqlEffect(): void {
 }
 
 function installSparqlPanel(nextStrings: UiStrings): void {
-  sparqlPanel = createSparqlPanel(nextStrings, {
+  sparqlPanel = createSparqlPanel(nextStrings, sparqlSamples, {
     onRun: (query) => {
       const requestId = `sparql-${++requestSeq}`;
       pendingSparqlRequestId = requestId;
@@ -926,6 +931,7 @@ function switchViewMode(mode: ViewMode): void {
     algorithm: layoutSelect.value as "fcose" | "dagre",
     viewMode,
     strings,
+    sparqlSamples,
   });
 }
 
@@ -995,6 +1001,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     // just eliminated.)
     lastRenderedGeneration = message.generation;
     strings = message.strings;
+    sparqlSamples = message.sparqlSamples;
     isEditableDocument = message.isEditableDocument;
     editableIds = new Set(message.editableNodeIds);
     commentEditableIds = new Set(message.commentEditableNodeIds);
@@ -1019,6 +1026,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
       algorithm: message.defaultLayoutAlgorithm,
       viewMode,
       strings: message.strings,
+      sparqlSamples: message.sparqlSamples,
     });
   } else if (message.type === "update") {
     // Defends against a stale message (e.g. the cached-state fast path
@@ -1236,6 +1244,7 @@ try {
     editableIds = new Set(cached.editableNodeIds);
     commentEditableIds = new Set(cached.commentEditableNodeIds);
     strings = cached.strings;
+    sparqlSamples = cached.sparqlSamples;
     isEditableDocument = cached.isEditableDocument;
     lastRenderedGeneration = cached.generation;
     viewMode = cached.viewMode;
