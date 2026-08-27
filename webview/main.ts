@@ -17,7 +17,7 @@ import { collectViewPositions, restorationPlan, savedLayoutKey } from "./graph/l
 import { applyDim, clearFocus, setSearchQuery, toggleFocusedNode } from "./graph/focus";
 import { createSearchPanel, type SearchPanel } from "./panels/search";
 import { createSparqlPanel, type SparqlPanel } from "./panels/sparql";
-import { applySparqlGraphEffect } from "./graph/sparqlHighlight";
+import { applySparqlGraphEffect, type SparqlGraphEffect } from "./graph/sparqlHighlight";
 import { renderStats } from "./panels/stats";
 import { renderLegend } from "./panels/legend";
 import { renderEmptySelection, renderEntitySelection, renderRelationSelection, renderUnattached } from "./panels/inspector";
@@ -185,8 +185,8 @@ let searchPanel: SearchPanel | undefined;
 let sparqlPanel: SparqlPanel | undefined;
 /** requestId of the in-flight SPARQL query, so a stale reply is ignored. */
 let pendingSparqlRequestId: string | undefined;
-/** IRIs matched by the most recent successful SPARQL query, for re-applying on mode change / re-render. */
-let lastSparqlHighlightIris: string[] = [];
+/** The most recent successful SPARQL result, reduced to what the graph reacts to. */
+let lastSparqlEffect: SparqlGraphEffect = { matchedIris: [], typeFallback: {} };
 let editableIds = new Set<string>();
 let commentEditableIds = new Set<string>();
 let strings: UiStrings | undefined;
@@ -294,7 +294,7 @@ function applySparqlEffect(): void {
   if (!cy || !sparqlPanel) {
     return;
   }
-  applySparqlGraphEffect(cy, lastSparqlHighlightIris, sparqlPanel.getMode());
+  applySparqlGraphEffect(cy, lastSparqlEffect, sparqlPanel.getMode());
   applyDim(cy);
 }
 
@@ -1092,12 +1092,15 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     pendingSparqlRequestId = undefined;
     sparqlPanel?.setBusy(false);
     if (!message.ok || !message.result) {
-      lastSparqlHighlightIris = [];
+      lastSparqlEffect = { matchedIris: [], typeFallback: {} };
       applySparqlEffect();
       sparqlPanel?.showError(message.errorMessage ?? "Query failed.");
       return;
     }
-    lastSparqlHighlightIris = message.highlightIris ?? [];
+    lastSparqlEffect = {
+      matchedIris: message.highlightIris ?? [],
+      typeFallback: message.highlightTypeFallback ?? {},
+    };
     sparqlPanel?.showResult(message.result);
     applySparqlEffect();
   }

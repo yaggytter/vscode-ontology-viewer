@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { parseOntology } from "../rdf/parse";
 import { runSparqlQuery } from "../sparql/engine";
-import { extractHighlightIris } from "../sparql/highlightMapping";
+import { resolveMatchedResources } from "../sparql/resourceResolution";
 import type { HostToWebviewMessage } from "../shared/messages";
 import { resolveFormat } from "./format";
 
@@ -48,8 +48,15 @@ export async function handleRunSparql(
   try {
     const parsed = await parseOntology(document.getText(), format, document.uri.toString());
     const result = await runSparqlQuery(parsed.quads, trimmed);
-    const highlightIris = [...extractHighlightIris(result)];
-    await post({ type: "sparqlResult", requestId, ok: true, result, highlightIris });
+    const { iris, types } = resolveMatchedResources(parsed.quads, result);
+    await post({
+      type: "sparqlResult",
+      requestId,
+      ok: true,
+      result,
+      highlightIris: iris,
+      highlightTypeFallback: types,
+    });
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     await post({

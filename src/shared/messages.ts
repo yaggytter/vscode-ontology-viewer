@@ -133,18 +133,23 @@ export interface HostToWebviewEditResult {
 
 /**
  * Reply to a {@link WebviewToHostRunSparql}. On success carries the
- * normalized result (for the text table) plus the pre-computed set of IRIs
- * the webview should highlight/keep in the diagram (see
- * src/sparql/highlightMapping.ts — computed host-side so the webview needs no
- * RDF knowledge). On failure carries a user-facing `errorMessage`.
+ * normalized result (for the text table) plus the resources the query matched
+ * and their types, from which the webview decides what to light up (see
+ * webview/graph/sparqlHighlight.ts — only the view knows which ids it drew).
+ * On failure carries a user-facing `errorMessage`.
  */
 export interface HostToWebviewSparqlResult {
   type: "sparqlResult";
   requestId: string;
   ok: boolean;
   result?: SparqlResult;
-  /** IRIs matched by the query, for diagram highlight/filter. Empty for ASK. */
+  /** Resources the query matched, for diagram highlight/filter. Empty for ASK. */
   highlightIris?: string[];
+  /**
+   * `rdf:type` IRIs per matched resource, used when the current view has no
+   * node for the resource itself (an individual on a class-centric diagram).
+   */
+  highlightTypeFallback?: Record<string, string[]>;
   errorMessage?: string;
 }
 
