@@ -7,7 +7,10 @@ All notable changes to the Ontology Viewer extension are documented in this file
 ## [Unreleased]
 
 - **SPARQL query panel** — run SPARQL 1.1 queries (SELECT, ASK, CONSTRUCT/DESCRIBE) against the open ontology directly from the diagram. Open it with the **SPARQL** toolbar button, type a query, and press **Run** (or `Ctrl`/`Cmd`+`Enter`). Results appear as a text table (variable bindings, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT). Queries run entirely in the extension host via [Comunica](https://comunica.dev/); nothing leaves your machine.
-- **Graph-linked results** — matched entities are reflected on the diagram. Choose **Highlight** to accent the matching nodes and their connecting edges, **Filter** to dim everything that did not match (composable with the existing search and focus filters), or **No graph effect** for a text-only result. IRIs that name no diagram node are ignored, and the effect is re-applied automatically when the diagram rebuilds.
+- **Graph-linked results** — matched entities are reflected on the diagram. Choose **Highlight** to accent the matching nodes and their connecting edges, **Filter** to dim everything that did not match (composable with the existing search and focus filters), or **No graph effect** for a text-only result.
+- **Results are matched per view.** A query that returns only literals still highlights the resources it was about: returned literals are traced back to the resources carrying them, so you don't have to project a variable just to see it on the diagram. Instance-level matches light up their class in the class-centric **Schema** view, and the individuals themselves in the **Triples** view.
+- **Nine built-in example queries**, offered from a picker in the panel, forming a beginner-first ladder from "show me anything" through OPTIONAL, FILTER, aggregation, ASK, and CONSTRUCT. Each is self-contained and runs against any ontology; selecting one explains what it demonstrates.
+- New tutorial: [Ask Questions with SPARQL](docs/en/tutorial-4-sparql.md).
 
 ## [0.2.0] — Schema diagram
 

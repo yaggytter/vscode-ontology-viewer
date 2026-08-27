@@ -47,5 +47,6 @@ VS Code Marketplace から **Ontology Viewer** をインストールします（
 - [チュートリアル1: 最初のオントロジーを作る](tutorial-1-first-ontology.md)
 - [チュートリアル2: 図から編集する](tutorial-2-editing-from-diagram.md)
 - [チュートリアル3: 既存の .owl ファイルを取り込む](tutorial-3-importing-owl.md)
+- [チュートリアル4: SPARQL で問い合わせる](tutorial-4-sparql.md)
 - [対応形式](format-support.md)
 - [トラブルシューティング](troubleshooting.md)

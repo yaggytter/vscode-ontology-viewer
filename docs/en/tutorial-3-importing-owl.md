@@ -31,4 +31,4 @@ Save the untitled document as a `.ttl` file. From here on, it's a normal editabl
 - Anything else is written with whatever prefixes were declared in the original file's `xmlns` attributes, where recoverable.
 - The exact formatting (line breaks, statement grouping) will look different from hand-written Turtle — that's expected, since it's generated fresh rather than reformatted from the XML source.
 
-Next: [Format Support](format-support.md) for the full picture of what's editable and what isn't.
+Next: [Tutorial 4: Ask Questions with SPARQL](tutorial-4-sparql.md), or [Format Support](format-support.md) for the full picture of what's editable and what isn't.

@@ -48,6 +48,8 @@ Continue with the [Getting Started guide](docs/en/getting-started.md) or the han
 
 Open the **SPARQL** panel from the toolbar to run SPARQL 1.1 queries against the ontology you have open. SELECT, ASK, and CONSTRUCT/DESCRIBE are supported. Press **Run** or `Ctrl`/`Cmd`+`Enter` to execute.
 
+New to SPARQL? The panel ships nine example queries that work on any ontology, ordered from "show me anything" up through OPTIONAL, FILTER, aggregation, ASK, and CONSTRUCT — pick one and run it. The [SPARQL tutorial](docs/en/tutorial-4-sparql.md) walks through them.
+
 Results show as text — a table of bindings for SELECT, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT — and are reflected on the diagram:
 
 - **Highlight** accents matching nodes and their connecting edges while keeping the rest of the graph visible.
@@ -104,6 +106,7 @@ See [Format Support](docs/en/format-support.md) for parser and editing details.
 - [Build Your First Ontology](docs/en/tutorial-1-first-ontology.md)
 - [Edit From the Diagram](docs/en/tutorial-2-editing-from-diagram.md)
 - [Import an Existing OWL File](docs/en/tutorial-3-importing-owl.md)
+- [Ask Questions with SPARQL](docs/en/tutorial-4-sparql.md)
 - [Format Support](docs/en/format-support.md)
 - [Troubleshooting](docs/en/troubleshooting.md)
 - [Support](SUPPORT.md) · [Privacy](PRIVACY.md) · [Security](SECURITY.md)

@@ -48,6 +48,8 @@ OWL、RDF、RDFS、SKOSを、VS Codeから離れずに見やすいスキーマ�
 
 ツールバーの **SPARQL** ボタンでパネルを開くと、開いているオントロジーに対して SPARQL 1.1 クエリを実行できます。SELECT・ASK・CONSTRUCT/DESCRIBE に対応しています。**実行**ボタンか `Ctrl`/`Cmd`+`Enter` で実行します。
 
+SPARQL がはじめての方へ: パネルには、どのオントロジーでも動く9つのサンプルクエリが用意されています。「とにかく何か表示する」から OPTIONAL、FILTER、集計、ASK、CONSTRUCT へと進む順序です。選んで実行するだけで試せます。[SPARQL チュートリアル](docs/ja/tutorial-4-sparql.md) で順を追って解説しています。
+
 結果はテキストで表示され（SELECT はバインディングの表、ASK は真偽値、CONSTRUCT は主語・述語・目的語の行）、図にも反映されます。
 
 - **ハイライト**: 一致したノードと接続エッジを強調し、他のグラフはそのまま表示します。
@@ -104,6 +106,7 @@ RDF/XMLとJSON-LDはそのまま表示できます。図から編集したい場
 - [最初のオントロジーを作る](docs/ja/tutorial-1-first-ontology.md)
 - [図から編集する](docs/ja/tutorial-2-editing-from-diagram.md)
 - [既存のOWLファイルを取り込む](docs/ja/tutorial-3-importing-owl.md)
+- [SPARQLで問い合わせる](docs/ja/tutorial-4-sparql.md)
 - [対応形式](docs/ja/format-support.md)
 - [トラブルシューティング](docs/ja/troubleshooting.md)
 - [サポート](SUPPORT.ja.md)・[プライバシー](PRIVACY.ja.md)・[セキュリティ](SECURITY.ja.md)
