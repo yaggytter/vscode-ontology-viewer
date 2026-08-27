@@ -281,10 +281,12 @@
     "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.1",
     "eslint": "^9.16.0",
+    "happy-dom": "^15.11.7",
     "typescript": "^5.7.2",
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "@comunica/query-sparql-rdfjs": "^4.5.0",
     "@vscode/l10n": "^0.0.18",
     "cytoscape": "^3.34.0",
     "cytoscape-dagre": "^4.0.0",

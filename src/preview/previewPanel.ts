@@ -20,6 +20,7 @@ import {
   handleEditLabel,
   handleUpdatePropertyType,
 } from "./editHandlers";
+import { handleRunSparql } from "./sparqlHandler";
 
 interface PanelState {
   panel: vscode.WebviewPanel;
@@ -108,6 +109,21 @@ function uiStrings(): UiStrings {
       "This property is inferred from usage and has no declaration to edit — add one in the text editor.",
     ),
     deleteLabel: vscode.l10n.t("Delete"),
+    sparqlToggleLabel: vscode.l10n.t("SPARQL"),
+    sparqlPanelTitle: vscode.l10n.t("SPARQL query"),
+    sparqlQueryPlaceholder: vscode.l10n.t("SELECT ?s WHERE { ?s ?p ?o } LIMIT 20"),
+    sparqlRunLabel: vscode.l10n.t("Run"),
+    sparqlRunningLabel: vscode.l10n.t("Running..."),
+    sparqlClearLabel: vscode.l10n.t("Clear"),
+    sparqlModeLabel: vscode.l10n.t("On match:"),
+    sparqlModeHighlight: vscode.l10n.t("Highlight"),
+    sparqlModeFilter: vscode.l10n.t("Filter"),
+    sparqlModeOff: vscode.l10n.t("No graph effect"),
+    sparqlAskResultTrue: vscode.l10n.t("Result: true"),
+    sparqlAskResultFalse: vscode.l10n.t("Result: false"),
+    sparqlResultCount: vscode.l10n.t("{0} rows"),
+    sparqlNoResults: vscode.l10n.t("No results."),
+    sparqlConstructHeading: vscode.l10n.t("Constructed triples"),
   };
 }
 
@@ -268,6 +284,9 @@ async function handleWebviewMessage(
       return;
     case "exportPng":
       await exportDiagramPng(state, message.dataUri);
+      return;
+    case "runSparql":
+      await handleRunSparql(state.panel, state.document, message.requestId, message.query);
       return;
   }
 }

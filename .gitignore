@@ -23,5 +23,6 @@ coverage/
 .codex/
 .entire/
 .serena/
+.kiro/
 
 pub-repo/

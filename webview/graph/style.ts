@@ -128,5 +128,26 @@ export function schemaStyle(): cytoscape.StylesheetStyle[] {
     // this one selector so neither can silently undo the other's dimming.
     { selector: "node.dimmed", style: { opacity: 0.15 } },
     { selector: "edge.dimmed", style: { opacity: 0.08 } },
+    // Owned by graph/sparqlHighlight.ts — nodes/edges a SPARQL query matched,
+    // in "highlight" mode (independent of the dim filter). An accent ring and
+    // brighter line make the matches pop without hiding the rest of the graph.
+    {
+      selector: "node.sparql-match",
+      style: {
+        "border-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
+        "border-width": 5,
+        "overlay-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
+        "overlay-opacity": 0.18,
+        "overlay-padding": 6,
+      },
+    },
+    {
+      selector: "edge.sparql-match",
+      style: {
+        "line-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
+        "target-arrow-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
+        width: 4,
+      },
+    },
   ];
 }

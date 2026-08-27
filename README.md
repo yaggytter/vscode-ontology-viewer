@@ -18,6 +18,7 @@ Explore OWL, RDF, RDFS, and SKOS as a readable schema diagram without leaving VS
 - **Accessible, meaningful colors** automatically choose readable node text and explain how related entities form color families.
 - **A spacious, zoomable canvas** includes zoom in/out, reset to 100%, fit-to-screen, layout switching, and PNG export.
 - **Fast navigation** searches classes, relations, and properties. Double-clicking a node focuses its neighborhood.
+- **SPARQL queries** run against the open ontology, entirely on your machine, with results shown as text and reflected on the diagram (highlight matches or filter out the rest).
 - **An adaptive Inspector** stays beside the graph on wide screens and becomes a dismissible sheet in narrow editor groups.
 - **Safe Turtle write-back** re-parses every generated edit before accepting it. Create classes and relations, rename entities, and edit properties or descriptions directly from the diagram.
 - **English and Japanese UI** follows the VS Code display language.
@@ -42,6 +43,18 @@ Continue with the [Getting Started guide](docs/en/getting-started.md) or the han
 - Drag nodes into a useful arrangement; positions are remembered per file and view when you reopen the diagram.
 - Choose the organic `fcose` layout or layered `dagre` layout.
 - Export the current diagram as PNG or its saved layout as JSON.
+
+### Query with SPARQL
+
+Open the **SPARQL** panel from the toolbar to run SPARQL 1.1 queries against the ontology you have open. SELECT, ASK, and CONSTRUCT/DESCRIBE are supported. Press **Run** or `Ctrl`/`Cmd`+`Enter` to execute.
+
+Results show as text — a table of bindings for SELECT, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT — and are reflected on the diagram:
+
+- **Highlight** accents matching nodes and their connecting edges while keeping the rest of the graph visible.
+- **Filter** dims everything the query did not match, and composes with the search box and double-click focus.
+- **No graph effect** shows the text result only.
+
+Queries execute locally in the extension host (powered by [Comunica](https://comunica.dev/)); no ontology contents leave your machine.
 
 ### Edit safely
 

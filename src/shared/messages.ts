@@ -1,6 +1,7 @@
 import type { OntologyGraph } from "../rdf/graphModel";
 import type { PropertyType, SchemaModel } from "../rdf/schemaModel";
 import type { DocumentLayout } from "../preview/layoutStore";
+import type { SparqlResult } from "../sparql/resultModel";
 
 export type ViewMode = "schema" | "triples";
 
@@ -76,6 +77,23 @@ export interface UiStrings {
   propertyNotEditableHint: string;
   /** Tooltip/aria-label for the small delete button next to a declared property row or a declared relation's Inspector panel. */
   deleteLabel: string;
+  // --- SPARQL panel ---
+  sparqlToggleLabel: string;
+  sparqlPanelTitle: string;
+  sparqlQueryPlaceholder: string;
+  sparqlRunLabel: string;
+  sparqlRunningLabel: string;
+  sparqlClearLabel: string;
+  sparqlModeLabel: string;
+  sparqlModeHighlight: string;
+  sparqlModeFilter: string;
+  sparqlModeOff: string;
+  sparqlAskResultTrue: string;
+  sparqlAskResultFalse: string;
+  /** Template with a single `{0}` placeholder for the row count. */
+  sparqlResultCount: string;
+  sparqlNoResults: string;
+  sparqlConstructHeading: string;
 }
 
 export interface HostToWebviewInit {
@@ -113,7 +131,28 @@ export interface HostToWebviewEditResult {
   newIri?: string;
 }
 
-export type HostToWebviewMessage = HostToWebviewInit | HostToWebviewUpdate | HostToWebviewEditResult;
+/**
+ * Reply to a {@link WebviewToHostRunSparql}. On success carries the
+ * normalized result (for the text table) plus the pre-computed set of IRIs
+ * the webview should highlight/keep in the diagram (see
+ * src/sparql/highlightMapping.ts — computed host-side so the webview needs no
+ * RDF knowledge). On failure carries a user-facing `errorMessage`.
+ */
+export interface HostToWebviewSparqlResult {
+  type: "sparqlResult";
+  requestId: string;
+  ok: boolean;
+  result?: SparqlResult;
+  /** IRIs matched by the query, for diagram highlight/filter. Empty for ASK. */
+  highlightIris?: string[];
+  errorMessage?: string;
+}
+
+export type HostToWebviewMessage =
+  | HostToWebviewInit
+  | HostToWebviewUpdate
+  | HostToWebviewEditResult
+  | HostToWebviewSparqlResult;
 
 export interface WebviewToHostReady {
   type: "ready";
@@ -210,6 +249,17 @@ export interface WebviewToHostDeleteDeclaration {
   iri: string;
 }
 
+/**
+ * A SPARQL query the webview wants executed against the current document's
+ * parsed quads. The host replies with a matching {@link HostToWebviewSparqlResult}
+ * carrying the same `requestId`.
+ */
+export interface WebviewToHostRunSparql {
+  type: "runSparql";
+  requestId: string;
+  query: string;
+}
+
 export type WebviewToHostMessage =
   | WebviewToHostReady
   | WebviewToHostNodeMoved
@@ -224,4 +274,5 @@ export type WebviewToHostMessage =
   | WebviewToHostAddRelation
   | WebviewToHostAddProperty
   | WebviewToHostUpdatePropertyType
-  | WebviewToHostDeleteDeclaration;
+  | WebviewToHostDeleteDeclaration
+  | WebviewToHostRunSparql;

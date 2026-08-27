@@ -16,6 +16,8 @@ import { graphLayoutOptions } from "./graph/layoutOptions";
 import { collectViewPositions, restorationPlan, savedLayoutKey } from "./graph/layoutPersistence";
 import { applyDim, clearFocus, setSearchQuery, toggleFocusedNode } from "./graph/focus";
 import { createSearchPanel, type SearchPanel } from "./panels/search";
+import { createSparqlPanel, type SparqlPanel } from "./panels/sparql";
+import { applySparqlGraphEffect } from "./graph/sparqlHighlight";
 import { renderStats } from "./panels/stats";
 import { renderLegend } from "./panels/legend";
 import { renderEmptySelection, renderEntitySelection, renderRelationSelection, renderUnattached } from "./panels/inspector";
@@ -79,6 +81,7 @@ root.innerHTML = `
       </div>
       <button id="add-class-btn" type="button" class="toolbar-btn toolbar-btn-primary" hidden></button>
       <button id="connect-btn" type="button" class="toolbar-btn" hidden></button>
+      <button id="sparql-toggle-btn" type="button" class="toolbar-btn" aria-pressed="false"></button>
       <button id="inspector-toggle-btn" type="button" class="icon-btn inspector-toggle-btn" hidden>
         <span aria-hidden="true">◫</span>
       </button>
@@ -97,6 +100,7 @@ root.innerHTML = `
         <span id="canvas-meta" class="canvas-meta"></span>
       </div>
       <div id="connect-hint" class="connect-hint" hidden></div>
+      <div id="sparql-panel-mount" class="sparql-panel-mount"></div>
       <div id="graph-controls" class="graph-controls" role="group">
         <button id="zoom-out-btn" type="button" class="graph-control-btn">−</button>
         <button id="zoom-level-btn" type="button" class="graph-control-btn graph-zoom-readout" aria-live="polite">100%</button>
@@ -139,6 +143,8 @@ const inspectorCloseBtn = document.getElementById("inspector-close-btn") as HTML
 const connectHintEl = document.getElementById("connect-hint") as HTMLDivElement;
 const exportPngBtn = document.getElementById("export-png-btn") as HTMLButtonElement;
 const exportPngLabel = document.getElementById("export-png-label") as HTMLSpanElement;
+const sparqlToggleBtn = document.getElementById("sparql-toggle-btn") as HTMLButtonElement;
+const sparqlPanelMount = document.getElementById("sparql-panel-mount") as HTMLDivElement;
 const searchContainer = document.getElementById("search-container") as HTMLDivElement;
 const stage = document.getElementById("stage") as HTMLDivElement;
 const cyContainer = document.getElementById("cy") as HTMLDivElement;
@@ -176,6 +182,11 @@ function showToast(text: string): void {
 
 let cy: cytoscape.Core | undefined;
 let searchPanel: SearchPanel | undefined;
+let sparqlPanel: SparqlPanel | undefined;
+/** requestId of the in-flight SPARQL query, so a stale reply is ignored. */
+let pendingSparqlRequestId: string | undefined;
+/** IRIs matched by the most recent successful SPARQL query, for re-applying on mode change / re-render. */
+let lastSparqlHighlightIris: string[] = [];
 let editableIds = new Set<string>();
 let commentEditableIds = new Set<string>();
 let strings: UiStrings | undefined;
@@ -274,6 +285,34 @@ function installSearch(nextStrings: UiStrings): void {
   searchContainer.replaceChildren(searchPanel.element);
 }
 
+/**
+ * Re-applies the last SPARQL result to the graph according to the panel's
+ * current mode. Called after a fresh result, on a mode change, and after any
+ * full graph rebuild (a rebuild drops the sparql-match/dimmed classes).
+ */
+function applySparqlEffect(): void {
+  if (!cy || !sparqlPanel) {
+    return;
+  }
+  applySparqlGraphEffect(cy, lastSparqlHighlightIris, sparqlPanel.getMode());
+  applyDim(cy);
+}
+
+function installSparqlPanel(nextStrings: UiStrings): void {
+  sparqlPanel = createSparqlPanel(nextStrings, {
+    onRun: (query) => {
+      const requestId = `sparql-${++requestSeq}`;
+      pendingSparqlRequestId = requestId;
+      sparqlPanel?.setBusy(true);
+      post({ type: "runSparql", requestId, query });
+    },
+    onModeChange: () => applySparqlEffect(),
+  });
+  sparqlPanelMount.replaceChildren(sparqlPanel.element);
+  sparqlToggleBtn.textContent = nextStrings.sparqlToggleLabel;
+  sparqlToggleBtn.setAttribute("aria-label", nextStrings.sparqlPanelTitle);
+}
+
 function configureChrome(nextStrings: UiStrings): void {
   layoutLabel.textContent = nextStrings.layoutSelectLabel;
   viewSchemaBtn.textContent = nextStrings.schemaViewLabel;
@@ -302,6 +341,7 @@ function configureChrome(nextStrings: UiStrings): void {
   exportPngBtn.title = nextStrings.exportPngLabel;
   emptyEl.textContent = nextStrings.emptyGraph;
   installSearch(nextStrings);
+  installSparqlPanel(nextStrings);
 }
 
 function currentStyleFn(mode: ViewMode): cytoscape.StylesheetStyle[] {
@@ -841,7 +881,14 @@ function render(
   }
 
   if (cy) {
-    applyDim(cy);
+    // Re-applies the dim filter and re-paints any active SPARQL highlight/
+    // filter, both of which a full element rebuild drops. Falls back to a
+    // plain dim when the SPARQL panel hasn't been created yet.
+    if (sparqlPanel) {
+      applySparqlEffect();
+    } else {
+      applyDim(cy);
+    }
   }
 
   if (strings) {
@@ -1036,6 +1083,23 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     if (!message.ok && message.message) {
       showToast(message.message);
     }
+  } else if (message.type === "sparqlResult") {
+    // Ignore a reply that isn't for the most recent query (a slow earlier
+    // query resolving after a newer one would otherwise clobber the view).
+    if (message.requestId !== pendingSparqlRequestId) {
+      return;
+    }
+    pendingSparqlRequestId = undefined;
+    sparqlPanel?.setBusy(false);
+    if (!message.ok || !message.result) {
+      lastSparqlHighlightIris = [];
+      applySparqlEffect();
+      sparqlPanel?.showError(message.errorMessage ?? "Query failed.");
+      return;
+    }
+    lastSparqlHighlightIris = message.highlightIris ?? [];
+    sparqlPanel?.showResult(message.result);
+    applySparqlEffect();
   }
 });
 
@@ -1050,6 +1114,18 @@ layoutSelect.addEventListener("change", () => {
 viewSchemaBtn.addEventListener("click", () => switchViewMode("schema"));
 viewTriplesBtn.addEventListener("click", () => switchViewMode("triples"));
 exportPngBtn.addEventListener("click", exportPng);
+sparqlToggleBtn.addEventListener("click", () => {
+  if (!sparqlPanel) {
+    return;
+  }
+  const next = !sparqlPanel.isVisible();
+  sparqlPanel.setVisible(next);
+  sparqlToggleBtn.setAttribute("aria-pressed", String(next));
+  sparqlToggleBtn.classList.toggle("toolbar-btn-active", next);
+  if (next) {
+    sparqlPanel.focusInput();
+  }
+});
 inspectorToggleBtn.addEventListener("click", () => setInspectorOpen(!inspectorOpen));
 inspectorCloseBtn.addEventListener("click", () => setInspectorOpen(false));
 inspectorScrimEl.addEventListener("click", () => setInspectorOpen(false));

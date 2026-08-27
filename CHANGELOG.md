@@ -4,6 +4,11 @@ All notable changes to the Ontology Viewer extension are documented in this file
 
 [日本語](CHANGELOG.ja.md)
 
+## [Unreleased]
+
+- **SPARQL query panel** — run SPARQL 1.1 queries (SELECT, ASK, CONSTRUCT/DESCRIBE) against the open ontology directly from the diagram. Open it with the **SPARQL** toolbar button, type a query, and press **Run** (or `Ctrl`/`Cmd`+`Enter`). Results appear as a text table (variable bindings, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT). Queries run entirely in the extension host via [Comunica](https://comunica.dev/); nothing leaves your machine.
+- **Graph-linked results** — matched entities are reflected on the diagram. Choose **Highlight** to accent the matching nodes and their connecting edges, **Filter** to dim everything that did not match (composable with the existing search and focus filters), or **No graph effect** for a text-only result. IRIs that name no diagram node are ignored, and the effect is re-applied automatically when the diagram rebuilds.
+
 ## [0.2.0] — Schema diagram
 
 - **Schema diagram** (new default view) — a class-centric ER-style diagram: one node per `owl:Class`, one edge per relation, with datatype properties folded into each class instead of drawn as separate nodes. A resolution ladder rescues object properties that only have `owl:inverseOf`, a union/intersection domain, an `owl:Restriction`, or purely instance-level usage, rather than silently dropping them; anything still unresolved is listed as an unattached property instead of vanishing. SKOS-only documents (no `owl:Class` at all) fall back to treating `skos:Concept` as the entity type.
