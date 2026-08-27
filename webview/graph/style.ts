@@ -1,6 +1,7 @@
 import type cytoscape from "cytoscape";
 import { COLOR_PALETTE_SIZE } from "../../src/rdf/appearance";
 import { accessibleTextColor, cssVar, paletteColorFor, paletteSurfaceFor } from "../theme";
+import { overlayStyles } from "./overlayStyles";
 
 /**
  * Cytoscape stylesheet for the class-centric schema view. Three things carry
@@ -124,30 +125,8 @@ export function schemaStyle(): cytoscape.StylesheetStyle[] {
         opacity: 0.65,
       },
     },
-    // Owned by graph/focus.ts's applyDim() — search and focus mode share
-    // this one selector so neither can silently undo the other's dimming.
-    { selector: "node.dimmed", style: { opacity: 0.15 } },
-    { selector: "edge.dimmed", style: { opacity: 0.08 } },
-    // Owned by graph/sparqlHighlight.ts — nodes/edges a SPARQL query matched,
-    // in "highlight" mode (independent of the dim filter). An accent ring and
-    // brighter line make the matches pop without hiding the rest of the graph.
-    {
-      selector: "node.sparql-match",
-      style: {
-        "border-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
-        "border-width": 5,
-        "overlay-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
-        "overlay-opacity": 0.18,
-        "overlay-padding": 6,
-      },
-    },
-    {
-      selector: "edge.sparql-match",
-      style: {
-        "line-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
-        "target-arrow-color": cssVar("--vscode-charts-yellow", "#e2c08d"),
-        width: 4,
-      },
-    },
+    // Dim and SPARQL-match selectors are shared with the triples view — see
+    // graph/overlayStyles.ts.
+    ...overlayStyles(),
   ];
 }

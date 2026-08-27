@@ -9,16 +9,17 @@ import type {
 import type { OntologyGraph, OntologyNode } from "../src/rdf/graphModel";
 import type { PropertyType, SchemaModel } from "../src/rdf/schemaModel";
 import type { DocumentLayout } from "../src/preview/layoutStore";
-import { accessibleTextColor, cssVar } from "./theme";
+import { cssVar } from "./theme";
+import { APP_TEMPLATE } from "./shell";
 import { createCy } from "./graph/cy";
 import { schemaToElements } from "./graph/elements";
 import { schemaStyle } from "./graph/style";
+import { tripleStyle } from "./graph/tripleStyle";
 import { graphLayoutOptions } from "./graph/layoutOptions";
 import { collectViewPositions, restorationPlan, savedLayoutKey } from "./graph/layoutPersistence";
 import { applyDim, clearFocus, setSearchQuery, toggleFocusedNode } from "./graph/focus";
 import { createSearchPanel, type SearchPanel } from "./panels/search";
-import { createSparqlPanel, type SparqlPanel } from "./panels/sparql";
-import { applySparqlGraphEffect, type SparqlGraphEffect } from "./graph/sparqlHighlight";
+import { createSparqlController } from "./controllers/sparqlController";
 import { renderStats } from "./panels/stats";
 import { renderLegend } from "./panels/legend";
 import { renderEmptySelection, renderEntitySelection, renderRelationSelection, renderUnattached } from "./panels/inspector";
@@ -64,75 +65,7 @@ function post(message: WebviewToHostMessage): void {
 }
 
 const root = document.getElementById("app") as HTMLDivElement;
-root.innerHTML = `
-  <div id="banner" class="banner" hidden></div>
-  <div id="toolbar" class="toolbar">
-    <div class="toolbar-leading">
-      <div id="view-toggle" class="view-toggle" role="group">
-        <button id="view-schema" type="button" class="view-toggle-btn"></button>
-        <button id="view-triples" type="button" class="view-toggle-btn"></button>
-      </div>
-      <div id="search-container" class="search-container"></div>
-    </div>
-    <div class="toolbar-actions">
-      <div class="layout-control">
-        <label id="layout-label" for="layout-select"></label>
-        <select id="layout-select">
-          <option value="fcose">fCoSE</option>
-          <option value="dagre">Dagre</option>
-        </select>
-      </div>
-      <button id="add-class-btn" type="button" class="toolbar-btn toolbar-btn-primary" hidden></button>
-      <button id="connect-btn" type="button" class="toolbar-btn" hidden></button>
-      <button id="sparql-toggle-btn" type="button" class="toolbar-btn" aria-pressed="false"></button>
-      <button id="inspector-toggle-btn" type="button" class="icon-btn inspector-toggle-btn" hidden>
-        <span aria-hidden="true">◫</span>
-      </button>
-      <button id="export-png-btn" type="button" class="icon-btn">
-        <span aria-hidden="true">⇩</span>
-        <span id="export-png-label"></span>
-      </button>
-    </div>
-  </div>
-  <div id="body" class="body-row">
-    <div id="stage">
-      <div id="cy"></div>
-      <div id="empty" class="empty" hidden></div>
-      <div id="canvas-summary" class="canvas-summary" hidden>
-        <strong id="canvas-title" class="canvas-title"></strong>
-        <span id="canvas-meta" class="canvas-meta"></span>
-      </div>
-      <div id="connect-hint" class="connect-hint" hidden></div>
-      <div id="sparql-panel-mount" class="sparql-panel-mount"></div>
-      <div id="graph-controls" class="graph-controls" role="group">
-        <button id="zoom-out-btn" type="button" class="graph-control-btn">−</button>
-        <button id="zoom-level-btn" type="button" class="graph-control-btn graph-zoom-readout" aria-live="polite">100%</button>
-        <button id="zoom-in-btn" type="button" class="graph-control-btn">+</button>
-        <span class="graph-control-separator" aria-hidden="true"></span>
-        <button id="fit-btn" type="button" class="graph-control-btn">⛶</button>
-        <button id="run-layout-btn" type="button" class="graph-control-btn">↻</button>
-      </div>
-    </div>
-    <div id="inspector-scrim" class="inspector-scrim" hidden></div>
-    <aside id="inspector" class="inspector">
-      <div class="inspector-toolbar">
-        <div>
-          <div class="inspector-eyebrow">Ontology</div>
-          <h2 id="inspector-heading"></h2>
-        </div>
-        <button id="inspector-close-btn" type="button" class="icon-btn inspector-close-btn">×</button>
-      </div>
-      <section class="overview-card">
-        <h3 id="overview-heading"></h3>
-        <div id="inspector-stats"></div>
-      </section>
-      <div id="inspector-selection"></div>
-      <div id="inspector-unattached"></div>
-      <div id="inspector-legend"></div>
-    </aside>
-  </div>
-  <div id="toast" class="toast" hidden></div>
-`;
+root.innerHTML = APP_TEMPLATE;
 
 const banner = document.getElementById("banner") as HTMLDivElement;
 const layoutLabel = document.getElementById("layout-label") as HTMLLabelElement;
@@ -185,11 +118,6 @@ function showToast(text: string): void {
 
 let cy: cytoscape.Core | undefined;
 let searchPanel: SearchPanel | undefined;
-let sparqlPanel: SparqlPanel | undefined;
-/** requestId of the in-flight SPARQL query, so a stale reply is ignored. */
-let pendingSparqlRequestId: string | undefined;
-/** The most recent successful SPARQL result, reduced to what the graph reacts to. */
-let lastSparqlEffect: SparqlGraphEffect = { matchedIris: [], typeFallback: {} };
 /** Example queries offered by the SPARQL panel's picker, supplied by the host. */
 let sparqlSamples: SparqlSample[] = [];
 let editableIds = new Set<string>();
@@ -295,28 +223,13 @@ function installSearch(nextStrings: UiStrings): void {
  * current mode. Called after a fresh result, on a mode change, and after any
  * full graph rebuild (a rebuild drops the sparql-match/dimmed classes).
  */
-function applySparqlEffect(): void {
-  if (!cy || !sparqlPanel) {
-    return;
-  }
-  applySparqlGraphEffect(cy, lastSparqlEffect, sparqlPanel.getMode());
-  applyDim(cy);
-}
-
-function installSparqlPanel(nextStrings: UiStrings): void {
-  sparqlPanel = createSparqlPanel(nextStrings, sparqlSamples, {
-    onRun: (query) => {
-      const requestId = `sparql-${++requestSeq}`;
-      pendingSparqlRequestId = requestId;
-      sparqlPanel?.setBusy(true);
-      post({ type: "runSparql", requestId, query });
-    },
-    onModeChange: () => applySparqlEffect(),
-  });
-  sparqlPanelMount.replaceChildren(sparqlPanel.element);
-  sparqlToggleBtn.textContent = nextStrings.sparqlToggleLabel;
-  sparqlToggleBtn.setAttribute("aria-label", nextStrings.sparqlPanelTitle);
-}
+const sparqlController = createSparqlController({
+  toggleButton: sparqlToggleBtn,
+  mount: sparqlPanelMount,
+  getCy: () => cy,
+  post,
+  nextRequestId: () => `sparql-${++requestSeq}`,
+});
 
 function configureChrome(nextStrings: UiStrings): void {
   layoutLabel.textContent = nextStrings.layoutSelectLabel;
@@ -346,83 +259,11 @@ function configureChrome(nextStrings: UiStrings): void {
   exportPngBtn.title = nextStrings.exportPngLabel;
   emptyEl.textContent = nextStrings.emptyGraph;
   installSearch(nextStrings);
-  installSparqlPanel(nextStrings);
+  sparqlController.install(nextStrings, sparqlSamples);
 }
 
 function currentStyleFn(mode: ViewMode): cytoscape.StylesheetStyle[] {
   return mode === "schema" ? schemaStyle() : tripleStyle();
-}
-
-/**
- * Cytoscape draws to a `<canvas>` and cannot resolve CSS custom properties —
- * a raw `var(--vscode-*)` string is invalid input to it and silently falls
- * back to cytoscape's own defaults (this used to be the whole stylesheet).
- * Every color here is resolved to a concrete value via `cssVar()` first, and
- * this function is re-invoked (and `cy.style()` reapplied) on theme change.
- */
-function tripleStyle(): cytoscape.StylesheetStyle[] {
-  const editorBackground = cssVar("--vscode-editor-background", "#1e1e1e");
-  const nodeColors = {
-    default: cssVar("--vscode-charts-blue", "#3794ff"),
-    class: cssVar("--vscode-charts-purple", "#b180d7"),
-    property: cssVar("--vscode-charts-orange", "#d18616"),
-    individual: cssVar("--vscode-charts-green", "#89d185"),
-  };
-  return [
-    {
-      selector: "node",
-      style: {
-        label: "data(label)",
-        "text-valign": "center",
-        "text-halign": "center",
-        "background-color": nodeColors.default,
-        color: accessibleTextColor(nodeColors.default, editorBackground),
-        "font-size": 11,
-        "text-wrap": "wrap",
-        "text-max-width": "120px",
-        width: "label",
-        height: "label",
-        padding: "8px",
-        shape: "round-rectangle",
-        "border-width": 1,
-        "border-color": cssVar("--vscode-editorWidget-border", "#454545"),
-      },
-    },
-    {
-      selector: "node[kind = 'class']",
-      style: { "background-color": nodeColors.class, color: accessibleTextColor(nodeColors.class, editorBackground) },
-    },
-    {
-      selector: "node[kind = 'property']",
-      style: { "background-color": nodeColors.property, color: accessibleTextColor(nodeColors.property, editorBackground) },
-    },
-    {
-      selector: "node[kind = 'individual']",
-      style: { "background-color": nodeColors.individual, color: accessibleTextColor(nodeColors.individual, editorBackground) },
-    },
-    {
-      selector: "node.editable",
-      style: { "border-style": "dashed", "border-width": 2 },
-    },
-    {
-      selector: "edge",
-      style: {
-        label: "data(predicateLabel)",
-        "font-size": 9,
-        color: cssVar("--vscode-descriptionForeground", "#999"),
-        width: 1.5,
-        // `--vscode-editorWidget-border` is a subtle low-emphasis border
-        // color that's nearly invisible in dark themes; `--vscode-charts-lines`
-        // is the token themes define for chart/graph line content instead.
-        "line-color": cssVar("--vscode-charts-lines", "#a0a0a0"),
-        "target-arrow-color": cssVar("--vscode-charts-lines", "#a0a0a0"),
-        "target-arrow-shape": "triangle",
-        "curve-style": "bezier",
-      },
-    },
-    { selector: "node.dimmed", style: { opacity: 0.15 } },
-    { selector: "edge.dimmed", style: { opacity: 0.08 } },
-  ];
 }
 
 function toElements(graph: OntologyGraph): cytoscape.ElementDefinition[] {
@@ -886,14 +727,9 @@ function render(
   }
 
   if (cy) {
-    // Re-applies the dim filter and re-paints any active SPARQL highlight/
-    // filter, both of which a full element rebuild drops. Falls back to a
-    // plain dim when the SPARQL panel hasn't been created yet.
-    if (sparqlPanel) {
-      applySparqlEffect();
-    } else {
-      applyDim(cy);
-    }
+    // Re-applies the dim filter and re-paints any active SPARQL highlight or
+    // filter, both of which a full element rebuild drops.
+    sparqlController.reapply();
   }
 
   if (strings) {
@@ -1092,25 +928,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
       showToast(message.message);
     }
   } else if (message.type === "sparqlResult") {
-    // Ignore a reply that isn't for the most recent query (a slow earlier
-    // query resolving after a newer one would otherwise clobber the view).
-    if (message.requestId !== pendingSparqlRequestId) {
-      return;
-    }
-    pendingSparqlRequestId = undefined;
-    sparqlPanel?.setBusy(false);
-    if (!message.ok || !message.result) {
-      lastSparqlEffect = { matchedIris: [], typeFallback: {} };
-      applySparqlEffect();
-      sparqlPanel?.showError(message.errorMessage ?? "Query failed.");
-      return;
-    }
-    lastSparqlEffect = {
-      matchedIris: message.highlightIris ?? [],
-      typeFallback: message.highlightTypeFallback ?? {},
-    };
-    sparqlPanel?.showResult(message.result);
-    applySparqlEffect();
+    sparqlController.handleResult(message);
   }
 });
 
@@ -1125,18 +943,6 @@ layoutSelect.addEventListener("change", () => {
 viewSchemaBtn.addEventListener("click", () => switchViewMode("schema"));
 viewTriplesBtn.addEventListener("click", () => switchViewMode("triples"));
 exportPngBtn.addEventListener("click", exportPng);
-sparqlToggleBtn.addEventListener("click", () => {
-  if (!sparqlPanel) {
-    return;
-  }
-  const next = !sparqlPanel.isVisible();
-  sparqlPanel.setVisible(next);
-  sparqlToggleBtn.setAttribute("aria-pressed", String(next));
-  sparqlToggleBtn.classList.toggle("toolbar-btn-active", next);
-  if (next) {
-    sparqlPanel.focusInput();
-  }
-});
 inspectorToggleBtn.addEventListener("click", () => setInspectorOpen(!inspectorOpen));
 inspectorCloseBtn.addEventListener("click", () => setInspectorOpen(false));
 inspectorScrimEl.addEventListener("click", () => setInspectorOpen(false));
