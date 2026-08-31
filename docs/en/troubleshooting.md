@@ -5,6 +5,25 @@
 - Check the Problems panel — if the file has a syntax error, the diagram keeps showing the last valid graph (or nothing, if it's never parsed successfully).
 - An ontology with no `rdf:type` / class / property / individual triples at all will show an empty diagram by design — there's nothing to draw yet.
 
+## My SPARQL query returned rows, but the diagram didn't change
+
+Check the **On match:** selector in the SPARQL panel first — if it is set to **No graph effect**, the result is text-only by design.
+
+Otherwise, the most likely reason is that the query matched things the current view doesn't draw. The **Schema** view draws classes; the **Triples** view draws every resource. So a query matching individuals highlights their *class* in the schema view, and the individuals themselves in the triples view. If nothing lights up in the schema view, try switching to **Triples** and running the query again.
+
+Note that you do *not* need to return a resource in order to highlight it: a query that projects only literals (labels, prices, names) still highlights the resources carrying those literals. If a query returns rows and still highlights nothing in either view, that's worth an issue report.
+
+An `ASK` query never highlights anything — it answers `true`/`false` and has no resources to point at.
+
+## My SPARQL query failed or returned nothing
+
+- A syntax error is reported in the panel and the diagram is left untouched. Check for a missing `PREFIX`, an unbalanced `{`, or a `.` at the end of the last pattern.
+- Returning zero rows is a valid answer. Try one of the built-in **Examples:** to confirm the panel works against this document, then narrow from there.
+- Remember to declare a prefix for your own namespace. The examples only declare `rdf:`, `rdfs:`, and `owl:`, so a pattern using your ontology's terms needs its own `PREFIX` line.
+- Queries run against the file as it currently is in the editor, including unsaved changes.
+
+See the [SPARQL tutorial](tutorial-4-sparql.md) for a guided walkthrough.
+
 ## A node doesn't have a dashed border (can't edit it)
 
 That entity's label isn't safely editable from the diagram right now. Common reasons:

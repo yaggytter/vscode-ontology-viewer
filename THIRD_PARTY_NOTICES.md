@@ -1,8 +1,8 @@
 # Third-Party Notices
 
-Ontology Viewer bundles open-source packages. The following inventory lists the extension's direct production dependencies. Adding the in-editor SPARQL engine pulls in the [Comunica](https://comunica.dev/) framework, which contributes a large tree of transitively bundled `@comunica/*`, `@rdfjs/*`, and related packages; the complete, machine-readable inventory of every bundled package and version is preserved in `package-lock.json`. The packages remain subject to their own licenses; this file does not replace those license texts.
+Ontology Viewer bundles open-source packages. The table below lists the extension's direct production dependencies for version 0.3.0. The in-editor SPARQL engine brings in the [Comunica](https://comunica.dev/) framework, which expands the bundled set to 403 packages in total (mostly `@comunica/*`, `@rdfjs/*`, and their supporting libraries); the complete, machine-readable inventory of every bundled package and exact version is preserved in `package-lock.json`. The packages remain subject to their own licenses; this file does not replace those license texts.
 
-Ontology Viewerには、次のオープンソースパッケージが含まれます。以下は直接の本番依存の一覧です。エディタ内SPARQL機能の追加により [Comunica](https://comunica.dev/) フレームワークが取り込まれ、多数の `@comunica/*`・`@rdfjs/*` 系パッケージが推移的に同梱されます。同梱される全パッケージとバージョンの完全な一覧は `package-lock.json` に記録されています。各パッケージにはそれぞれのライセンスが適用され、この文書はライセンス本文に代わるものではありません。
+Ontology Viewerには、次のオープンソースパッケージが含まれます。下の表はバージョン0.3.0における直接の本番依存です。エディタ内SPARQL機能により [Comunica](https://comunica.dev/) フレームワークが加わり、同梱されるパッケージは合計403個になります（大半は `@comunica/*`・`@rdfjs/*` とその依存ライブラリです）。同梱される全パッケージと正確なバージョンの完全な一覧は `package-lock.json` に記録されています。各パッケージにはそれぞれのライセンスが適用され、この文書はライセンス本文に代わるものではありません。
 
 | Package | Version | License |
 | --- | --- | --- |
@@ -16,5 +16,23 @@ Ontology Viewerには、次のオープンソースパッケージが含まれ�
 | `rdfxml-streaming-parser` | 3.2.0 | MIT |
 
 The Comunica SPARQL engine and its `@comunica/*` / `@rdfjs/*` dependency tree are published under the MIT license. Source code and complete license information for each package are available through its npm package page at `https://www.npmjs.com/package/<package-name>` and in the corresponding package metadata installed by npm. A machine-readable dependency snapshot is preserved in `package-lock.json`.
+
+## License summary of the full bundled set
+
+Every one of the 403 bundled production packages is distributed under a permissive license. No copyleft-licensed package (GPL, LGPL, AGPL, MPL, EPL, CDDL, or SSPL) is included.
+
+同梱される403個の本番依存パッケージは、すべて許容的ライセンスで配布されています。コピーレフト系ライセンス（GPL・LGPL・AGPL・MPL・EPL・CDDL・SSPL）のパッケージは含まれていません。
+
+| License | Packages |
+| --- | ---: |
+| MIT | 385 |
+| ISC | 9 |
+| BSD-2-Clause | 5 |
+| Apache-2.0 | 1 |
+| BSD-3-Clause | 1 |
+| FreeBSD (BSD-2-Clause) | 1 |
+| WTFPL OR MIT | 1 |
+
+Counts were taken from the installed dependency tree for version 0.3.0 (`npm ls --omit=dev --all`). Re-run that command against `package-lock.json` to reproduce them.
 
 The project as a whole is distributed under the [MIT License](LICENSE).

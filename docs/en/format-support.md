@@ -1,13 +1,15 @@
 # Format Support
 
-| Format | Extensions | Diagram | Edit from diagram | Rename (F2) |
-| --- | --- | --- | --- | --- |
-| Turtle | `.ttl`, `.turtle` | ✅ | ✅ | ✅ |
-| TriG | `.trig` | ✅ | — | — |
-| N-Triples | `.nt` | ✅ | — | — |
-| Notation3 | `.n3` | ✅ | — | — |
-| RDF/XML | `.rdf`, `.owl` | ✅ | Convert to Turtle first | — |
-| JSON-LD | `.jsonld` | ✅ | Convert to Turtle first | — |
+| Format | Extensions | Diagram | SPARQL | Edit from diagram | Rename (F2) |
+| --- | --- | --- | --- | --- | --- |
+| Turtle | `.ttl`, `.turtle` | ✅ | ✅ | ✅ | ✅ |
+| TriG | `.trig` | ✅ | ✅ | — | — |
+| N-Triples | `.nt` | ✅ | ✅ | — | — |
+| Notation3 | `.n3` | ✅ | ✅ | — | — |
+| RDF/XML | `.rdf`, `.owl` | ✅ | ✅ | Convert to Turtle first | — |
+| JSON-LD | `.jsonld` | ✅ | ✅ | Convert to Turtle first | — |
+
+SPARQL querying works on every format the diagram can read, because it runs against the parsed triples rather than the source text — no conversion needed. Only *writing back* is Turtle-only.
 
 ## Why only Turtle is editable
 

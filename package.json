@@ -2,7 +2,7 @@
   "name": "ontology-viewer",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "AkihiroYAGASAKI",
   "author": {
     "name": "yaggytter",
@@ -23,6 +23,7 @@
     "rdf",
     "rdfs",
     "turtle",
+    "sparql",
     "semantic web",
     "knowledge graph",
     "skos",
@@ -281,7 +282,7 @@
     "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.1",
     "eslint": "^9.16.0",
-    "happy-dom": "^15.11.7",
+    "happy-dom": "^20.12.0",
     "typescript": "^5.7.2",
     "vitest": "^4.1.10"
   },

@@ -79,6 +79,8 @@ RDF/XML and JSON-LD are viewable directly. Use **Ontology Viewer: Convert to Tur
 | RDF/XML / OWL/XML | `.rdf`, `.owl` | Yes | Convert first |
 | JSON-LD | `.jsonld` | Yes | Convert first |
 
+SPARQL querying works on every format in this table — it runs against the parsed triples, so no conversion is needed. Only writing back is Turtle-only.
+
 See [Format Support](docs/en/format-support.md) for parser and editing details.
 
 ## Commands
