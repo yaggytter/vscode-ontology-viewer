@@ -10,6 +10,7 @@ out-test/**
 .claude/**
 .codex/**
 .entire/**
+.kiro/**
 tmp/**
 coverage/**
 node_modules/.cache/**

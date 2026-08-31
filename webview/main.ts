@@ -1,6 +1,7 @@
 import type cytoscape from "cytoscape";
 import type {
   HostToWebviewMessage,
+  SparqlSample,
   UiStrings,
   ViewMode,
   WebviewToHostMessage,
@@ -8,14 +9,17 @@ import type {
 import type { OntologyGraph, OntologyNode } from "../src/rdf/graphModel";
 import type { PropertyType, SchemaModel } from "../src/rdf/schemaModel";
 import type { DocumentLayout } from "../src/preview/layoutStore";
-import { accessibleTextColor, cssVar } from "./theme";
+import { cssVar } from "./theme";
+import { APP_TEMPLATE } from "./shell";
 import { createCy } from "./graph/cy";
 import { schemaToElements } from "./graph/elements";
 import { schemaStyle } from "./graph/style";
+import { tripleStyle } from "./graph/tripleStyle";
 import { graphLayoutOptions } from "./graph/layoutOptions";
 import { collectViewPositions, restorationPlan, savedLayoutKey } from "./graph/layoutPersistence";
 import { applyDim, clearFocus, setSearchQuery, toggleFocusedNode } from "./graph/focus";
 import { createSearchPanel, type SearchPanel } from "./panels/search";
+import { createSparqlController } from "./controllers/sparqlController";
 import { renderStats } from "./panels/stats";
 import { renderLegend } from "./panels/legend";
 import { renderEmptySelection, renderEntitySelection, renderRelationSelection, renderUnattached } from "./panels/inspector";
@@ -30,9 +34,10 @@ import { DEFAULT_ZOOM, readableFitZoom, zoomLabel, zoomStep } from "./viewportMo
  * try/catch around the cache fast-path below. Bumped 2->3 for the schema
  * view (viewMode/schema fields, and layout keys now namespaced per view);
  * 3->4 for commentEditableNodeIds (Phase 5 comment editing); 4->5 for the
- * resetZoomLabel chrome string; 5->6 for persisted layout restoration.
+ * resetZoomLabel chrome string; 5->6 for persisted layout restoration;
+ * 6->7 for the SPARQL panel's cached example queries.
  */
-const STATE_VERSION = 6;
+const STATE_VERSION = 7;
 
 interface WebviewState {
   stateVersion: number;
@@ -46,6 +51,7 @@ interface WebviewState {
   algorithm: "fcose" | "dagre";
   viewMode: ViewMode;
   strings: UiStrings;
+  sparqlSamples: SparqlSample[];
 }
 
 function saveState(state: Omit<WebviewState, "stateVersion">): void {
@@ -59,73 +65,7 @@ function post(message: WebviewToHostMessage): void {
 }
 
 const root = document.getElementById("app") as HTMLDivElement;
-root.innerHTML = `
-  <div id="banner" class="banner" hidden></div>
-  <div id="toolbar" class="toolbar">
-    <div class="toolbar-leading">
-      <div id="view-toggle" class="view-toggle" role="group">
-        <button id="view-schema" type="button" class="view-toggle-btn"></button>
-        <button id="view-triples" type="button" class="view-toggle-btn"></button>
-      </div>
-      <div id="search-container" class="search-container"></div>
-    </div>
-    <div class="toolbar-actions">
-      <div class="layout-control">
-        <label id="layout-label" for="layout-select"></label>
-        <select id="layout-select">
-          <option value="fcose">fCoSE</option>
-          <option value="dagre">Dagre</option>
-        </select>
-      </div>
-      <button id="add-class-btn" type="button" class="toolbar-btn toolbar-btn-primary" hidden></button>
-      <button id="connect-btn" type="button" class="toolbar-btn" hidden></button>
-      <button id="inspector-toggle-btn" type="button" class="icon-btn inspector-toggle-btn" hidden>
-        <span aria-hidden="true">◫</span>
-      </button>
-      <button id="export-png-btn" type="button" class="icon-btn">
-        <span aria-hidden="true">⇩</span>
-        <span id="export-png-label"></span>
-      </button>
-    </div>
-  </div>
-  <div id="body" class="body-row">
-    <div id="stage">
-      <div id="cy"></div>
-      <div id="empty" class="empty" hidden></div>
-      <div id="canvas-summary" class="canvas-summary" hidden>
-        <strong id="canvas-title" class="canvas-title"></strong>
-        <span id="canvas-meta" class="canvas-meta"></span>
-      </div>
-      <div id="connect-hint" class="connect-hint" hidden></div>
-      <div id="graph-controls" class="graph-controls" role="group">
-        <button id="zoom-out-btn" type="button" class="graph-control-btn">−</button>
-        <button id="zoom-level-btn" type="button" class="graph-control-btn graph-zoom-readout" aria-live="polite">100%</button>
-        <button id="zoom-in-btn" type="button" class="graph-control-btn">+</button>
-        <span class="graph-control-separator" aria-hidden="true"></span>
-        <button id="fit-btn" type="button" class="graph-control-btn">⛶</button>
-        <button id="run-layout-btn" type="button" class="graph-control-btn">↻</button>
-      </div>
-    </div>
-    <div id="inspector-scrim" class="inspector-scrim" hidden></div>
-    <aside id="inspector" class="inspector">
-      <div class="inspector-toolbar">
-        <div>
-          <div class="inspector-eyebrow">Ontology</div>
-          <h2 id="inspector-heading"></h2>
-        </div>
-        <button id="inspector-close-btn" type="button" class="icon-btn inspector-close-btn">×</button>
-      </div>
-      <section class="overview-card">
-        <h3 id="overview-heading"></h3>
-        <div id="inspector-stats"></div>
-      </section>
-      <div id="inspector-selection"></div>
-      <div id="inspector-unattached"></div>
-      <div id="inspector-legend"></div>
-    </aside>
-  </div>
-  <div id="toast" class="toast" hidden></div>
-`;
+root.innerHTML = APP_TEMPLATE;
 
 const banner = document.getElementById("banner") as HTMLDivElement;
 const layoutLabel = document.getElementById("layout-label") as HTMLLabelElement;
@@ -139,6 +79,8 @@ const inspectorCloseBtn = document.getElementById("inspector-close-btn") as HTML
 const connectHintEl = document.getElementById("connect-hint") as HTMLDivElement;
 const exportPngBtn = document.getElementById("export-png-btn") as HTMLButtonElement;
 const exportPngLabel = document.getElementById("export-png-label") as HTMLSpanElement;
+const sparqlToggleBtn = document.getElementById("sparql-toggle-btn") as HTMLButtonElement;
+const sparqlPanelMount = document.getElementById("sparql-panel-mount") as HTMLDivElement;
 const searchContainer = document.getElementById("search-container") as HTMLDivElement;
 const stage = document.getElementById("stage") as HTMLDivElement;
 const cyContainer = document.getElementById("cy") as HTMLDivElement;
@@ -176,6 +118,8 @@ function showToast(text: string): void {
 
 let cy: cytoscape.Core | undefined;
 let searchPanel: SearchPanel | undefined;
+/** Example queries offered by the SPARQL panel's picker, supplied by the host. */
+let sparqlSamples: SparqlSample[] = [];
 let editableIds = new Set<string>();
 let commentEditableIds = new Set<string>();
 let strings: UiStrings | undefined;
@@ -274,6 +218,19 @@ function installSearch(nextStrings: UiStrings): void {
   searchContainer.replaceChildren(searchPanel.element);
 }
 
+/**
+ * Re-applies the last SPARQL result to the graph according to the panel's
+ * current mode. Called after a fresh result, on a mode change, and after any
+ * full graph rebuild (a rebuild drops the sparql-match/dimmed classes).
+ */
+const sparqlController = createSparqlController({
+  toggleButton: sparqlToggleBtn,
+  mount: sparqlPanelMount,
+  getCy: () => cy,
+  post,
+  nextRequestId: () => `sparql-${++requestSeq}`,
+});
+
 function configureChrome(nextStrings: UiStrings): void {
   layoutLabel.textContent = nextStrings.layoutSelectLabel;
   viewSchemaBtn.textContent = nextStrings.schemaViewLabel;
@@ -302,82 +259,11 @@ function configureChrome(nextStrings: UiStrings): void {
   exportPngBtn.title = nextStrings.exportPngLabel;
   emptyEl.textContent = nextStrings.emptyGraph;
   installSearch(nextStrings);
+  sparqlController.install(nextStrings, sparqlSamples);
 }
 
 function currentStyleFn(mode: ViewMode): cytoscape.StylesheetStyle[] {
   return mode === "schema" ? schemaStyle() : tripleStyle();
-}
-
-/**
- * Cytoscape draws to a `<canvas>` and cannot resolve CSS custom properties —
- * a raw `var(--vscode-*)` string is invalid input to it and silently falls
- * back to cytoscape's own defaults (this used to be the whole stylesheet).
- * Every color here is resolved to a concrete value via `cssVar()` first, and
- * this function is re-invoked (and `cy.style()` reapplied) on theme change.
- */
-function tripleStyle(): cytoscape.StylesheetStyle[] {
-  const editorBackground = cssVar("--vscode-editor-background", "#1e1e1e");
-  const nodeColors = {
-    default: cssVar("--vscode-charts-blue", "#3794ff"),
-    class: cssVar("--vscode-charts-purple", "#b180d7"),
-    property: cssVar("--vscode-charts-orange", "#d18616"),
-    individual: cssVar("--vscode-charts-green", "#89d185"),
-  };
-  return [
-    {
-      selector: "node",
-      style: {
-        label: "data(label)",
-        "text-valign": "center",
-        "text-halign": "center",
-        "background-color": nodeColors.default,
-        color: accessibleTextColor(nodeColors.default, editorBackground),
-        "font-size": 11,
-        "text-wrap": "wrap",
-        "text-max-width": "120px",
-        width: "label",
-        height: "label",
-        padding: "8px",
-        shape: "round-rectangle",
-        "border-width": 1,
-        "border-color": cssVar("--vscode-editorWidget-border", "#454545"),
-      },
-    },
-    {
-      selector: "node[kind = 'class']",
-      style: { "background-color": nodeColors.class, color: accessibleTextColor(nodeColors.class, editorBackground) },
-    },
-    {
-      selector: "node[kind = 'property']",
-      style: { "background-color": nodeColors.property, color: accessibleTextColor(nodeColors.property, editorBackground) },
-    },
-    {
-      selector: "node[kind = 'individual']",
-      style: { "background-color": nodeColors.individual, color: accessibleTextColor(nodeColors.individual, editorBackground) },
-    },
-    {
-      selector: "node.editable",
-      style: { "border-style": "dashed", "border-width": 2 },
-    },
-    {
-      selector: "edge",
-      style: {
-        label: "data(predicateLabel)",
-        "font-size": 9,
-        color: cssVar("--vscode-descriptionForeground", "#999"),
-        width: 1.5,
-        // `--vscode-editorWidget-border` is a subtle low-emphasis border
-        // color that's nearly invisible in dark themes; `--vscode-charts-lines`
-        // is the token themes define for chart/graph line content instead.
-        "line-color": cssVar("--vscode-charts-lines", "#a0a0a0"),
-        "target-arrow-color": cssVar("--vscode-charts-lines", "#a0a0a0"),
-        "target-arrow-shape": "triangle",
-        "curve-style": "bezier",
-      },
-    },
-    { selector: "node.dimmed", style: { opacity: 0.15 } },
-    { selector: "edge.dimmed", style: { opacity: 0.08 } },
-  ];
 }
 
 function toElements(graph: OntologyGraph): cytoscape.ElementDefinition[] {
@@ -841,7 +727,9 @@ function render(
   }
 
   if (cy) {
-    applyDim(cy);
+    // Re-applies the dim filter and re-paints any active SPARQL highlight or
+    // filter, both of which a full element rebuild drops.
+    sparqlController.reapply();
   }
 
   if (strings) {
@@ -879,6 +767,7 @@ function switchViewMode(mode: ViewMode): void {
     algorithm: layoutSelect.value as "fcose" | "dagre",
     viewMode,
     strings,
+    sparqlSamples,
   });
 }
 
@@ -948,6 +837,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     // just eliminated.)
     lastRenderedGeneration = message.generation;
     strings = message.strings;
+    sparqlSamples = message.sparqlSamples;
     isEditableDocument = message.isEditableDocument;
     editableIds = new Set(message.editableNodeIds);
     commentEditableIds = new Set(message.commentEditableNodeIds);
@@ -972,6 +862,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
       algorithm: message.defaultLayoutAlgorithm,
       viewMode,
       strings: message.strings,
+      sparqlSamples: message.sparqlSamples,
     });
   } else if (message.type === "update") {
     // Defends against a stale message (e.g. the cached-state fast path
@@ -1036,6 +927,8 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     if (!message.ok && message.message) {
       showToast(message.message);
     }
+  } else if (message.type === "sparqlResult") {
+    sparqlController.handleResult(message);
   }
 });
 
@@ -1157,6 +1050,7 @@ try {
     editableIds = new Set(cached.editableNodeIds);
     commentEditableIds = new Set(cached.commentEditableNodeIds);
     strings = cached.strings;
+    sparqlSamples = cached.sparqlSamples;
     isEditableDocument = cached.isEditableDocument;
     lastRenderedGeneration = cached.generation;
     viewMode = cached.viewMode;

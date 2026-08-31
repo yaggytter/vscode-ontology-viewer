@@ -4,6 +4,20 @@ All notable changes to the Ontology Viewer extension are documented in this file
 
 [日本語](CHANGELOG.ja.md)
 
+## [0.3.0] — SPARQL Query
+
+- **SPARQL query panel** — run SPARQL 1.1 queries (SELECT, ASK, CONSTRUCT/DESCRIBE) against the open ontology directly from the diagram. Open it with the **SPARQL** toolbar button, type a query, and press **Run** (or `Ctrl`/`Cmd`+`Enter`). Results appear as a text table (variable bindings, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT). Queries run entirely in the extension host via [Comunica](https://comunica.dev/); nothing leaves your machine.
+- **Graph-linked results** — matched entities are reflected on the diagram. Choose **Highlight** to accent the matching nodes and their connecting edges, **Filter** to dim everything that did not match (composable with the existing search and focus filters), or **No graph effect** for a text-only result.
+- **Results are matched per view.** A query that returns only literals still highlights the resources it was about: returned literals are traced back to the resources carrying them, so you don't have to project a variable just to see it on the diagram. Instance-level matches light up their class in the class-centric **Schema** view, and the individuals themselves in the **Triples** view.
+- **Nine built-in example queries**, offered from a picker in the panel, forming a beginner-first ladder from "show me anything" through OPTIONAL, FILTER, aggregation, ASK, and CONSTRUCT. Each is self-contained and runs against any ontology; selecting one explains what it demonstrates.
+- New tutorial: [Ask Questions with SPARQL](docs/en/tutorial-4-sparql.md), plus SPARQL entries in [Troubleshooting](docs/en/troubleshooting.md) for the two results that most often look like bugs (a query that highlights a class instead of the instance it matched, and one that returns rows but changes nothing).
+- The [Privacy Notice](PRIVACY.md) now covers query execution explicitly: query text, the ontology it runs against, and the results all stay on your machine, and the extension queries no remote SPARQL endpoint and resolves no external IRI over the network.
+- Packaging fix: the VSIX no longer ships development-only tooling directories. The published package drops from 203 files to 54 (1.75 MB to 1.41 MB).
+
+## [0.2.1] — Fix rendering bug
+
+- fix: package build now includes webview/style.css (graph was invisible)
+
 ## [0.2.0] — Schema diagram
 
 - **Schema diagram** (new default view) — a class-centric ER-style diagram: one node per `owl:Class`, one edge per relation, with datatype properties folded into each class instead of drawn as separate nodes. A resolution ladder rescues object properties that only have `owl:inverseOf`, a union/intersection domain, an `owl:Restriction`, or purely instance-level usage, rather than silently dropping them; anything still unresolved is listed as an unattached property instead of vanishing. SKOS-only documents (no `owl:Class` at all) fall back to treating `skos:Concept` as the entity type.

@@ -4,11 +4,13 @@
 
 Effective date: August 9, 2026
 
-Ontology Viewer is designed to work locally. The extension does not collect or transmit telemetry, ontology contents, file paths, search queries, diagram edits, or account identifiers to a service operated by this project.
+Ontology Viewer is designed to work locally. The extension does not collect or transmit telemetry, ontology contents, file paths, search queries, SPARQL queries or their results, diagram edits, or account identifiers to a service operated by this project.
 
 ## Data processed locally
 
 To provide its features, the extension reads the ontology document open in VS Code and builds an in-memory graph. The graph is sent only to the extension's own VS Code webview for rendering. Diagram edits are processed locally and, after validation, are written to the document you opened.
+
+SPARQL queries you run from the diagram are executed inside the extension host on your machine, against an in-memory copy of the open document, using the bundled [Comunica](https://comunica.dev/) engine. The query text, the ontology it runs against, and the results stay on your machine. The extension does not query remote SPARQL endpoints and does not resolve `owl:imports` or other external IRIs over the network.
 
 Dragged node positions and view preferences may be stored in VS Code workspace state. They remain under VS Code's storage controls and can be removed by uninstalling the extension and clearing its stored data or by using a fresh VS Code profile.
 

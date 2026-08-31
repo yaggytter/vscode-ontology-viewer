@@ -79,6 +79,9 @@ export function schemaToElements(schema: SchemaModel, editableIds: Set<string>):
         kind: relation.kind,
         provenance: relation.provenance,
         loopIndex,
+        // Lets a SPARQL result that returned the predicate itself highlight
+        // this relation — see webview/graph/sparqlHighlight.ts.
+        relationIri: relation.iri ?? null,
       },
     });
   }

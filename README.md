@@ -18,6 +18,7 @@ Explore OWL, RDF, RDFS, and SKOS as a readable schema diagram without leaving VS
 - **Accessible, meaningful colors** automatically choose readable node text and explain how related entities form color families.
 - **A spacious, zoomable canvas** includes zoom in/out, reset to 100%, fit-to-screen, layout switching, and PNG export.
 - **Fast navigation** searches classes, relations, and properties. Double-clicking a node focuses its neighborhood.
+- **SPARQL queries** run against the open ontology, entirely on your machine, with results shown as text and reflected on the diagram (highlight matches or filter out the rest).
 - **An adaptive Inspector** stays beside the graph on wide screens and becomes a dismissible sheet in narrow editor groups.
 - **Safe Turtle write-back** re-parses every generated edit before accepting it. Create classes and relations, rename entities, and edit properties or descriptions directly from the diagram.
 - **English and Japanese UI** follows the VS Code display language.
@@ -43,6 +44,20 @@ Continue with the [Getting Started guide](docs/en/getting-started.md) or the han
 - Choose the organic `fcose` layout or layered `dagre` layout.
 - Export the current diagram as PNG or its saved layout as JSON.
 
+### Query with SPARQL
+
+Open the **SPARQL** panel from the toolbar to run SPARQL 1.1 queries against the ontology you have open. SELECT, ASK, and CONSTRUCT/DESCRIBE are supported. Press **Run** or `Ctrl`/`Cmd`+`Enter` to execute.
+
+New to SPARQL? The panel ships nine example queries that work on any ontology, ordered from "show me anything" up through OPTIONAL, FILTER, aggregation, ASK, and CONSTRUCT — pick one and run it. The [SPARQL tutorial](docs/en/tutorial-4-sparql.md) walks through them.
+
+Results show as text — a table of bindings for SELECT, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT — and are reflected on the diagram:
+
+- **Highlight** accents matching nodes and their connecting edges while keeping the rest of the graph visible.
+- **Filter** dims everything the query did not match, and composes with the search box and double-click focus.
+- **No graph effect** shows the text result only.
+
+Queries execute locally in the extension host (powered by [Comunica](https://comunica.dev/)); no ontology contents leave your machine.
+
 ### Edit safely
 
 Turtle files support diagram editing. You can create classes and relations, rename entities, add/rename/retype/delete properties, and edit descriptions. Every write is applied to an in-memory candidate and re-parsed first. If verification fails, the source file is left unchanged.
@@ -63,6 +78,8 @@ RDF/XML and JSON-LD are viewable directly. Use **Ontology Viewer: Convert to Tur
 | Notation3 | `.n3` | Yes | No |
 | RDF/XML / OWL/XML | `.rdf`, `.owl` | Yes | Convert first |
 | JSON-LD | `.jsonld` | Yes | Convert first |
+
+SPARQL querying works on every format in this table — it runs against the parsed triples, so no conversion is needed. Only writing back is Turtle-only.
 
 See [Format Support](docs/en/format-support.md) for parser and editing details.
 
@@ -91,6 +108,7 @@ See [Format Support](docs/en/format-support.md) for parser and editing details.
 - [Build Your First Ontology](docs/en/tutorial-1-first-ontology.md)
 - [Edit From the Diagram](docs/en/tutorial-2-editing-from-diagram.md)
 - [Import an Existing OWL File](docs/en/tutorial-3-importing-owl.md)
+- [Ask Questions with SPARQL](docs/en/tutorial-4-sparql.md)
 - [Format Support](docs/en/format-support.md)
 - [Troubleshooting](docs/en/troubleshooting.md)
 - [Support](SUPPORT.md) · [Privacy](PRIVACY.md) · [Security](SECURITY.md)

@@ -1230,3 +1230,185 @@ summary:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* --- SPARQL query panel --- */
+/* Mount is an inert wrapper; the panel itself is the positioned overlay so
+   an empty (hidden) panel takes up no space and never blocks canvas clicks. */
+.sparql-panel-mount {
+  display: contents;
+}
+
+.sparql-panel {
+  position: absolute;
+  z-index: 8;
+  top: 16px;
+  right: 16px;
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--ov-border);
+  border-radius: 12px;
+  background: var(--ov-surface);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.sparql-panel[hidden] {
+  display: none;
+}
+
+.sparql-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sparql-panel-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sparql-mode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sparql-mode-label {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.sparql-mode-select {
+  min-height: 26px;
+  border: 1px solid var(--ov-border);
+  border-radius: var(--ov-radius-sm);
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, var(--vscode-foreground));
+  font-size: 11px;
+}
+
+.sparql-samples {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sparql-samples-label {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  flex: 0 0 auto;
+}
+
+.sparql-sample-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 26px;
+  border: 1px solid var(--ov-border);
+  border-radius: var(--ov-radius-sm);
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, var(--vscode-foreground));
+  font-size: 11px;
+}
+
+.sparql-sample-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--vscode-descriptionForeground);
+}
+
+.sparql-sample-hint:empty {
+  display: none;
+}
+
+.sparql-input {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 72px;
+  padding: 8px;
+  border: 1px solid var(--ov-border);
+  border-radius: var(--ov-radius-sm);
+  background: var(--vscode-input-background, transparent);
+  color: var(--vscode-input-foreground, var(--vscode-foreground));
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sparql-input:focus {
+  outline: 1px solid var(--ov-focus);
+  outline-offset: -1px;
+}
+
+.sparql-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sparql-result {
+  overflow: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.sparql-result-count,
+.sparql-ask-result,
+.sparql-empty,
+.sparql-error {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.sparql-ask-result {
+  font-weight: 700;
+}
+
+.sparql-error {
+  color: var(--vscode-errorForeground, #f14c4c);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sparql-result-heading {
+  margin: 6px 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sparql-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.sparql-table th,
+.sparql-table td {
+  padding: 4px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--ov-border);
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sparql-table th {
+  font-weight: 700;
+  color: var(--vscode-descriptionForeground);
+  border-bottom: 1px solid var(--ov-focus);
+}
+
+.sparql-cell-literal {
+  color: var(--vscode-charts-orange, #d9a066);
+}
+
+.sparql-cell-namednode {
+  color: var(--vscode-textLink-foreground, #4daafc);
+}

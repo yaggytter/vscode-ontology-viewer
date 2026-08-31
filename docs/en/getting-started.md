@@ -47,5 +47,6 @@ The diagram opens beside your file in the **schema view** by default: one node p
 - [Tutorial 1: Build Your First Ontology](tutorial-1-first-ontology.md)
 - [Tutorial 2: Edit From the Diagram](tutorial-2-editing-from-diagram.md)
 - [Tutorial 3: Bring In an Existing .owl File](tutorial-3-importing-owl.md)
+- [Tutorial 4: Ask Questions with SPARQL](tutorial-4-sparql.md)
 - [Format Support](format-support.md)
 - [Troubleshooting](troubleshooting.md)

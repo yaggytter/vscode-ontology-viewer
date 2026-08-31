@@ -1,6 +1,7 @@
 import type cytoscape from "cytoscape";
 import { COLOR_PALETTE_SIZE } from "../../src/rdf/appearance";
 import { accessibleTextColor, cssVar, paletteColorFor, paletteSurfaceFor } from "../theme";
+import { overlayStyles } from "./overlayStyles";
 
 /**
  * Cytoscape stylesheet for the class-centric schema view. Three things carry
@@ -124,9 +125,8 @@ export function schemaStyle(): cytoscape.StylesheetStyle[] {
         opacity: 0.65,
       },
     },
-    // Owned by graph/focus.ts's applyDim() — search and focus mode share
-    // this one selector so neither can silently undo the other's dimming.
-    { selector: "node.dimmed", style: { opacity: 0.15 } },
-    { selector: "edge.dimmed", style: { opacity: 0.08 } },
+    // Dim and SPARQL-match selectors are shared with the triples view — see
+    // graph/overlayStyles.ts.
+    ...overlayStyles(),
   ];
 }

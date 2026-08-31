@@ -96,7 +96,29 @@ declare module "n3" {
     blankNode(value?: string): BlankNode;
     literal(value: string, languageOrDatatype?: string | NamedNode): Literal;
     defaultGraph(): DefaultGraph;
+    quad(subject: Quad_Subject, predicate: Quad_Predicate, object: Quad_Object, graph?: Quad_Graph): Quad;
   };
+
+  /**
+   * In-memory RDF/JS-compatible quad store. Only the surface this extension
+   * uses is declared: `addQuad` to load parsed quads, and `getQuads` for
+   * inspection. The full RDF/JS `Source` interface (`match`, `Symbol.iterator`)
+   * that Comunica queries against is present on the runtime object — see the
+   * SPARQL engine's boundary cast in src/sparql/engine.ts.
+   */
+  export class Store {
+    constructor(quads?: Quad[]);
+    readonly size: number;
+    addQuad(quad: Quad): void;
+    addQuad(subject: Quad_Subject, predicate: Quad_Predicate, object: Quad_Object, graph?: Quad_Graph): void;
+    addQuads(quads: Quad[]): void;
+    getQuads(
+      subject: Term | null,
+      predicate: Term | null,
+      object: Term | null,
+      graph: Term | null,
+    ): Quad[];
+  }
 }
 
 declare module "rdfxml-streaming-parser" {
