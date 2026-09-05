@@ -1,8 +1,8 @@
 # Third-Party Notices
 
-Ontology Viewer bundles open-source packages. The table below lists the extension's direct production dependencies for version 0.3.0. The in-editor SPARQL engine brings in the [Comunica](https://comunica.dev/) framework, which expands the bundled set to 403 packages in total (mostly `@comunica/*`, `@rdfjs/*`, and their supporting libraries); the complete, machine-readable inventory of every bundled package and exact version is preserved in `package-lock.json`. The packages remain subject to their own licenses; this file does not replace those license texts.
+Ontology Viewer bundles open-source packages. The table below lists the extension's direct production dependencies for version 0.4.0. The in-editor SPARQL engine brings in the [Comunica](https://comunica.dev/) framework, which expands the bundled set to 403 packages in total (mostly `@comunica/*`, `@rdfjs/*`, and their supporting libraries); the complete, machine-readable inventory of every bundled package and exact version is preserved in `package-lock.json`. The packages remain subject to their own licenses; this file does not replace those license texts.
 
-Ontology Viewerには、次のオープンソースパッケージが含まれます。下の表はバージョン0.3.0における直接の本番依存です。エディタ内SPARQL機能により [Comunica](https://comunica.dev/) フレームワークが加わり、同梱されるパッケージは合計403個になります（大半は `@comunica/*`・`@rdfjs/*` とその依存ライブラリです）。同梱される全パッケージと正確なバージョンの完全な一覧は `package-lock.json` に記録されています。各パッケージにはそれぞれのライセンスが適用され、この文書はライセンス本文に代わるものではありません。
+Ontology Viewerには、次のオープンソースパッケージが含まれます。下の表はバージョン0.4.0における直接の本番依存です。エディタ内SPARQL機能により [Comunica](https://comunica.dev/) フレームワークが加わり、同梱されるパッケージは合計403個になります（大半は `@comunica/*`・`@rdfjs/*` とその依存ライブラリです）。同梱される全パッケージと正確なバージョンの完全な一覧は `package-lock.json` に記録されています。各パッケージにはそれぞれのライセンスが適用され、この文書はライセンス本文に代わるものではありません。
 
 | Package | Version | License |
 | --- | --- | --- |
@@ -33,6 +33,11 @@ Every one of the 403 bundled production packages is distributed under a permissi
 | FreeBSD (BSD-2-Clause) | 1 |
 | WTFPL OR MIT | 1 |
 
-Counts were taken from the installed dependency tree for version 0.3.0 (`npm ls --omit=dev --all`). Re-run that command against `package-lock.json` to reproduce them.
+Counts were taken from the installed dependency tree for version 0.4.0 (`npm ls --omit=dev --all`). Re-run that command against `package-lock.json` to reproduce them.
+
+One package, `negotiate`, declares its license through the legacy
+`licenses: [{ "type": "FreeBSD" }]` array rather than the modern `license`
+string field, so tooling that only reads `license` reports it as unknown.
+FreeBSD is the historical name for the 2-clause BSD license.
 
 The project as a whole is distributed under the [MIT License](LICENSE).

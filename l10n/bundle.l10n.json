@@ -138,5 +138,10 @@
   "9. Build a resource-only graph (CONSTRUCT)": "9. Build a resource-only graph (CONSTRUCT)",
   "CONSTRUCT returns triples instead of a table. This one keeps only links between resources, dropping literal values.": "CONSTRUCT returns triples instead of a table. This one keeps only links between resources, dropping literal values.",
   "Examples:": "Examples:",
-  "Pick an example query...": "Pick an example query..."
+  "Pick an example query...": "Pick an example query...",
+  "Compact": "Compact",
+  "Fold standard-vocabulary nodes (xsd:string, rdfs:Resource, ...) into the nodes that point at them.": "Fold standard-vocabulary nodes (xsd:string, rdfs:Resource, ...) into the nodes that point at them.",
+  "Compact view: {0} standard-vocabulary nodes and {1} edges folded into node labels. Click to show them.": "Compact view: {0} standard-vocabulary nodes and {1} edges folded into node labels. Click to show them.",
+  "This document draws {0} nodes as raw triples. The Schema view shows the same ontology as classes and relations.": "This document draws {0} nodes as raw triples. The Schema view shows the same ontology as classes and relations.",
+  "Switch to Schema view": "Switch to Schema view"
 }

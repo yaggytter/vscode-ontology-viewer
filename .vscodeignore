@@ -11,6 +11,7 @@ out-test/**
 .codex/**
 .entire/**
 .kiro/**
+local/**
 tmp/**
 coverage/**
 node_modules/.cache/**

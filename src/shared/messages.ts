@@ -108,6 +108,14 @@ export interface UiStrings {
   sparqlConstructHeading: string;
   sparqlSamplesLabel: string;
   sparqlSamplesPlaceholder: string;
+  // --- Triples view compaction ---
+  compactTriplesLabel: string;
+  compactTriplesHint: string;
+  /** Template with `{0}` for folded node count and `{1}` for folded edge count. */
+  compactTriplesActiveHint: string;
+  /** Template with `{0}` for the node count; suggests the schema view for large graphs. */
+  triplesLargeGraphBanner: string;
+  switchToSchemaLabel: string;
 }
 
 export interface HostToWebviewInit {

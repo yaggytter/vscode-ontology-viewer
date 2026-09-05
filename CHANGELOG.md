@@ -4,6 +4,13 @@ All notable changes to the Ontology Viewer extension are documented in this file
 
 [日本語](CHANGELOG.ja.md)
 
+## [0.4.0] — Readable triples view
+
+- **Compact triples view** (on by default) — the raw Triples view now folds standard-vocabulary sink nodes (`xsd:string`, `rdfs:Resource`, `rdf:nil`, ...) into the nodes that point at them, so a datatype property reads `createdAt / range: dateTime` instead of drawing an edge to a shared hub. Nothing is discarded: every folded statement appears on its subject, and a **Compact** checkbox in the toolbar shows them as nodes again. It is a checkbox rather than a pressed button because compaction is an independent on/off, unlike the mutually exclusive Schema/Triples selection, and because a checkbox states its value without depending on a fill colour. A node is folded only when its IRI is in a standard vocabulary *and* the document states nothing about it, so a term you have described keeps its node.
+- **Schema view suggestion** — a document that draws more than 120 nodes as raw triples now offers a one-click switch to the Schema view, which presents the same ontology as classes and relations.
+- Release validation now fails if an untracked file is sitting in `samples/`. `vsce package` bundles the working directory rather than the git index, so a scratch ontology left there would be published without appearing in any diff — which is exactly what this release was about to do.
+- Updated two development dependencies to clear a high-severity `fast-uri` advisory and a moderate `qs` advisory. Both were development-only and absent from the packaged extension, so published builds were never affected.
+
 ## [0.3.0] — SPARQL Query
 
 - **SPARQL query panel** — run SPARQL 1.1 queries (SELECT, ASK, CONSTRUCT/DESCRIBE) against the open ontology directly from the diagram. Open it with the **SPARQL** toolbar button, type a query, and press **Run** (or `Ctrl`/`Cmd`+`Enter`). Results appear as a text table (variable bindings, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT). Queries run entirely in the extension host via [Comunica](https://comunica.dev/); nothing leaves your machine.
