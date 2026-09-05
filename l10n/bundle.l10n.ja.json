@@ -138,5 +138,10 @@
   "9. Build a resource-only graph (CONSTRUCT)": "9. リソースだけのグラフを構築する（CONSTRUCT）",
   "CONSTRUCT returns triples instead of a table. This one keeps only links between resources, dropping literal values.": "CONSTRUCT は表ではなくトリプルを返します。この例ではリソース間のつながりだけを残し、リテラル値を除外します。",
   "Examples:": "サンプル:",
-  "Pick an example query...": "サンプルクエリを選ぶ..."
+  "Pick an example query...": "サンプルクエリを選ぶ...",
+  "Compact": "簡約",
+  "Fold standard-vocabulary nodes (xsd:string, rdfs:Resource, ...) into the nodes that point at them.": "標準語彙のノード（xsd:string、rdfs:Resource など）を、それを参照しているノードに畳み込みます。",
+  "Compact view: {0} standard-vocabulary nodes and {1} edges folded into node labels. Click to show them.": "簡約表示中: 標準語彙のノード {0} 個とエッジ {1} 本をノードのラベルに畳み込んでいます。クリックすると展開します。",
+  "This document draws {0} nodes as raw triples. The Schema view shows the same ontology as classes and relations.": "この文書はトリプルとして {0} 個のノードを描画します。スキーマビューなら、同じオントロジーをクラスと関係として表示できます。",
+  "Switch to Schema view": "スキーマビューに切り替える"
 }

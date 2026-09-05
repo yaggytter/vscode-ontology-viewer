@@ -127,6 +127,17 @@ function uiStrings(): UiStrings {
     sparqlConstructHeading: vscode.l10n.t("Constructed triples"),
     sparqlSamplesLabel: vscode.l10n.t("Examples:"),
     sparqlSamplesPlaceholder: vscode.l10n.t("Pick an example query..."),
+    compactTriplesLabel: vscode.l10n.t("Compact"),
+    compactTriplesHint: vscode.l10n.t(
+      "Fold standard-vocabulary nodes (xsd:string, rdfs:Resource, ...) into the nodes that point at them.",
+    ),
+    compactTriplesActiveHint: vscode.l10n.t(
+      "Compact view: {0} standard-vocabulary nodes and {1} edges folded into node labels. Click to show them.",
+    ),
+    triplesLargeGraphBanner: vscode.l10n.t(
+      "This document draws {0} nodes as raw triples. The Schema view shows the same ontology as classes and relations.",
+    ),
+    switchToSchemaLabel: vscode.l10n.t("Switch to Schema view"),
   };
 }
 

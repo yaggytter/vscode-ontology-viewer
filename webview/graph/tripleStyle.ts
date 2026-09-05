@@ -26,14 +26,17 @@ export function tripleStyle(): cytoscape.StylesheetStyle[] {
     {
       selector: "node",
       style: {
-        label: "data(label)",
+        // `tripleLabel` is the plain label plus any facts folded onto this
+        // node by graph/compactTriples.ts. `label` stays the bare name so the
+        // search filter in graph/focus.ts keeps matching on it.
+        label: "data(tripleLabel)",
         "text-valign": "center",
         "text-halign": "center",
         "background-color": nodeColors.default,
         color: accessibleTextColor(nodeColors.default, editorBackground),
         "font-size": 11,
         "text-wrap": "wrap",
-        "text-max-width": "120px",
+        "text-max-width": "150px",
         width: "label",
         height: "label",
         padding: "8px",

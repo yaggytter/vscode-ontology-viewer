@@ -31,6 +31,7 @@ export const APP_TEMPLATE = `
       </div>
       <button id="add-class-btn" type="button" class="toolbar-btn toolbar-btn-primary" hidden></button>
       <button id="connect-btn" type="button" class="toolbar-btn" hidden></button>
+      <button id="compact-triples-btn" type="button" class="toolbar-btn" aria-pressed="true" hidden></button>
       <button id="sparql-toggle-btn" type="button" class="toolbar-btn" aria-pressed="false"></button>
       <button id="inspector-toggle-btn" type="button" class="icon-btn inspector-toggle-btn" hidden>
         <span aria-hidden="true">◫</span>

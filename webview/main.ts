@@ -15,6 +15,7 @@ import { createCy } from "./graph/cy";
 import { schemaToElements } from "./graph/elements";
 import { schemaStyle } from "./graph/style";
 import { tripleStyle } from "./graph/tripleStyle";
+import { compactTriples } from "./graph/compactTriples";
 import { graphLayoutOptions } from "./graph/layoutOptions";
 import { collectViewPositions, restorationPlan, savedLayoutKey } from "./graph/layoutPersistence";
 import { applyDim, clearFocus, setSearchQuery, toggleFocusedNode } from "./graph/focus";
@@ -35,9 +36,10 @@ import { DEFAULT_ZOOM, readableFitZoom, zoomLabel, zoomStep } from "./viewportMo
  * view (viewMode/schema fields, and layout keys now namespaced per view);
  * 3->4 for commentEditableNodeIds (Phase 5 comment editing); 4->5 for the
  * resetZoomLabel chrome string; 5->6 for persisted layout restoration;
- * 6->7 for the SPARQL panel's cached example queries.
+ * 6->7 for the SPARQL panel's cached example queries; 7->8 for the triples
+ * view's compaction toggle.
  */
-const STATE_VERSION = 7;
+const STATE_VERSION = 8;
 
 interface WebviewState {
   stateVersion: number;
@@ -52,10 +54,35 @@ interface WebviewState {
   viewMode: ViewMode;
   strings: UiStrings;
   sparqlSamples: SparqlSample[];
+  compactTriplesEnabled: boolean;
 }
 
 function saveState(state: Omit<WebviewState, "stateVersion">): void {
   vscode.setState({ ...state, stateVersion: STATE_VERSION });
+}
+
+/**
+ * Persists the current view state. Centralized so a new field cannot be added
+ * to WebviewState and silently forgotten at one of the call sites.
+ */
+function persistViewState(): void {
+  if (!strings) {
+    return;
+  }
+  saveState({
+    generation: lastRenderedGeneration,
+    graph: lastGraph,
+    schema: lastSchema,
+    layoutCache,
+    editableNodeIds: [...editableIds],
+    commentEditableNodeIds: [...commentEditableIds],
+    isEditableDocument,
+    algorithm: layoutSelect.value as "fcose" | "dagre",
+    viewMode,
+    strings,
+    sparqlSamples,
+    compactTriplesEnabled,
+  });
 }
 
 const vscode = acquireVsCodeApi<WebviewState>();
@@ -79,6 +106,7 @@ const inspectorCloseBtn = document.getElementById("inspector-close-btn") as HTML
 const connectHintEl = document.getElementById("connect-hint") as HTMLDivElement;
 const exportPngBtn = document.getElementById("export-png-btn") as HTMLButtonElement;
 const exportPngLabel = document.getElementById("export-png-label") as HTMLSpanElement;
+const compactTriplesBtn = document.getElementById("compact-triples-btn") as HTMLButtonElement;
 const sparqlToggleBtn = document.getElementById("sparql-toggle-btn") as HTMLButtonElement;
 const sparqlPanelMount = document.getElementById("sparql-panel-mount") as HTMLDivElement;
 const searchContainer = document.getElementById("search-container") as HTMLDivElement;
@@ -120,6 +148,15 @@ let cy: cytoscape.Core | undefined;
 let searchPanel: SearchPanel | undefined;
 /** Example queries offered by the SPARQL panel's picker, supplied by the host. */
 let sparqlSamples: SparqlSample[] = [];
+/**
+ * Whether the triples view folds standard-vocabulary sink nodes away (see
+ * graph/compactTriples.ts). On by default: without it, a schema-heavy
+ * ontology converges every datatype range on a handful of `xsd:*` nodes and
+ * no layout can arrange the result readably.
+ */
+let compactTriplesEnabled = true;
+/** What the last compaction removed, for the toggle's tooltip. Undefined when off. */
+let lastCompactionSummary: { removedNodes: number; removedEdges: number } | undefined;
 let editableIds = new Set<string>();
 let commentEditableIds = new Set<string>();
 let strings: UiStrings | undefined;
@@ -219,6 +256,25 @@ function installSearch(nextStrings: UiStrings): void {
 }
 
 /**
+ * The compaction toggle only means anything in the triples view (the schema
+ * view already folds datatype properties into class cards), so it is hidden
+ * elsewhere rather than shown as a dead control.
+ */
+function updateCompactToggle(nextStrings: UiStrings): void {
+  compactTriplesBtn.hidden = (lastRenderedMode ?? viewMode) !== "triples";
+  compactTriplesBtn.textContent = nextStrings.compactTriplesLabel;
+  compactTriplesBtn.setAttribute("aria-pressed", String(compactTriplesEnabled));
+  const summary =
+    compactTriplesEnabled && lastCompactionSummary
+      ? nextStrings.compactTriplesActiveHint
+          .replace("{0}", String(lastCompactionSummary.removedNodes))
+          .replace("{1}", String(lastCompactionSummary.removedEdges))
+      : nextStrings.compactTriplesHint;
+  compactTriplesBtn.title = summary;
+  compactTriplesBtn.setAttribute("aria-label", `${nextStrings.compactTriplesLabel} — ${summary}`);
+}
+
+/**
  * Re-applies the last SPARQL result to the graph according to the panel's
  * current mode. Called after a fresh result, on a mode change, and after any
  * full graph rebuild (a rebuild drops the sparql-match/dimmed classes).
@@ -260,18 +316,44 @@ function configureChrome(nextStrings: UiStrings): void {
   emptyEl.textContent = nextStrings.emptyGraph;
   installSearch(nextStrings);
   sparqlController.install(nextStrings, sparqlSamples);
+  updateCompactToggle(nextStrings);
 }
 
 function currentStyleFn(mode: ViewMode): cytoscape.StylesheetStyle[] {
   return mode === "schema" ? schemaStyle() : tripleStyle();
 }
 
+/**
+ * Builds the triples-view label: the node's name, plus any facts
+ * graph/compactTriples.ts folded onto it, one per line. Kept separate from
+ * `label` so search (graph/focus.ts) still matches the bare name.
+ */
+function tripleLabelFor(label: string, facts: string[] | undefined): string {
+  return facts && facts.length > 0 ? `${label}\n${facts.join("\n")}` : label;
+}
+
 function toElements(graph: OntologyGraph): cytoscape.ElementDefinition[] {
-  const nodes: cytoscape.ElementDefinition[] = graph.nodes.map((n: OntologyNode) => ({
-    data: { id: n.id, label: n.label, kind: n.kind, comment: n.comment ?? "" },
+  // Compaction is a view concern: `graph` stays a faithful representation of
+  // the parsed triples, and the toolbar toggle re-renders from it without a
+  // round-trip to the host.
+  const compacted = compactTriplesEnabled ? compactTriples(graph) : undefined;
+  const sourceNodes = compacted?.nodes ?? graph.nodes;
+  const sourceEdges = compacted?.edges ?? graph.edges;
+  lastCompactionSummary = compacted
+    ? { removedNodes: compacted.removedNodeCount, removedEdges: compacted.removedEdgeCount }
+    : undefined;
+
+  const nodes: cytoscape.ElementDefinition[] = sourceNodes.map((n: OntologyNode) => ({
+    data: {
+      id: n.id,
+      label: n.label,
+      tripleLabel: tripleLabelFor(n.label, compacted?.foldedFacts.get(n.id)),
+      kind: n.kind,
+      comment: n.comment ?? "",
+    },
     classes: editableIds.has(n.id) ? "editable" : "",
   }));
-  const edges: cytoscape.ElementDefinition[] = graph.edges.map((e) => ({
+  const edges: cytoscape.ElementDefinition[] = sourceEdges.map((e) => ({
     data: {
       id: e.id,
       source: e.source,
@@ -733,7 +815,15 @@ function render(
   }
 
   if (strings) {
-    updateBanner(strings, isEditableDocument, parseErrorMessage, viewMode === "schema" && schema.isEmpty);
+    updateCompactToggle(strings);
+    const effectiveNodeCount = cy?.nodes().length ?? 0;
+    updateBanner(
+      strings,
+      isEditableDocument,
+      parseErrorMessage,
+      viewMode === "schema" && schema.isEmpty,
+      effectiveMode === "triples" && effectiveNodeCount > LARGE_TRIPLES_GRAPH_NODES ? effectiveNodeCount : undefined,
+    );
     if (effectiveMode === "schema") {
       updateInspectorSelection();
       updateInspectorPanels();
@@ -756,19 +846,7 @@ function switchViewMode(mode: ViewMode): void {
   clearFocus();
   selection = undefined;
   render(lastGraph, lastSchema, layoutSelect.value as "fcose" | "dagre", undefined);
-  saveState({
-    generation: lastRenderedGeneration,
-    graph: lastGraph,
-    schema: lastSchema,
-    layoutCache,
-    editableNodeIds: [...editableIds],
-    commentEditableNodeIds: [...commentEditableIds],
-    isEditableDocument,
-    algorithm: layoutSelect.value as "fcose" | "dagre",
-    viewMode,
-    strings,
-    sparqlSamples,
-  });
+  persistViewState();
 }
 
 /**
@@ -778,11 +856,19 @@ function switchViewMode(mode: ViewMode): void {
  * was a real, silent failure mode — this is the only place `parseErrorMessage`
  * is read, so it must always be consulted here, on every init AND every update.
  */
+/**
+ * Above this many triples-view nodes, the banner offers the schema view.
+ * Chosen from the bundled samples: the largest hand-written ones draw 23-59
+ * nodes and read fine, while saas_ontology_v0.ttl draws 252 and does not.
+ */
+const LARGE_TRIPLES_GRAPH_NODES = 120;
+
 function updateBanner(
   s: UiStrings,
   editable: boolean,
   parseErrorMessage: string | undefined,
   schemaEmptyFallback: boolean,
+  largeTriplesNodeCount: number | undefined,
 ): void {
   banner.replaceChildren();
   if (parseErrorMessage) {
@@ -807,6 +893,22 @@ function updateBanner(
   if (schemaEmptyFallback) {
     banner.hidden = false;
     banner.textContent = s.schemaEmptyBanner;
+    return;
+  }
+  // Lowest priority: a readability suggestion never hides a correctness
+  // message about the document itself.
+  if (largeTriplesNodeCount !== undefined) {
+    banner.hidden = false;
+    banner.textContent = s.triplesLargeGraphBanner.replace("{0}", String(largeTriplesNodeCount));
+    const link = document.createElement("a");
+    link.href = "#";
+    link.textContent = s.switchToSchemaLabel;
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchViewMode("schema");
+    });
+    banner.appendChild(document.createTextNode(" "));
+    banner.appendChild(link);
     return;
   }
   banner.hidden = true;
@@ -863,6 +965,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
       viewMode,
       strings: message.strings,
       sparqlSamples: message.sparqlSamples,
+      compactTriplesEnabled,
     });
   } else if (message.type === "update") {
     // Defends against a stale message (e.g. the cached-state fast path
@@ -943,6 +1046,18 @@ layoutSelect.addEventListener("change", () => {
 viewSchemaBtn.addEventListener("click", () => switchViewMode("schema"));
 viewTriplesBtn.addEventListener("click", () => switchViewMode("triples"));
 exportPngBtn.addEventListener("click", exportPng);
+compactTriplesBtn.addEventListener("click", () => {
+  if (!strings) {
+    return;
+  }
+  compactTriplesEnabled = !compactTriplesEnabled;
+  // A full rebuild is required: compaction changes which elements exist, not
+  // just how they look. lastRenderedMode is cleared so render() takes the
+  // initial path and re-runs layout for the new element set.
+  lastRenderedMode = undefined;
+  render(lastGraph, lastSchema, layoutSelect.value as "fcose" | "dagre", undefined);
+  persistViewState();
+});
 inspectorToggleBtn.addEventListener("click", () => setInspectorOpen(!inspectorOpen));
 inspectorCloseBtn.addEventListener("click", () => setInspectorOpen(false));
 inspectorScrimEl.addEventListener("click", () => setInspectorOpen(false));
@@ -1051,6 +1166,7 @@ try {
     commentEditableIds = new Set(cached.commentEditableNodeIds);
     strings = cached.strings;
     sparqlSamples = cached.sparqlSamples;
+    compactTriplesEnabled = cached.compactTriplesEnabled;
     isEditableDocument = cached.isEditableDocument;
     lastRenderedGeneration = cached.generation;
     viewMode = cached.viewMode;

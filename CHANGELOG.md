@@ -4,6 +4,11 @@ All notable changes to the Ontology Viewer extension are documented in this file
 
 [日本語](CHANGELOG.ja.md)
 
+## [Unreleased]
+
+- **Compact triples view** (on by default) — the raw Triples view now folds standard-vocabulary sink nodes (`xsd:string`, `rdfs:Resource`, `rdf:nil`, ...) into the nodes that point at them, so a datatype property reads `createdAt / range: dateTime` instead of drawing an edge to a shared hub. Nothing is discarded: every folded statement appears on its subject, and the **Compact** toolbar toggle shows them as nodes again. A node is folded only when its IRI is in a standard vocabulary *and* the document states nothing about it, so a term you have described keeps its node.
+- **Schema view suggestion** — a document that draws more than 120 nodes as raw triples now offers a one-click switch to the Schema view, which presents the same ontology as classes and relations.
+
 ## [0.3.0] — SPARQL Query
 
 - **SPARQL query panel** — run SPARQL 1.1 queries (SELECT, ASK, CONSTRUCT/DESCRIBE) against the open ontology directly from the diagram. Open it with the **SPARQL** toolbar button, type a query, and press **Run** (or `Ctrl`/`Cmd`+`Enter`). Results appear as a text table (variable bindings, a boolean for ASK, or subject/predicate/object rows for CONSTRUCT). Queries run entirely in the extension host via [Comunica](https://comunica.dev/); nothing leaves your machine.
