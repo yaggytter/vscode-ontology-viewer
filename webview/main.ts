@@ -106,7 +106,9 @@ const inspectorCloseBtn = document.getElementById("inspector-close-btn") as HTML
 const connectHintEl = document.getElementById("connect-hint") as HTMLDivElement;
 const exportPngBtn = document.getElementById("export-png-btn") as HTMLButtonElement;
 const exportPngLabel = document.getElementById("export-png-label") as HTMLSpanElement;
-const compactTriplesBtn = document.getElementById("compact-triples-btn") as HTMLButtonElement;
+const compactTriplesToggle = document.getElementById("compact-triples-toggle") as HTMLLabelElement;
+const compactTriplesCheckbox = document.getElementById("compact-triples-checkbox") as HTMLInputElement;
+const compactTriplesLabel = document.getElementById("compact-triples-label") as HTMLSpanElement;
 const sparqlToggleBtn = document.getElementById("sparql-toggle-btn") as HTMLButtonElement;
 const sparqlPanelMount = document.getElementById("sparql-panel-mount") as HTMLDivElement;
 const searchContainer = document.getElementById("search-container") as HTMLDivElement;
@@ -261,17 +263,17 @@ function installSearch(nextStrings: UiStrings): void {
  * elsewhere rather than shown as a dead control.
  */
 function updateCompactToggle(nextStrings: UiStrings): void {
-  compactTriplesBtn.hidden = (lastRenderedMode ?? viewMode) !== "triples";
-  compactTriplesBtn.textContent = nextStrings.compactTriplesLabel;
-  compactTriplesBtn.setAttribute("aria-pressed", String(compactTriplesEnabled));
+  compactTriplesToggle.hidden = (lastRenderedMode ?? viewMode) !== "triples";
+  compactTriplesLabel.textContent = nextStrings.compactTriplesLabel;
+  compactTriplesCheckbox.checked = compactTriplesEnabled;
   const summary =
     compactTriplesEnabled && lastCompactionSummary
       ? nextStrings.compactTriplesActiveHint
           .replace("{0}", String(lastCompactionSummary.removedNodes))
           .replace("{1}", String(lastCompactionSummary.removedEdges))
       : nextStrings.compactTriplesHint;
-  compactTriplesBtn.title = summary;
-  compactTriplesBtn.setAttribute("aria-label", `${nextStrings.compactTriplesLabel} — ${summary}`);
+  compactTriplesToggle.title = summary;
+  compactTriplesCheckbox.setAttribute("aria-label", `${nextStrings.compactTriplesLabel} — ${summary}`);
 }
 
 /**
@@ -1046,11 +1048,11 @@ layoutSelect.addEventListener("change", () => {
 viewSchemaBtn.addEventListener("click", () => switchViewMode("schema"));
 viewTriplesBtn.addEventListener("click", () => switchViewMode("triples"));
 exportPngBtn.addEventListener("click", exportPng);
-compactTriplesBtn.addEventListener("click", () => {
+compactTriplesCheckbox.addEventListener("change", () => {
   if (!strings) {
     return;
   }
-  compactTriplesEnabled = !compactTriplesEnabled;
+  compactTriplesEnabled = compactTriplesCheckbox.checked;
   // A full rebuild is required: compaction changes which elements exist, not
   // just how they look. lastRenderedMode is cleared so render() takes the
   // initial path and re-runs layout for the new element set.

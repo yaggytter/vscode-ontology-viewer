@@ -13,9 +13,9 @@
  */
 export const APP_TEMPLATE = `
   <div id="banner" class="banner" hidden></div>
-  <div id="toolbar" class="toolbar">
+  <div class="toolbar">
     <div class="toolbar-leading">
-      <div id="view-toggle" class="view-toggle" role="group">
+      <div class="view-toggle" role="group">
         <button id="view-schema" type="button" class="view-toggle-btn"></button>
         <button id="view-triples" type="button" class="view-toggle-btn"></button>
       </div>
@@ -31,7 +31,10 @@ export const APP_TEMPLATE = `
       </div>
       <button id="add-class-btn" type="button" class="toolbar-btn toolbar-btn-primary" hidden></button>
       <button id="connect-btn" type="button" class="toolbar-btn" hidden></button>
-      <button id="compact-triples-btn" type="button" class="toolbar-btn" aria-pressed="true" hidden></button>
+      <label id="compact-triples-toggle" class="compact-toggle" hidden>
+        <input id="compact-triples-checkbox" type="checkbox" checked />
+        <span id="compact-triples-label"></span>
+      </label>
       <button id="sparql-toggle-btn" type="button" class="toolbar-btn" aria-pressed="false"></button>
       <button id="inspector-toggle-btn" type="button" class="icon-btn inspector-toggle-btn" hidden>
         <span aria-hidden="true">◫</span>

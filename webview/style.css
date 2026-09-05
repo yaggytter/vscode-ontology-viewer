@@ -189,6 +189,59 @@ summary:focus-visible {
   box-shadow: 0 0 0 1px var(--ov-focus);
 }
 
+/* Triples-view compaction toggle. A checkbox rather than a pressed button:
+   the Schema/Triples pair is a mutually exclusive selection, while compaction
+   is an independent on/off, and a checkbox states its value structurally
+   instead of relying on a fill colour. Sized to match .toolbar-btn so it does
+   not look bolted onto the toolbar. */
+.compact-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid var(--ov-border);
+  border-radius: var(--ov-radius-sm);
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  background: var(--vscode-button-secondaryBackground, transparent);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.compact-toggle[hidden] {
+  display: none;
+}
+
+.compact-toggle:hover {
+  background: var(--vscode-button-secondaryHoverBackground, var(--vscode-list-hoverBackground));
+}
+
+.compact-toggle input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--vscode-button-background, #0e639c);
+  cursor: pointer;
+}
+
+/* Focus lands on the input, so raise the ring to the whole chip. Scoped to
+   :focus-visible so a mouse click does not leave a ring behind that reads as
+   "still enabled" on an unchecked control. */
+.compact-toggle:has(input:focus-visible) {
+  outline: 1px solid var(--ov-focus);
+  outline-offset: 1px;
+}
+
+/* The checked state also shifts the chip, so the setting reads from across the
+   toolbar rather than only from the 14px box. */
+.compact-toggle:has(input:checked) {
+  border-color: var(--ov-focus);
+  color: var(--vscode-textLink-foreground, #4daafc);
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
