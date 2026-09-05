@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -91,6 +92,36 @@ function validateLocalMarkdownLinks() {
   }
 }
 
+/**
+ * `vsce package` bundles the working directory, not the git index, so an
+ * untracked file sitting in a packaged directory ships to Marketplace users
+ * without ever appearing in a diff. That happened during 0.4.0 preparation:
+ * two scratch ontologies left in `samples/` were packaged. Anything shipped
+ * must therefore be tracked, which is also what keeps the originality claim in
+ * samples/README.md true.
+ */
+function validateBundledSamplesAreTracked() {
+  let tracked;
+  try {
+    tracked = new Set(
+      execFileSync("git", ["ls-files", "samples"], { cwd: root, encoding: "utf8" })
+        .split("\n")
+        .filter(Boolean),
+    );
+  } catch {
+    // Not a git checkout (e.g. an extracted tarball) — nothing to compare against.
+    return;
+  }
+  const present = readdirSync(resolve(root, "samples"), { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => `samples/${entry.name}`);
+  for (const path of present) {
+    if (!tracked.has(path)) {
+      fail(`${path} is untracked but would be packaged. Move it out of samples/ or commit it as a bundled sample.`);
+    }
+  }
+}
+
 const bilingualDocumentBases = [
   "README",
   "CHANGELOG",
@@ -132,6 +163,7 @@ if (manifest.contributes?.configuration?.properties?.["ontologyViewer.layout.sto
 compareKeys("package.nls.json", "package.nls.ja.json");
 compareKeys("l10n/bundle.l10n.json", "l10n/bundle.l10n.ja.json");
 validateLocalMarkdownLinks();
+validateBundledSamplesAreTracked();
 
 const runtimeMessages = readJson("l10n/bundle.l10n.json");
 if (!("Reset zoom to 100%" in runtimeMessages)) {
