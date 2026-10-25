@@ -6,7 +6,8 @@ import { buildSchemaModel, type SchemaModel } from "../rdf/schemaModel";
 import { computeEditableSubjects } from "../edit/editLiteral";
 import { computeCommentEditableSubjects } from "../edit/editComment";
 import { isEditableLanguage } from "../util/languages";
-import { detectObjectOntology, type ObjectOntologySyntax } from "../objectOntology/detect";
+import type { ObjectOntologySyntax } from "../objectOntology/detect";
+import { detectDocumentObjectOntology } from "../objectOntology/detectDocument";
 import { parseObjectOntology, type ParsedObjectOntology } from "../objectOntology/parse";
 import { objectOntologyToSchemaModel } from "../objectOntology/toSchemaModel";
 import { objectOntologyToQuads } from "../objectOntology/toQuads";
@@ -23,7 +24,7 @@ export type DocumentKind =
   | { kind: "objectOntology"; syntax: ObjectOntologySyntax };
 
 export function resolveDocumentKind(document: vscode.TextDocument): DocumentKind | undefined {
-  const syntax = detectObjectOntology(document.fileName, document.languageId, document.getText());
+  const syntax = detectDocumentObjectOntology(document);
   if (syntax) {
     return { kind: "objectOntology", syntax };
   }

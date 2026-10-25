@@ -36,6 +36,7 @@ describe("insertEntry", () => {
     const text = "a:\r\n  x: 1\r\nb: 2\r\n";
     const next = run(text, (d) => insertEntry(text, d, ["a"], "y", 2));
     expect(parseDocument(next).toJS()).toEqual({ a: { x: 1, y: 2 }, b: 2 });
+    expect(next.replace(/\r\n/g, "")).not.toContain("\n");
   });
 
   it("refuses duplicates and non-maps", () => {

@@ -10,7 +10,7 @@ import {
   planSetPropertyType,
   type EditPlan,
 } from "../objectOntology/edit/operations";
-import { detectObjectOntology } from "../objectOntology/detect";
+import { detectDocumentObjectOntology } from "../objectOntology/detectDocument";
 
 type EditMessage = Extract<
   WebviewToHostMessage,
@@ -62,7 +62,7 @@ export async function handleObjectOntologyEdit(
   const post = (result: HostToWebviewMessage): Thenable<boolean> => panel.webview.postMessage(result);
   const requestId = message.requestId;
 
-  if (detectObjectOntology(document.fileName, document.languageId, document.getText()) !== "yaml") {
+  if (detectDocumentObjectOntology(document) !== "yaml") {
     await post({
       type: "editResult",
       requestId,

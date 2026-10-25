@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { detectObjectOntology, OBJECT_ONTOLOGY_GLOB } from "../objectOntology/detect";
+import { OBJECT_ONTOLOGY_GLOB } from "../objectOntology/detect";
+import { detectDocumentObjectOntology } from "../objectOntology/detectDocument";
 import { parseObjectOntology } from "../objectOntology/parse";
 import { keyRangeAt } from "../objectOntology/locate";
 import type { Document } from "yaml";
@@ -7,7 +8,7 @@ import type { Document } from "yaml";
 const DEBOUNCE_MS = 300;
 
 function isObjectOntology(document: vscode.TextDocument): boolean {
-  return detectObjectOntology(document.fileName, document.languageId, document.getText()) !== undefined;
+  return detectDocumentObjectOntology(document) !== undefined;
 }
 
 function toRange(document: vscode.TextDocument, start: number, end: number): vscode.Range {

@@ -86,6 +86,10 @@ function keyIndentOfPair(text: string, document: Document, parent: Node | null, 
  * gets `, key: value` before its closing brace.
  */
 export function insertEntry(text: string, document: Document, mapPath: YamlPath, key: string, value: YamlValue): SpliceResult {
+  return withEol(text, planInsert(text, document, mapPath, key, value));
+}
+
+function planInsert(text: string, document: Document, mapPath: YamlPath, key: string, value: YamlValue): SpliceResult {
   const target = nodeAt(document, mapPath);
 
   if (target === undefined) {
@@ -97,7 +101,7 @@ export function insertEntry(text: string, document: Document, mapPath: YamlPath,
     if (typeof missingKey !== "string") {
       return { ok: false, reason: "Cannot create a list item here." };
     }
-    return insertEntry(text, document, parentPath, missingKey, { [key]: value });
+    return planInsert(text, document, parentPath, missingKey, { [key]: value });
   }
 
   // `key:` with no value (or an explicit null) — the mapping does not exist yet.
@@ -220,6 +224,14 @@ export function removeEntry(text: string, document: Document, mapPath: YamlPath,
   // Removing the last entry leaves `parent:` with an empty value, which the
   // reader treats as an empty mapping — still a valid document.
   return { ok: true, splice: { start, end, newText: "" } };
+}
+
+/** New lines follow the document's own line endings. */
+function withEol(text: string, result: SpliceResult): SpliceResult {
+  if (!result.ok || !text.includes("\r\n")) {
+    return result;
+  }
+  return { ok: true, splice: { ...result.splice, newText: result.splice.newText.replace(/\r?\n/g, "\r\n") } };
 }
 
 export function applySplice(text: string, splice: TextSplice): string {

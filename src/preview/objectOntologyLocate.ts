@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { detectObjectOntology } from "../objectOntology/detect";
+import { detectDocumentObjectOntology } from "../objectOntology/detectDocument";
 import { keyRangeAt, pathForElement } from "../objectOntology/locate";
 import { parseObjectOntology } from "../objectOntology/parse";
 
@@ -9,7 +9,7 @@ import { parseObjectOntology } from "../objectOntology/parse";
  * undefined for any other document or an id with no declaration.
  */
 export function locateObjectOntologyElement(document: vscode.TextDocument, nodeId: string): vscode.Range | undefined {
-  if (!detectObjectOntology(document.fileName, document.languageId, document.getText())) {
+  if (!detectDocumentObjectOntology(document)) {
     return undefined;
   }
   const parsed = parseObjectOntology(document.getText());

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { stringify } from "yaml";
-import { detectObjectOntology } from "./detect";
+import { detectDocumentObjectOntology } from "./detectDocument";
 import { parseObjectOntology } from "./parse";
 import type { ObjectOntology } from "./model";
 import { buildAgentTools } from "./export/agentTools";
@@ -16,7 +16,7 @@ import { objectOntologyToTurtle } from "./export/turtle";
 
 async function targetDocument(uri: vscode.Uri | undefined): Promise<vscode.TextDocument | undefined> {
   const document = uri ? await vscode.workspace.openTextDocument(uri) : vscode.window.activeTextEditor?.document;
-  if (!document || !detectObjectOntology(document.fileName, document.languageId, document.getText())) {
+  if (!document || !detectDocumentObjectOntology(document)) {
     void vscode.window.showWarningMessage(vscode.l10n.t("Open an Object Ontology file (*.oont.yaml) first."));
     return undefined;
   }
@@ -97,7 +97,7 @@ export async function convertToYaml(uri?: vscode.Uri): Promise<void> {
   if (!document) {
     return;
   }
-  if (detectObjectOntology(document.fileName, document.languageId, document.getText()) === "yaml") {
+  if (detectDocumentObjectOntology(document) === "yaml") {
     void vscode.window.showInformationMessage(vscode.l10n.t("This file is already YAML."));
     return;
   }

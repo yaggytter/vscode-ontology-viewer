@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { parseObjectOntology } from "./parse";
+import { MAX_DOCUMENT_LENGTH, parseObjectOntology } from "./parse";
 import { actionAffectedTypes } from "./model";
 
 const SAMPLES_DIR = join(__dirname, "..", "..", "samples");
@@ -103,6 +103,26 @@ objectTypes:
 `);
     expect(ontology?.objectTypes).toEqual([]);
     expect(({} as Record<string, unknown>).primaryKey).toBeUndefined();
+  });
+
+  it("reads an exponential alias tree without expanding it", () => {
+    const levels = ["a0: &a0 [x, x, x, x, x, x, x, x, x]"];
+    for (let i = 1; i < 9; i++) {
+      levels.push(`a${i}: &a${i} [${Array(9).fill(`*a${i - 1}`).join(", ")}]`);
+    }
+    const bomb = `objectOntology: 1\n${levels.join("\n")}\nobjects:\n  T:\n    - { id: *a8 }\n`;
+    const started = Date.now();
+    const result = parseObjectOntology(bomb);
+    // The reader only follows the shapes the format defines, so a nested
+    // alias is read one level deep rather than expanded.
+    expect(Date.now() - started).toBeLessThan(2000);
+    expect(result.diagnostics.some((d) => d.severity === "error")).toBe(true);
+  });
+
+  it("refuses files beyond the size cap", () => {
+    const result = parseObjectOntology(`objectOntology: 1\n#${"x".repeat(MAX_DOCUMENT_LENGTH)}`);
+    expect(result.ontology).toBeUndefined();
+    expect(result.diagnostics[0].message).toMatch(/too large/);
   });
 
   it("warns about unknown fields so typos do not pass silently", () => {

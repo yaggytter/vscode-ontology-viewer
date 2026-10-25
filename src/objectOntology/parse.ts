@@ -41,10 +41,23 @@ export interface ParsedObjectOntology {
  */
 export const MAX_OBJECT_RECORDS = 5000;
 
+/**
+ * Bounds on untrusted input. YAML aliases let a few hundred bytes describe an
+ * exponentially large tree ("billion laughs"); the yaml library's own alias
+ * cap only guards `toJS()`, which this reader deliberately does not use, so
+ * the walk counts the nodes it visits itself. Files beyond the size cap are
+ * not hand-written ontologies and are reported instead of parsed.
+ */
+export const MAX_DOCUMENT_LENGTH = 5_000_000;
+export const MAX_NODE_VISITS = 2_000_000;
+
+class ParseBudgetExceeded extends Error {}
+
 type Entry = { key: string; keyNode: Node; value: Node | null };
 
 class Reader {
   readonly diagnostics: OoDiagnostic[] = [];
+  private visits = 0;
 
   constructor(private readonly doc: Document.Parsed) {}
 
@@ -53,6 +66,9 @@ class Reader {
   }
 
   resolve(node: unknown): Node | null {
+    if (++this.visits > MAX_NODE_VISITS) {
+      throw new ParseBudgetExceeded();
+    }
     if (isAlias(node)) {
       return (node.resolve(this.doc) as Node | undefined) ?? null;
     }
@@ -503,7 +519,39 @@ const TOP_LEVEL_FIELDS = [
  * so the diagram can keep showing whatever is valid.
  */
 export function parseObjectOntology(text: string): ParsedObjectOntology {
+  if (text.length > MAX_DOCUMENT_LENGTH) {
+    return {
+      diagnostics: [
+        {
+          message: `This file is too large to read as an Object Ontology (over ${MAX_DOCUMENT_LENGTH.toLocaleString("en-US")} characters).`,
+          severity: "error",
+          range: { start: 0, end: 0 },
+        },
+      ],
+      document: parseDocument(""),
+    };
+  }
   const document = parseDocument(text, { prettyErrors: false, uniqueKeys: true, strict: false });
+  try {
+    return readDocument(document);
+  } catch (error) {
+    if (!(error instanceof ParseBudgetExceeded)) {
+      throw error;
+    }
+    return {
+      diagnostics: [
+        {
+          message: "This document has too many nodes to read (check for YAML aliases that reference each other).",
+          severity: "error",
+          range: { start: 0, end: 0 },
+        },
+      ],
+      document,
+    };
+  }
+}
+
+function readDocument(document: Document.Parsed): ParsedObjectOntology {
   const diagnostics: OoDiagnostic[] = [
     ...document.errors.map((e) => ({
       message: e.message.split("\n")[0],
