@@ -35,6 +35,9 @@ export interface OntologyGraph {
   edges: OntologyEdge[];
 }
 
+/** Id prefix of the synthetic nodes that stand for literal values. */
+export const LITERAL_NODE_PREFIX = "_:literal:";
+
 /** Predicates rendered as edges rather than folded into a node's label/comment. */
 const LABEL_LIKE_PREDICATES = new Set([RDFS_LABEL, RDFS_COMMENT]);
 
@@ -82,7 +85,7 @@ export function buildGraphModel(quads: Quad[]): OntologyGraph {
       // Other literal-valued properties (e.g. dcterms:title) still become
       // edges, pointing at a synthetic literal "node" so they're visible in
       // the diagram without being mistaken for a resource.
-      const literalNodeId = `_:literal:${subjectId}:${quad.predicate.value}:${quad.object.value}`;
+      const literalNodeId = `${LITERAL_NODE_PREFIX}${subjectId}:${quad.predicate.value}:${quad.object.value}`;
       const literalNode = nodeFor(literalNodeId, true);
       literalNode.label = quad.object.value;
       literalNode.kind = "resource";
@@ -144,7 +147,7 @@ function objectKey(quad: Quad): string {
 /** Falls back to `prefix:local` style or the fragment/last-segment of an IRI. */
 function shortLabel(id: string, isBlankNode: boolean): string {
   if (isBlankNode) {
-    return id.startsWith("_:literal:") ? id : `[blank node ${id.slice(2)}]`;
+    return id.startsWith(LITERAL_NODE_PREFIX) ? id : `[blank node ${id.slice(2)}]`;
   }
   const known = lookupKnownTerm(id);
   if (known) {

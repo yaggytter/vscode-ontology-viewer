@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { parseOntology } from "../../src/rdf/parse";
-import { buildGraphModel, type OntologyGraph } from "../../src/rdf/graphModel";
+import { buildGraphModel, LITERAL_NODE_PREFIX, type OntologyGraph } from "../../src/rdf/graphModel";
+import { OONT } from "../../src/objectOntology/iris";
+import { parseObjectOntology } from "../../src/objectOntology/parse";
+import { objectOntologyToQuads } from "../../src/objectOntology/toQuads";
 import { compactTriples } from "./compactTriples";
 
 const XSD = "http://www.w3.org/2001/XMLSchema#";
@@ -153,6 +156,75 @@ describe("compactTriples", () => {
     compactTriples(input);
     expect(input.nodes).toHaveLength(nodeCount);
     expect(input.edges).toHaveLength(edgeCount);
+  });
+
+  it("folds Object Ontology vocabulary literals but keeps the document's own values", () => {
+    const apiName = `${LITERAL_NODE_PREFIX}http://ex/Vehicle.status:${OONT}apiName:status`;
+    const value = `${LITERAL_NODE_PREFIX}http://ex/Vehicle/V-1:http://ex/Vehicle.status:idle`;
+    const result = compactTriples(
+      graph(
+        [
+          { id: "http://ex/Vehicle.status", kind: "property", label: "status" },
+          { id: apiName, label: "status", isBlankNode: true },
+          { id: "http://ex/Vehicle/V-1", label: "V-1" },
+          { id: value, label: "idle", isBlankNode: true },
+        ],
+        [
+          { source: "http://ex/Vehicle.status", target: apiName, predicate: `${OONT}apiName`, predicateLabel: "apiName" },
+          { source: "http://ex/Vehicle/V-1", target: value, predicate: "http://ex/Vehicle.status", predicateLabel: "status" },
+        ],
+      ),
+    );
+    expect(result.nodes.map((n) => n.id)).toEqual(["http://ex/Vehicle.status", "http://ex/Vehicle/V-1", value]);
+    expect(result.foldedFacts.get("http://ex/Vehicle.status")).toEqual(["apiName: status"]);
+    expect(result.edges.map((e) => e.target)).toEqual([value]);
+  });
+
+  it("keeps literal values of standard vocabulary such as dcterms:title", () => {
+    const title = `${LITERAL_NODE_PREFIX}http://ex/doc:http://purl.org/dc/terms/title:Guide`;
+    const result = compactTriples(
+      graph(
+        [{ id: "http://ex/doc" }, { id: title, label: "Guide", isBlankNode: true }],
+        [{ source: "http://ex/doc", target: title, predicate: "http://purl.org/dc/terms/title", predicateLabel: "dcterms:title" }],
+      ),
+    );
+    expect(result.nodes).toHaveLength(2);
+    expect(result.removedNodeCount).toBe(0);
+  });
+
+  it("never folds a literal node of a bundled RDF sample", async () => {
+    const files = readdirSync("samples").filter((name) => /\.(ttl|rdf)$/.test(name));
+    expect(files.length).toBeGreaterThan(0);
+    for (const name of files) {
+      const { quads } = await parseOntology(
+        readFileSync(`samples/${name}`, "utf8"),
+        name.endsWith(".rdf") ? "rdfxml" : "turtle",
+        `file:///${name}`,
+      );
+      const full = buildGraphModel(quads);
+      const kept = new Set(compactTriples(full).nodes.map((n) => n.id));
+      const literals = full.nodes.filter((n) => n.id.startsWith(LITERAL_NODE_PREFIX));
+      expect(literals.filter((n) => !kept.has(n.id)), name).toEqual([]);
+    }
+  });
+
+  it("halves an Object Ontology sample and leaves only example-object values as literals", () => {
+    const parsed = parseObjectOntology(readFileSync("samples/delivery-ops.oont.yaml", "utf8"));
+    const full = buildGraphModel(objectOntologyToQuads(parsed.ontology!));
+    const compact = compactTriples(full);
+
+    expect(compact.nodes.length).toBeLessThan(full.nodes.length / 2);
+    const ids = new Set(compact.nodes.map((n) => n.id));
+    for (const edge of compact.edges) {
+      expect(ids.has(edge.source)).toBe(true);
+      expect(ids.has(edge.target)).toBe(true);
+      if (edge.target.startsWith(LITERAL_NODE_PREFIX)) {
+        expect(edge.predicate.startsWith(OONT)).toBe(false);
+      }
+    }
+    expect(compact.foldedFacts.get("urn:object-ontology:harbor-city-delivery-ops#Trackable.lat")).toContain(
+      "dataType: double",
+    );
   });
 
   /**
