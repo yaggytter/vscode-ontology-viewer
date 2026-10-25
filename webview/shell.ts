@@ -35,6 +35,7 @@ export const APP_TEMPLATE = `
         <input id="compact-triples-checkbox" type="checkbox" checked />
         <span id="compact-triples-label"></span>
       </label>
+      <button id="actions-toggle-btn" type="button" class="toolbar-btn" aria-pressed="false" hidden></button>
       <button id="sparql-toggle-btn" type="button" class="toolbar-btn" aria-pressed="false"></button>
       <button id="inspector-toggle-btn" type="button" class="icon-btn inspector-toggle-btn" hidden>
         <span aria-hidden="true">◫</span>
@@ -55,6 +56,7 @@ export const APP_TEMPLATE = `
       </div>
       <div id="connect-hint" class="connect-hint" hidden></div>
       <div id="sparql-panel-mount" class="sparql-panel-mount"></div>
+      <div id="actions-panel-mount" class="sparql-panel-mount"></div>
       <div id="graph-controls" class="graph-controls" role="group">
         <button id="zoom-out-btn" type="button" class="graph-control-btn">−</button>
         <button id="zoom-level-btn" type="button" class="graph-control-btn graph-zoom-readout" aria-live="polite">100%</button>

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { SPARQL_SAMPLE_QUERIES } from "../sparql/sampleQueries";
-import type { SparqlSample } from "../shared/messages";
+import { OBJECT_ONTOLOGY_SAMPLE_QUERIES } from "../objectOntology/sampleQueries";
+import type { DocumentKindName, SparqlSample } from "../shared/messages";
 
 /**
  * Localized labels for each sample query, keyed by the id declared in
@@ -66,6 +67,46 @@ function labelFor(id: string): { name: string; description: string } | undefined
           "CONSTRUCT returns triples instead of a table. This one keeps only links between resources, dropping literal values.",
         ),
       };
+    case "oo-object-types":
+      return {
+        name: vscode.l10n.t("1. List object types"),
+        description: vscode.l10n.t("Every object type with its primary key and how many properties it has."),
+      };
+    case "oo-links":
+      return {
+        name: vscode.l10n.t("2. List link types and cardinalities"),
+        description: vscode.l10n.t("Which object types each link connects, and whether each side holds one or many."),
+      };
+    case "oo-actions-by-type":
+      return {
+        name: vscode.l10n.t("3. What can be done to each type?"),
+        description: vscode.l10n.t("Action types per object type — the tool list an AI agent would be given."),
+      };
+    case "oo-action-parameters":
+      return {
+        name: vscode.l10n.t("4. Action parameters"),
+        description: vscode.l10n.t("Every parameter an action takes, its type, and whether it is required."),
+      };
+    case "oo-count-objects":
+      return {
+        name: vscode.l10n.t("5. Count example objects per type (aggregate)"),
+        description: vscode.l10n.t("GROUP BY and COUNT over the example objects in the objects: section."),
+      };
+    case "oo-search-around":
+      return {
+        name: vscode.l10n.t("6. Follow links between objects (search around)"),
+        description: vscode.l10n.t("Every link from each example object to its neighbours, like an object-set searchAround."),
+      };
+    case "oo-filter-objects":
+      return {
+        name: vscode.l10n.t("7. Filter objects by title"),
+        description: vscode.l10n.t("Example objects whose title contains a word. Replace the \"e\" with the word you want."),
+      };
+    case "oo-interfaces":
+      return {
+        name: vscode.l10n.t("8. Interfaces and implementers"),
+        description: vscode.l10n.t("Each interface and the object types that implement it."),
+      };
     default:
       return undefined;
   }
@@ -77,9 +118,9 @@ function labelFor(id: string): { name: string; description: string } | undefined
  * dropped rather than shown untranslated, so the picker can never present a
  * blank option.
  */
-export function sparqlSampleQueries(): SparqlSample[] {
+export function sparqlSampleQueries(kind: DocumentKindName = "rdf"): SparqlSample[] {
   const samples: SparqlSample[] = [];
-  for (const { id, query } of SPARQL_SAMPLE_QUERIES) {
+  for (const { id, query } of kind === "objectOntology" ? OBJECT_ONTOLOGY_SAMPLE_QUERIES : SPARQL_SAMPLE_QUERIES) {
     const label = labelFor(id);
     if (label) {
       samples.push({ id, name: label.name, description: label.description, query });

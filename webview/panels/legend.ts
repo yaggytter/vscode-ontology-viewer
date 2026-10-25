@@ -21,6 +21,12 @@ export function renderLegend(container: HTMLElement, strings: UiStrings, schema:
   if (origins.has("skosConcept")) {
     list.appendChild(legendRow("legend-swatch legend-swatch-skos", strings.legendSkosConcept));
   }
+  if (origins.has("objectType")) {
+    list.appendChild(legendRow("legend-swatch legend-swatch-class", strings.legendObjectType));
+  }
+  if (origins.has("interface")) {
+    list.appendChild(legendRow("legend-swatch legend-swatch-interface", strings.legendInterface));
+  }
   if (origins.has("inferred")) {
     list.appendChild(legendRow("legend-swatch legend-swatch-inferred", strings.legendInferredEntity));
   }
@@ -34,6 +40,15 @@ export function renderLegend(container: HTMLElement, strings: UiStrings, schema:
   }
   if (kinds.has("skosBroader")) {
     list.appendChild(legendRow("legend-line legend-line-broader", strings.legendSkosBroader));
+  }
+  if (kinds.has("linkType")) {
+    list.appendChild(legendRow("legend-line legend-line-relation", strings.legendLinkType));
+  }
+  if (kinds.has("implements")) {
+    list.appendChild(legendRow("legend-line legend-line-implements", strings.legendImplements));
+  }
+  if (kinds.has("extends")) {
+    list.appendChild(legendRow("legend-line legend-line-subclassof", strings.legendExtends));
   }
 
   details.appendChild(list);

@@ -8,5 +8,9 @@
   "command.newSample.title": "サンプルオントロジーを作成...",
   "config.autoRefreshDebounceMs.description": "ソースファイルを編集してから図のプレビューが更新されるまでの遅延時間（ミリ秒）。",
   "config.defaultView.description": "既定で開く図の種類: 'schema'（クラス中心のER図）または 'triples'（生のトリプルグラフ）。",
-  "config.layout.description": "図のノード配置に使う自動レイアウトアルゴリズム。"
+  "config.layout.description": "図のノード配置に使う自動レイアウトアルゴリズム。",
+  "command.exportAgentTools.title": "アクションを AI エージェント用ツール定義 (JSON Schema) としてエクスポート...",
+  "command.exportContextSummary.title": "LLM コンテキスト用のオントロジー要約をエクスポート...",
+  "command.exportObjectOntologyTurtle.title": "Object Ontology を Turtle (OWL) としてエクスポート...",
+  "command.convertObjectOntologyToYaml.title": "Object Ontology の JSON を編集用に YAML へ変換..."
 }

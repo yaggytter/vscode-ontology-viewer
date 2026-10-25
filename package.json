@@ -30,7 +30,12 @@
     "json-ld",
     "rdf/xml",
     "diagram",
-    "visual editor"
+    "visual editor",
+    "palantir-style ontology",
+    "object ontology",
+    "ai agent",
+    "llm",
+    "mcp"
   ],
   "icon": "media/icon.png",
   "galleryBanner": {
@@ -59,7 +64,12 @@
   },
   "l10n": "./l10n",
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:yaml",
+    "workspaceContains:**/*.oont.yaml",
+    "workspaceContains:**/*.oont.yml",
+    "workspaceContains:**/*.oont.json"
+  ],
   "contributes": {
     "languages": [
       {
@@ -189,6 +199,26 @@
         "command": "ontologyViewer.newSample",
         "title": "%command.newSample.title%",
         "category": "%extension.category%"
+      },
+      {
+        "command": "ontologyViewer.exportAgentTools",
+        "title": "%command.exportAgentTools.title%",
+        "category": "%extension.category%"
+      },
+      {
+        "command": "ontologyViewer.exportContextSummary",
+        "title": "%command.exportContextSummary.title%",
+        "category": "%extension.category%"
+      },
+      {
+        "command": "ontologyViewer.exportObjectOntologyTurtle",
+        "title": "%command.exportObjectOntologyTurtle.title%",
+        "category": "%extension.category%"
+      },
+      {
+        "command": "ontologyViewer.convertObjectOntologyToYaml",
+        "title": "%command.convertObjectOntologyToYaml.title%",
+        "category": "%extension.category%"
       }
     ],
     "keybindings": [
@@ -196,21 +226,21 @@
         "command": "ontologyViewer.openPreview",
         "key": "ctrl+alt+o",
         "mac": "cmd+alt+o",
-        "when": "editorLangId in ontologyViewer.viewableLanguages"
+        "when": "editorLangId in ontologyViewer.viewableLanguages || (resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)"
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "ontologyViewer.openPreview",
-          "when": "editorLangId in ontologyViewer.viewableLanguages",
+          "when": "editorLangId in ontologyViewer.viewableLanguages || (resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)",
           "group": "navigation"
         }
       ],
       "commandPalette": [
         {
           "command": "ontologyViewer.openPreview",
-          "when": "editorLangId in ontologyViewer.viewableLanguages"
+          "when": "editorLangId in ontologyViewer.viewableLanguages || (resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)"
         },
         {
           "command": "ontologyViewer.convertToTurtle",
@@ -218,7 +248,23 @@
         },
         {
           "command": "ontologyViewer.exportLayout",
-          "when": "editorLangId in ontologyViewer.viewableLanguages"
+          "when": "editorLangId in ontologyViewer.viewableLanguages || (resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)"
+        },
+        {
+          "command": "ontologyViewer.exportAgentTools",
+          "when": "(resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)"
+        },
+        {
+          "command": "ontologyViewer.exportContextSummary",
+          "when": "(resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)"
+        },
+        {
+          "command": "ontologyViewer.exportObjectOntologyTurtle",
+          "when": "(resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology)"
+        },
+        {
+          "command": "ontologyViewer.convertObjectOntologyToYaml",
+          "when": "(resourceFilename =~ /\\.oont\\.(ya?ml|json)$/ || ontologyViewer.isObjectOntology) && editorLangId != yaml"
         }
       ]
     },
@@ -251,7 +297,24 @@
           "description": "%config.layout.description%"
         }
       }
-    }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "*.oont.json"
+        ],
+        "url": "./schemas/object-ontology.schema.json"
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": [
+          "*.oont.yaml",
+          "*.oont.yml"
+        ],
+        "url": "./schemas/object-ontology.schema.json"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile:production",

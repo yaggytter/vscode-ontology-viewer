@@ -17,13 +17,17 @@ export function registerLanguageFeatures(context: vscode.ExtensionContext): void
     import("./completion"),
     import("./diagnostics"),
     import("./rename"),
-  ]).then(([symbols, hover, completion, diagnostics, rename]) => {
+    import("./objectOntology"),
+  ]).then(([symbols, hover, completion, diagnostics, rename, objectOntology]) => {
     context.subscriptions.push(
       vscode.languages.registerDocumentSymbolProvider(selectors, symbols.provider),
       vscode.languages.registerHoverProvider(selectors, hover.provider),
       vscode.languages.registerCompletionItemProvider(selectors, completion.provider, ":"),
       diagnostics.register(context),
       vscode.languages.registerRenameProvider(editableSelectors, rename.provider),
+      // Object Ontology files keep their yaml/json language ids, so they get
+      // their own providers rather than joining the RDF selectors above.
+      objectOntology.register(),
     );
   });
 }

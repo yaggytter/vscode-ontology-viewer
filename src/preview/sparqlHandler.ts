@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
-import { parseOntology } from "../rdf/parse";
 import { runSparqlQuery } from "../sparql/engine";
 import { resolveMatchedResources } from "../sparql/resourceResolution";
 import type { HostToWebviewMessage } from "../shared/messages";
-import { resolveFormat } from "./format";
+import { documentQuads } from "./documentModel";
 
 /**
  * Executes a SPARQL query for the webview and posts back a `sparqlResult`.
@@ -34,8 +33,8 @@ export async function handleRunSparql(
     return;
   }
 
-  const format = resolveFormat(document);
-  if (!format) {
+  const quads = await documentQuads(document);
+  if (!quads) {
     await post({
       type: "sparqlResult",
       requestId,
@@ -46,9 +45,8 @@ export async function handleRunSparql(
   }
 
   try {
-    const parsed = await parseOntology(document.getText(), format, document.uri.toString());
-    const result = await runSparqlQuery(parsed.quads, trimmed);
-    const { iris, types } = resolveMatchedResources(parsed.quads, result);
+    const result = await runSparqlQuery(quads, trimmed);
+    const { iris, types } = resolveMatchedResources(quads, result);
     await post({
       type: "sparqlResult",
       requestId,

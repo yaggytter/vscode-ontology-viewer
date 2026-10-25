@@ -1,16 +1,13 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
 import { randomBytes } from "node:crypto";
-import { parseOntology } from "../rdf/parse";
-import { buildGraphModel } from "../rdf/graphModel";
-import { buildSchemaModel } from "../rdf/schemaModel";
 import { buildPositionIndex } from "../rdf/positionIndex";
 import { getDocumentLayout, mergeDocumentLayout } from "./layoutStore";
-import { computeEditableSubjects } from "../edit/editLiteral";
-import { computeCommentEditableSubjects } from "../edit/editComment";
-import type { HostToWebviewMessage, UiStrings, ViewMode, WebviewToHostMessage } from "../shared/messages";
+import type { DocumentKindName, HostToWebviewMessage, UiStrings, ViewMode, WebviewToHostMessage } from "../shared/messages";
 import { isEditableLanguage } from "../util/languages";
-import { resolveFormat } from "./format";
+import { loadDocumentModel, resolveDocumentKind } from "./documentModel";
+import { handleObjectOntologyEdit, isObjectOntologyEditMessage } from "./objectOntologyEditHandlers";
+import { locateObjectOntologyElement } from "./objectOntologyLocate";
 import {
   handleAddClass,
   handleAddProperty,
@@ -39,8 +36,8 @@ function layoutKey(viewMode: ViewMode, nodeId: string): string {
 
 const panels = new Map<string, PanelState>();
 
-function uiStrings(): UiStrings {
-  return {
+function uiStrings(kind: DocumentKindName): UiStrings {
+  const base: UiStrings = {
     loading: vscode.l10n.t("Loading diagram..."),
     parseError: vscode.l10n.t("This file has a syntax error — showing the last valid diagram."),
     readOnlyBanner: vscode.l10n.t("This format is view-only in the diagram."),
@@ -138,6 +135,42 @@ function uiStrings(): UiStrings {
       "This document draws {0} nodes as raw triples. The Schema view shows the same ontology as classes and relations.",
     ),
     switchToSchemaLabel: vscode.l10n.t("Switch to Schema view"),
+    legendObjectType: vscode.l10n.t("Object type"),
+    legendInterface: vscode.l10n.t("Interface"),
+    legendLinkType: vscode.l10n.t("Link type"),
+    legendImplements: vscode.l10n.t("Implements"),
+    legendExtends: vscode.l10n.t("Extends"),
+    actionsToggleLabel: vscode.l10n.t("Actions"),
+    actionsPanelTitle: vscode.l10n.t("Action types"),
+    actionsEmpty: vscode.l10n.t("This ontology declares no action types."),
+    actionsHint: vscode.l10n.t(
+      "Actions are the only declared ways to change data — the tools an AI agent may call. Select one to highlight the object types it touches.",
+    ),
+    actionParametersLabel: vscode.l10n.t("Parameters"),
+    actionRulesLabel: vscode.l10n.t("Effects"),
+    actionValidationsLabel: vscode.l10n.t("Rejected unless"),
+    actionSideEffectsLabel: vscode.l10n.t("Side effects"),
+    actionRequiredLabel: vscode.l10n.t("required"),
+    actionExportToolsLabel: vscode.l10n.t("Export as agent tools"),
+  };
+  if (kind !== "objectOntology") {
+    return base;
+  }
+  return {
+    ...base,
+    readOnlyBanner: vscode.l10n.t("Object Ontology JSON is view-only in the diagram."),
+    convertToTurtle: vscode.l10n.t("Convert to YAML to edit"),
+    emptyGraph: vscode.l10n.t("No object types found yet."),
+    schemaEmptyBanner: vscode.l10n.t("This document has no object types yet — showing its raw RDF projection instead."),
+    addClassLabel: vscode.l10n.t("+ Object type"),
+    promptClassNameLabel: vscode.l10n.t("Object type name"),
+    promptRelationNameLabel: vscode.l10n.t("Link name"),
+    connectHintPickSource: vscode.l10n.t("Click the object type the new link starts from (Esc to cancel)."),
+    entitiesLabel: vscode.l10n.t("Types"),
+    relationsLabel: vscode.l10n.t("Links"),
+    instancesLabel: vscode.l10n.t("{0} example objects"),
+    triplesViewLabel: vscode.l10n.t("RDF"),
+    propertyNotEditableHint: vscode.l10n.t("Edit this property directly in the text editor."),
   };
 }
 
@@ -149,8 +182,7 @@ export async function openPreview(
     void vscode.window.showWarningMessage(vscode.l10n.t("Open an ontology file first."));
     return;
   }
-  const format = resolveFormat(document);
-  if (!format) {
+  if (!resolveDocumentKind(document)) {
     void vscode.window.showWarningMessage(vscode.l10n.t("This file is not a recognized ontology format."));
     return;
   }
@@ -225,6 +257,23 @@ async function handleWebviewMessage(
   state: PanelState,
   message: WebviewToHostMessage,
 ): Promise<void> {
+  const kind = resolveDocumentKind(state.document)?.kind;
+  if (kind === "objectOntology") {
+    if (isObjectOntologyEditMessage(message)) {
+      if (await handleObjectOntologyEdit(state.panel, state.document, message)) {
+        await pushUpdate(state);
+      }
+      return;
+    }
+    if (message.type === "convertToTurtle") {
+      await vscode.commands.executeCommand("ontologyViewer.convertObjectOntologyToYaml", state.document.uri);
+      return;
+    }
+    if (message.type === "exportAgentTools") {
+      await vscode.commands.executeCommand("ontologyViewer.exportAgentTools", state.document.uri);
+      return;
+    }
+  }
   switch (message.type) {
     case "ready":
       await sendInit(context, state);
@@ -302,6 +351,8 @@ async function handleWebviewMessage(
     case "runSparql":
       await handleRunSparql(state.panel, state.document, message.requestId, message.query);
       return;
+    case "exportAgentTools":
+      return;
   }
 }
 
@@ -323,37 +374,26 @@ async function exportDiagramPng(state: PanelState, dataUri: string): Promise<voi
 }
 
 async function sendInit(context: vscode.ExtensionContext, state: PanelState): Promise<void> {
-  const format = resolveFormat(state.document);
-  if (!format) {
+  const model = await loadDocumentModel(state.document);
+  if (!model) {
     return;
   }
-  const isEditableDocument = isEditableLanguage(state.document.languageId);
-  const text = state.document.getText();
-  const baseIRI = state.document.uri.toString();
-  const parsed = await parseOntology(text, format, baseIRI);
-  const graph = buildGraphModel(parsed.quads);
-  const schema = buildSchemaModel(parsed.quads);
-  const editableNodeIds = isEditableDocument
-    ? [...computeEditableSubjects(text, baseIRI, graph.nodes.map((n) => n.id))]
-    : [];
-  const commentEditableNodeIds = isEditableDocument
-    ? [...computeCommentEditableSubjects(text, baseIRI, graph.nodes.map((n) => n.id))]
-    : [];
-
   const message: HostToWebviewMessage = {
     type: "init",
     generation: state.document.version,
-    graph,
-    schema,
+    documentKind: model.kind.kind,
+    graph: model.graph,
+    schema: model.schema,
+    actions: model.actions,
     layout: getDocumentLayout(context, state.document.uri),
-    editableNodeIds,
-    commentEditableNodeIds,
-    isEditableDocument,
+    editableNodeIds: model.editableNodeIds,
+    commentEditableNodeIds: model.commentEditableNodeIds,
+    isEditableDocument: model.isEditableDocument,
     defaultLayoutAlgorithm: state.algorithm,
     defaultViewMode: state.defaultViewMode,
-    strings: uiStrings(),
-    sparqlSamples: sparqlSampleQueries(),
-    parseErrorMessage: parsed.errors[0]?.message,
+    strings: uiStrings(model.kind.kind),
+    sparqlSamples: sparqlSampleQueries(model.kind.kind),
+    parseErrorMessage: model.parseErrorMessage,
   };
   await state.panel.webview.postMessage(message);
 }
@@ -369,39 +409,27 @@ function scheduleRefresh(state: PanelState): void {
 }
 
 async function pushUpdate(state: PanelState): Promise<void> {
-  const format = resolveFormat(state.document);
-  if (!format) {
+  const model = await loadDocumentModel(state.document);
+  if (!model) {
     return;
   }
-  const isEditableDocument = isEditableLanguage(state.document.languageId);
-  const text = state.document.getText();
-  const baseIRI = state.document.uri.toString();
-  const parsed = await parseOntology(text, format, baseIRI);
-  const graph = buildGraphModel(parsed.quads);
-  const schema = buildSchemaModel(parsed.quads);
-  const editableNodeIds = isEditableDocument
-    ? [...computeEditableSubjects(text, baseIRI, graph.nodes.map((n) => n.id))]
-    : [];
-  const commentEditableNodeIds = isEditableDocument
-    ? [...computeCommentEditableSubjects(text, baseIRI, graph.nodes.map((n) => n.id))]
-    : [];
-
   const message: HostToWebviewMessage = {
     type: "update",
     generation: state.document.version,
-    graph,
-    schema,
-    editableNodeIds,
-    commentEditableNodeIds,
-    parseErrorMessage: parsed.errors[0]?.message,
+    graph: model.graph,
+    schema: model.schema,
+    actions: model.actions,
+    editableNodeIds: model.editableNodeIds,
+    commentEditableNodeIds: model.commentEditableNodeIds,
+    parseErrorMessage: model.parseErrorMessage,
   };
   await state.panel.webview.postMessage(message);
 }
 
 async function jumpToNode(document: vscode.TextDocument, nodeId: string): Promise<void> {
-  let range: vscode.Range | undefined;
+  let range: vscode.Range | undefined = locateObjectOntologyElement(document, nodeId);
 
-  if (isEditableLanguage(document.languageId)) {
+  if (!range && isEditableLanguage(document.languageId)) {
     const index = buildPositionIndex(document.getText(), document.uri.toString());
     if (!index.degraded) {
       const match =
