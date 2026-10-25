@@ -1524,6 +1524,7 @@ summary:focus-visible {
 
 .action-item-header {
   display: flex;
+  font-size: 12px;
   align-items: center;
   gap: 6px;
   width: 100%;
@@ -1538,6 +1539,7 @@ summary:focus-visible {
 
 .action-item-name {
   flex: 1;
+  font-size: 12px;
   font-weight: 600;
 }
 
