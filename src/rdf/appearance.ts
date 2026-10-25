@@ -211,7 +211,7 @@ const COLOR_OVERRIDE_LOCAL_NAMES = ["color", "colour", "fillColor"];
  * A 1-4 code-point, non-ASCII value — guards against a document using an
  * unrelated `icon` predicate that happens to hold a URL or plain word.
  */
-function looksLikeIcon(value: string): boolean {
+export function looksLikeIcon(value: string): boolean {
   const codePoints = [...value];
   if (codePoints.length < 1 || codePoints.length > 4) {
     return false;
@@ -227,7 +227,7 @@ const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
  * canvas draw calls, so anything that isn't a plain hex color must be
  * rejected rather than passed through.
  */
-function looksLikeColor(value: string): boolean {
+export function looksLikeColor(value: string): boolean {
   return HEX_COLOR.test(value.trim());
 }
 

@@ -72,8 +72,8 @@ import {
 
 export type PropertyType = "string" | "integer" | "decimal" | "double" | "date" | "datetime" | "boolean" | "enum" | "other";
 export type Cardinality = "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" | "unspecified";
-export type EntityOrigin = "owlClass" | "rdfsClass" | "skosConcept" | "inferred";
-export type RelationKind = "objectProperty" | "subClassOf" | "skosBroader";
+export type EntityOrigin = "owlClass" | "rdfsClass" | "skosConcept" | "inferred" | "objectType" | "interface";
+export type RelationKind = "objectProperty" | "subClassOf" | "skosBroader" | "linkType" | "implements" | "extends";
 
 /**
  * How a fact was arrived at. `"declared"` facts come straight from the text;

@@ -1,0 +1,96 @@
+objectOntology: 1
+name: Corner Cafe Orders
+description: >-
+  A small cafe's menu, orders and ingredient stock. Start here to learn the
+  Object Ontology format: object types, properties, link types and actions.
+
+objectTypes:
+  MenuItem:
+    displayName: Menu item
+    description: Something a customer can order.
+    primaryKey: itemId
+    titleProperty: name
+    properties:
+      itemId: { type: string }
+      name: { type: string }
+      priceYen: { type: integer, unit: JPY }
+      category: { type: string, enum: [drink, food, dessert] }
+      available: { type: boolean }
+
+  Order:
+    description: One customer order at the counter.
+    primaryKey: orderId
+    titleProperty: orderId
+    properties:
+      orderId: { type: string }
+      placedAt: { type: timestamp }
+      status: { type: string, enum: [open, preparing, served, cancelled] }
+      totalYen: { type: integer, unit: JPY }
+
+  Ingredient:
+    description: Stock kept in the back room.
+    primaryKey: ingredientId
+    titleProperty: name
+    properties:
+      ingredientId: { type: string }
+      name: { type: string }
+      stockLevel: { type: double }
+      unit: { type: string }
+      reorderLevel: { type: double }
+
+linkTypes:
+  orderItems:
+    displayName: Ordered items
+    from: { objectType: Order, name: items, cardinality: many }
+    to: { objectType: MenuItem, name: orders, cardinality: many }
+  itemIngredients:
+    displayName: Uses ingredient
+    from: { objectType: MenuItem, name: ingredients, cardinality: many }
+    to: { objectType: Ingredient, name: usedIn, cardinality: many }
+
+actionTypes:
+  placeOrder:
+    displayName: Place order
+    description: Open a new order for one or more menu items.
+    parameters:
+      orderId: { type: string, required: true }
+      items: { type: "objectRef[]", objectType: MenuItem, required: true }
+    rules:
+      - { op: createObject, objectType: Order, set: { orderId: $orderId, status: open } }
+      - { op: createLink, linkType: orderItems, from: orderId, to: items }
+    validations:
+      - description: Every ordered item must be available.
+        expr: "all(items, item => item.available)"
+
+  markServed:
+    displayName: Mark order served
+    parameters:
+      order: { type: objectRef, objectType: Order, required: true }
+    rules:
+      - { op: modifyObject, objectType: Order, object: order, set: { status: served } }
+    validations:
+      - description: Only an order that is being prepared can be served.
+        expr: "order.status == 'preparing'"
+
+  restockIngredient:
+    displayName: Restock ingredient
+    parameters:
+      ingredient: { type: objectRef, objectType: Ingredient, required: true }
+      amount: { type: double, required: true, description: "Amount added, in the ingredient's unit." }
+    rules:
+      - { op: modifyObject, objectType: Ingredient, object: ingredient, set: { stockLevel: $amount } }
+    sideEffects:
+      - Notify the shift lead when stock was below the reorder level.
+
+objects:
+  MenuItem:
+    - { itemId: M-01, name: Drip coffee, priceYen: 450, category: drink, available: true, ingredients: [I-01] }
+    - { itemId: M-02, name: Cafe latte, priceYen: 520, category: drink, available: true, ingredients: [I-01, I-02] }
+    - { itemId: M-03, name: Cheese toast, priceYen: 600, category: food, available: false, ingredients: [I-03] }
+  Ingredient:
+    - { ingredientId: I-01, name: Coffee beans, stockLevel: 2.5, unit: kg, reorderLevel: 1.0 }
+    - { ingredientId: I-02, name: Milk, stockLevel: 3, unit: L, reorderLevel: 4 }
+    - { ingredientId: I-03, name: Cheese, stockLevel: 0.2, unit: kg, reorderLevel: 0.5 }
+  Order:
+    - { orderId: O-1001, placedAt: "2026-04-01T08:12:00+09:00", status: served, totalYen: 970, items: [M-01, M-02] }
+    - { orderId: O-1002, placedAt: "2026-04-01T08:30:00+09:00", status: preparing, totalYen: 520, items: [M-02] }
