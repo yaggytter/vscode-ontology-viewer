@@ -5,7 +5,7 @@ import { parseObjectOntology } from "./parse";
 import { objectOntologyToSchemaModel } from "./toSchemaModel";
 import { objectOntologyToQuads } from "./toQuads";
 import { buildAgentTools } from "./export/agentTools";
-import { OBJECT_ONTOLOGY_FILE_PATTERN } from "./detect";
+import { detectObjectOntology, OBJECT_ONTOLOGY_FILE_PATTERN } from "./detect";
 import { runSparqlQuery } from "../sparql/engine";
 
 /**
@@ -26,7 +26,12 @@ describe("bundled Object Ontology samples", () => {
 
   for (const fileName of SAMPLES) {
     describe(fileName, () => {
-      const parsed = parseObjectOntology(readFileSync(join(SAMPLES_DIR, fileName), "utf8"));
+      const text = readFileSync(join(SAMPLES_DIR, fileName), "utf8");
+      const parsed = parseObjectOntology(text);
+
+      it("is recognized when opened as an untitled document (the sample picker)", () => {
+        expect(detectObjectOntology("Untitled-1", "yaml", text)).toBe("yaml");
+      });
 
       it("parses without any diagnostics", () => {
         expect(parsed.diagnostics).toEqual([]);
