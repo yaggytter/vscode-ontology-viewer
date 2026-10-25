@@ -294,7 +294,8 @@
     "cytoscape-fcose": "^2.2.0",
     "jsonld-streaming-parser": "^5.0.1",
     "n3": "^2.1.1",
-    "rdfxml-streaming-parser": "^3.2.0"
+    "rdfxml-streaming-parser": "^3.2.0",
+    "yaml": "^2.9.1"
   },
   "overrides": {
     "diff": "^8.0.4",

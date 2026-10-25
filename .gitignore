@@ -29,3 +29,5 @@ pub-repo/
 
 # Local working ontologies and scratch files (never packaged)
 local/
+
+docs/plans

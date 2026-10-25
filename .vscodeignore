@@ -28,3 +28,4 @@ vitest.config.ts
 DevPlan.md
 **/*.test.ts
 !CONTRIBUTING.md
+docs/plans/**
