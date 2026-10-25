@@ -17,8 +17,17 @@ Run the command **Ontology Viewer: Create Sample Ontology...** from the Command 
 | Harbor Market | Icons, colors, cardinality, and relationship attributes. |
 | City Mobility Hub | A medium operational ontology spanning several domains. |
 | Community Event (RDF/XML) | An original view-only sample and the "Convert to Turtle" workflow. |
+| Bicycle Parts Compatibility | OWL facts an LLM can query instead of guessing (GraphRAG). |
+| Logistics Glossary (en/ja) | A bilingual SKOS glossary for search expansion and term normalization. |
+| Dataset Catalog with Provenance | DCAT + PROV-O, for answers that cite where a number came from. |
+| Research Knowledge Graph | schema.org entities merged across organizations with `sameAs`. |
+| Delivery Operations (OWL) | The OWL version of the delivery sample, for comparing the two styles. |
+| Corner Cafe Orders (Object Ontology) | The starter Object Ontology: object types, links, and actions. |
+| Delivery Operations (Object Ontology) | Actions as AI-agent tools for handling a delayed shipment. |
+| Plant Maintenance (Object Ontology) | Following links from a sensor alert to a work order. |
+| Support Desk (Object Ontology) | Validations as guard rails for refunds issued by an agent. |
 
-Or just open your own `.ttl` file — nothing special is required.
+Or just open your own `.ttl` file — nothing special is required. Object Ontology files need the `.oont.yaml` suffix; see [Your First Object Ontology](tutorial-5-object-ontology.md).
 
 ## Open the diagram
 
@@ -48,5 +57,9 @@ The diagram opens beside your file in the **schema view** by default: one node p
 - [Tutorial 2: Edit From the Diagram](tutorial-2-editing-from-diagram.md)
 - [Tutorial 3: Bring In an Existing .owl File](tutorial-3-importing-owl.md)
 - [Tutorial 4: Ask Questions with SPARQL](tutorial-4-sparql.md)
+- [Tutorial 5: Your First Object Ontology](tutorial-5-object-ontology.md)
+- [Tutorial 6: Object Ontology × AI Agents](tutorial-6-object-ontology-ai-agents.md)
+- [Tutorial 7: Semantic Web Ontologies × LLMs](tutorial-7-semantic-web-llm.md)
+- [Choosing an Ontology Style](choosing-ontology-style.md) · [Use Cases](use-cases.md)
 - [Format Support](format-support.md)
 - [Troubleshooting](troubleshooting.md)

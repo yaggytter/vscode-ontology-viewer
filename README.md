@@ -8,6 +8,8 @@
 
 Explore OWL, RDF, RDFS, and SKOS as a readable schema diagram without leaving VS Code. Ontology Viewer combines a polished, searchable canvas with safe Turtle editing, so the diagram is useful for both understanding an ontology and shaping it.
 
+It also reads **Object Ontology** files (`*.oont.yaml`): an object-centric format inspired by the ontologies of operational platforms such as Palantir Foundry, with object types, link types, interfaces, and **action types** that can be exported as tool definitions for AI agents.
+
 > Ontology Viewer is in preview. Keep source control enabled for important ontologies and review diagram-generated changes before committing them.
 
 ![Ontology Viewer showing the Harbor Market schema with icons, colors, cardinality, search, and Inspector](media/ontology-viewer-overview.png)
@@ -23,6 +25,47 @@ Explore OWL, RDF, RDFS, and SKOS as a readable schema diagram without leaving VS
 - **Safe Turtle write-back** re-parses every generated edit before accepting it. Create classes and relations, rename entities, and edit properties or descriptions directly from the diagram.
 - **English and Japanese UI** follows the VS Code display language.
 - **Local-first operation** sends no ontology contents or usage telemetry from the extension.
+
+## Two styles of ontology, one viewer
+
+| | Semantic Web (OWL / RDF / SKOS) | Object Ontology (`*.oont.yaml`) |
+| --- | --- | --- |
+| Answers | What things are and how they relate | What the business operates on, and how it may change |
+| Identity | Global IRIs, reusable W3C vocabularies | Primary keys inside one system |
+| Changes | Not modeled (SPARQL Update is separate) | First-class **action types** with parameters, rules and validations |
+| Best AI fit | Grounding answers: GraphRAG, glossaries, provenance | Acting safely: actions become typed agent tools with guard rails |
+
+The [choosing guide](docs/en/choosing-ontology-style.md) and the [use-case catalog](docs/en/use-cases.md) explain when to use which, and how to combine them.
+
+### Object Ontology at a glance
+
+![The Harbor City Delivery Ops sample: object types, an interface, link types with cardinality, and the Actions panel](media/object-ontology-actions.png)
+
+```yaml
+objectOntology: 1
+name: Corner Cafe Orders
+objectTypes:
+  Order:
+    primaryKey: orderId
+    properties:
+      orderId: { type: string }
+      status: { type: string, enum: [open, preparing, served, cancelled] }
+actionTypes:
+  markServed:
+    parameters:
+      order: { type: objectRef, objectType: Order, required: true }
+    rules:
+      - { op: modifyObject, objectType: Order, object: order, set: { status: served } }
+    validations:
+      - description: Only an order that is being prepared can be served.
+```
+
+- **Diagram, edit, and query** with the same canvas: object types, interfaces (hexagons), link types with cardinality badges, and an **Actions** panel. Diagram edits are surgical YAML changes that are re-parsed before they are applied, and comments are kept.
+- **Problems and outline**: broken references, unknown fields, and duplicate example keys are reported at their exact location. A bundled JSON Schema adds completion for `*.oont.json` (and for `*.oont.yaml` with the Red Hat YAML extension).
+- **SPARQL** runs over an RDF projection (OWL + an `oont:` vocabulary), with eight Object-Ontology example queries such as "what can be done to each type?" and "follow links between objects".
+- **AI-agent exports** open as untitled documents for you to review: action types as **tool definitions** (JSON Schema, the shape used by MCP and function-calling APIs), a compact **LLM context summary** in Markdown, and **Turtle** for combining with Semantic Web data. The extension itself never calls an LLM or the network.
+
+The format is this extension's own; it is not Palantir's file format and does not connect to Foundry.
 
 ## Get started in one minute
 
@@ -78,8 +121,10 @@ RDF/XML and JSON-LD are viewable directly. Use **Ontology Viewer: Convert to Tur
 | Notation3 | `.n3` | Yes | No |
 | RDF/XML / OWL/XML | `.rdf`, `.owl` | Yes | Convert first |
 | JSON-LD | `.jsonld` | Yes | Convert first |
+| Object Ontology (YAML) | `.oont.yaml`, `.oont.yml` | Yes | Yes |
+| Object Ontology (JSON) | `.oont.json` | Yes | Convert to YAML first |
 
-SPARQL querying works on every format in this table — it runs against the parsed triples, so no conversion is needed. Only writing back is Turtle-only.
+SPARQL querying works on every format in this table — it runs against the parsed triples (or, for Object Ontology files, their RDF projection), so no conversion is needed.
 
 See [Format Support](docs/en/format-support.md) for parser and editing details.
 
@@ -91,6 +136,10 @@ See [Format Support](docs/en/format-support.md) for parser and editing details.
 | Ontology Viewer: Convert to Turtle for Editing... | — |
 | Ontology Viewer: Export Diagram Layout as JSON... | — |
 | Ontology Viewer: Create Sample Ontology... | — |
+| Ontology Viewer: Export Actions as AI Agent Tools (JSON Schema)... | — |
+| Ontology Viewer: Export Ontology Summary for LLM Context... | — |
+| Ontology Viewer: Export Object Ontology as Turtle (OWL)... | — |
+| Ontology Viewer: Convert Object Ontology JSON to YAML for Editing... | — |
 
 `Cmd+Shift+O` / `Ctrl+Shift+O` remains VS Code's built-in **Go to Symbol in Editor** command.
 
@@ -109,6 +158,10 @@ See [Format Support](docs/en/format-support.md) for parser and editing details.
 - [Edit From the Diagram](docs/en/tutorial-2-editing-from-diagram.md)
 - [Import an Existing OWL File](docs/en/tutorial-3-importing-owl.md)
 - [Ask Questions with SPARQL](docs/en/tutorial-4-sparql.md)
+- [Your First Object Ontology](docs/en/tutorial-5-object-ontology.md)
+- [Object Ontology × AI Agents](docs/en/tutorial-6-object-ontology-ai-agents.md)
+- [Semantic Web Ontologies × LLMs](docs/en/tutorial-7-semantic-web-llm.md)
+- [Choosing an Ontology Style](docs/en/choosing-ontology-style.md) · [Use Cases](docs/en/use-cases.md)
 - [Format Support](docs/en/format-support.md)
 - [Troubleshooting](docs/en/troubleshooting.md)
 - [Support](SUPPORT.md) · [Privacy](PRIVACY.md) · [Security](SECURITY.md)
