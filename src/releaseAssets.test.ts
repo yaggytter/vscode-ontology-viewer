@@ -51,6 +51,27 @@ describe("Marketplace release assets", () => {
     expect(() => readFileSync(resolve(root, "media/ontology-viewer-overview.png"))).not.toThrow();
   });
 
+  it("offers only bundled samples in the sample picker, with localized labels", () => {
+    const pickerSource = readFileSync(resolve(root, "src/util/samples.ts"), "utf8");
+    const entries = [...pickerSource.matchAll(/\{ file: "([^"]+)", label: "([^"]+)", detail: "([^"]+)" \}/g)];
+    expect(entries.length).toBeGreaterThan(7);
+    const bundle = readJson("l10n/bundle.l10n.ja.json");
+    for (const [, file, label, detail] of entries) {
+      expect(() => readFileSync(resolve(root, "samples", file))).not.toThrow();
+      expect(bundle).toHaveProperty([label]);
+      expect(bundle).toHaveProperty([detail]);
+    }
+  });
+
+  it("ships the Object Ontology JSON Schema referenced by the manifest", () => {
+    const contributes = readJson("package.json").contributes as Record<string, { url: string }[]>;
+    for (const point of ["jsonValidation", "yamlValidation"]) {
+      for (const { url } of contributes[point]) {
+        expect(() => JSON.parse(readFileSync(resolve(root, url), "utf8"))).not.toThrow();
+      }
+    }
+  });
+
   it("defines repeatable CI and release workflows", () => {
     expect(() => readFileSync(resolve(root, ".github/workflows/ci.yml"), "utf8")).not.toThrow();
     expect(() => readFileSync(resolve(root, ".github/workflows/release.yml"), "utf8")).not.toThrow();

@@ -1,0 +1,110 @@
+# Harbor City Delivery Ops (OWL edition) — the OWL counterpart of delivery-ops.oont.yaml.
+# LLM/AI use: compare an OWL model of the same delivery domain with the Object Ontology
+# model, where an AI agent also gets callable actions (assignVehicle, notifyCustomer, …).
+#
+# The city, depots, people, and records are fictional and mirror the YAML sample's data.
+
+@prefix : <https://example.org/delivery-ops#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/delivery-ops> a owl:Ontology ;
+  rdfs:label "Harbor City Delivery Ops (OWL)"@en, "ハーバーシティ配送オペレーション（OWL版）"@ja ;
+  rdfs:comment "The OWL counterpart of delivery-ops.oont.yaml, modeling the same last-mile delivery domain (depots, vehicles, drivers, customers, shipments, delivery stops) so the two styles can be compared side by side. Both describe what exists and how it is connected — here, shipment S-5001 is delayed because van V-101 is in maintenance. OWL, however, has no first-class notion of 'actions': it can state that S-5001 is delayed, but not that an agent may call assignVehicle with validations and side effects. That gap is the point of comparison."@en .
+
+# --- Classes ---
+:Trackable a owl:Class ; rdfs:label "Trackable"@en ;
+  rdfs:comment "Anything with a current position on the map."@en .
+:Depot a owl:Class ; rdfs:subClassOf :Trackable ; rdfs:label "Depot"@en, "営業所"@ja ;
+  rdfs:comment "A warehouse where vehicles are based and shipments are loaded."@en .
+:Vehicle a owl:Class ; rdfs:subClassOf :Trackable ; rdfs:label "Vehicle"@en, "車両"@ja ;
+  rdfs:comment "A delivery van, truck or cargo bike."@en .
+:Driver a owl:Class ; rdfs:label "Driver"@en, "ドライバー"@ja .
+:Customer a owl:Class ; rdfs:label "Customer"@en, "顧客"@ja .
+:Shipment a owl:Class ; rdfs:label "Shipment"@en, "出荷"@ja ;
+  rdfs:comment "One parcel or pallet to be delivered."@en .
+:DeliveryStop a owl:Class ; rdfs:label "Delivery Stop"@en, "配達先"@ja .
+:VehicleStatus a owl:Class ; rdfs:label "Vehicle Status"@en ;
+  owl:oneOf ( :available :onRoute :maintenance ) .
+:ShipmentStatus a owl:Class ; rdfs:label "Shipment Status"@en ;
+  owl:oneOf ( :pending :assigned :inTransit :delayed :delivered ) .
+
+# --- Object properties ---
+:basedAt a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "based at"@en ;
+  rdfs:domain :Vehicle ; rdfs:range :Depot .
+:drivenBy a owl:ObjectProperty, owl:FunctionalProperty, owl:InverseFunctionalProperty ;
+  rdfs:label "driven by"@en ; rdfs:domain :Vehicle ; rdfs:range :Driver .
+:deliveredTo a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "delivered to"@en ;
+  rdfs:domain :Shipment ; rdfs:range :Customer .
+:shipsFrom a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "ships from"@en ;
+  rdfs:domain :Shipment ; rdfs:range :Depot .
+:carriedBy a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "carried by"@en ;
+  rdfs:domain :Shipment ; rdfs:range :Vehicle .
+:carries a owl:ObjectProperty ; rdfs:label "carries"@en ; owl:inverseOf :carriedBy .
+:hasStop a owl:ObjectProperty ; rdfs:label "has stop"@en ;
+  rdfs:domain :Shipment ; rdfs:range :DeliveryStop .
+:vehicleStatus a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "vehicle status"@en ;
+  rdfs:domain :Vehicle ; rdfs:range :VehicleStatus .
+:shipmentStatus a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:label "shipment status"@en ;
+  rdfs:domain :Shipment ; rdfs:range :ShipmentStatus .
+
+# --- Datatype properties ---
+:identifier a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "identifier"@en ; rdfs:range xsd:string .
+:name a owl:DatatypeProperty ; rdfs:label "name"@en ; rdfs:range xsd:string .
+:lat a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "latitude"@en ; rdfs:domain :Trackable ; rdfs:range xsd:double .
+:lon a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "longitude"@en ; rdfs:domain :Trackable ; rdfs:range xsd:double .
+:plate a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "plate"@en ; rdfs:domain :Vehicle ; rdfs:range xsd:string .
+:capacityKg a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "capacity (kg)"@en ; rdfs:domain :Vehicle ; rdfs:range xsd:double .
+:loadKg a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "load (kg)"@en ; rdfs:domain :Vehicle ; rdfs:range xsd:double .
+:onShift a owl:DatatypeProperty ; rdfs:label "on shift"@en ; rdfs:domain :Driver ; rdfs:range xsd:boolean .
+:email a owl:DatatypeProperty ; rdfs:label "email"@en ; rdfs:domain :Customer ; rdfs:range xsd:string .
+:weightKg a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:label "weight (kg)"@en ; rdfs:domain :Shipment ; rdfs:range xsd:double .
+:promisedBy a owl:DatatypeProperty ; rdfs:label "promised by"@en ; rdfs:domain :Shipment ; rdfs:range xsd:dateTime .
+:eta a owl:DatatypeProperty ; rdfs:label "ETA"@en ; rdfs:domain :Shipment ; rdfs:range xsd:dateTime .
+:delayReason a owl:DatatypeProperty ; rdfs:label "delay reason"@en ; rdfs:domain :Shipment ; rdfs:range xsd:string .
+:address a owl:DatatypeProperty ; rdfs:label "address"@en ; rdfs:domain :DeliveryStop ; rdfs:range xsd:string .
+:sequence a owl:DatatypeProperty ; rdfs:label "sequence"@en ; rdfs:domain :DeliveryStop ; rdfs:range xsd:integer .
+
+# --- Status values ---
+:available a :VehicleStatus ; rdfs:label "available"@en .
+:onRoute a :VehicleStatus ; rdfs:label "on route"@en .
+:maintenance a :VehicleStatus ; rdfs:label "maintenance"@en .
+:pending a :ShipmentStatus ; rdfs:label "pending"@en .
+:assigned a :ShipmentStatus ; rdfs:label "assigned"@en .
+:inTransit a :ShipmentStatus ; rdfs:label "in transit"@en .
+:delayed a :ShipmentStatus ; rdfs:label "delayed"@en .
+:delivered a :ShipmentStatus ; rdfs:label "delivered"@en .
+
+# --- Instances (same records as delivery-ops.oont.yaml) ---
+:D-01 a :Depot ; :identifier "D-01" ; :name "Harbor North Depot" ; :lat 35.4521e0 ; :lon 139.6402e0 .
+:D-02 a :Depot ; :identifier "D-02" ; :name "Eastside Depot" ; :lat 35.4389e0 ; :lon 139.6655e0 .
+
+:DR-01 a :Driver ; :identifier "DR-01" ; :name "Ren Ishida" ; :onShift false .
+:DR-02 a :Driver ; :identifier "DR-02" ; :name "Lena Ortiz" ; :onShift true .
+:DR-03 a :Driver ; :identifier "DR-03" ; :name "Kai Morgan" ; :onShift true .
+
+:V-101 a :Vehicle ; :identifier "V-101" ; :plate "HC-101" ; :vehicleStatus :maintenance ;
+  :capacityKg 800.0e0 ; :loadKg 120.0e0 ; :basedAt :D-01 ; :drivenBy :DR-01 ; :lat 35.4521e0 ; :lon 139.6402e0 .
+:V-102 a :Vehicle ; :identifier "V-102" ; :plate "HC-102" ; :vehicleStatus :available ;
+  :capacityKg 1000.0e0 ; :loadKg 350.0e0 ; :basedAt :D-01 ; :drivenBy :DR-02 ; :lat 35.4524e0 ; :lon 139.6398e0 .
+:V-201 a :Vehicle ; :identifier "V-201" ; :plate "HC-201" ; :vehicleStatus :onRoute ;
+  :capacityKg 3000.0e0 ; :loadKg 2900.0e0 ; :basedAt :D-02 ; :drivenBy :DR-03 ; :lat 35.4467e0 ; :lon 139.6581e0 .
+
+:C-01 a :Customer ; :identifier "C-01" ; :name "Bayview Bakery" ; :email "orders@bayview-bakery.example.org" .
+:C-02 a :Customer ; :identifier "C-02" ; :name "Pier 7 Bike Shop" ; :email "hello@pier7-bikes.example.org" .
+
+:ST-01 a :DeliveryStop ; :identifier "ST-01" ; :address "3-1 Bayview Street" ; :sequence 1 .
+:ST-02 a :DeliveryStop ; :identifier "ST-02" ; :address "7 Pier Road" ; :sequence 1 .
+:ST-03 a :DeliveryStop ; :identifier "ST-03" ; :address "12 Canal Lane" ; :sequence 1 .
+:ST-04 a :DeliveryStop ; :identifier "ST-04" ; :address "3-1 Bayview Street" ; :sequence 2 .
+
+:S-5001 a :Shipment ; :identifier "S-5001" ; :shipmentStatus :delayed ; :weightKg 120.0e0 ;
+  :promisedBy "2026-05-12T11:00:00+09:00"^^xsd:dateTime ; :eta "2026-05-12T15:30:00+09:00"^^xsd:dateTime ;
+  :delayReason "vehicleMaintenance" ; :deliveredTo :C-01 ; :shipsFrom :D-01 ; :carriedBy :V-101 ; :hasStop :ST-01 .
+:S-5002 a :Shipment ; :identifier "S-5002" ; :shipmentStatus :assigned ; :weightKg 350.0e0 ;
+  :promisedBy "2026-05-12T13:00:00+09:00"^^xsd:dateTime ; :eta "2026-05-12T12:40:00+09:00"^^xsd:dateTime ;
+  :deliveredTo :C-02 ; :shipsFrom :D-01 ; :carriedBy :V-102 ; :hasStop :ST-02 .
+:S-5003 a :Shipment ; :identifier "S-5003" ; :shipmentStatus :inTransit ; :weightKg 2900.0e0 ;
+  :promisedBy "2026-05-12T16:00:00+09:00"^^xsd:dateTime ; :eta "2026-05-12T15:10:00+09:00"^^xsd:dateTime ;
+  :deliveredTo :C-01 ; :shipsFrom :D-02 ; :carriedBy :V-201 ; :hasStop :ST-03, :ST-04 .

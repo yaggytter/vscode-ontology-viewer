@@ -1483,9 +1483,18 @@ summary:focus-visible {
 .actions-panel {
   right: auto;
   left: 16px;
-  top: 64px;
-  max-height: calc(100% - 80px);
+  top: 76px;
+  max-height: calc(100% - 92px);
   width: min(360px, calc(100% - 32px));
+}
+
+.actions-panel .sparql-panel-title {
+  white-space: nowrap;
+}
+
+.actions-panel .sparql-panel-header .toolbar-btn {
+  font-size: 11px;
+  padding: 3px 8px;
 }
 
 .actions-hint {

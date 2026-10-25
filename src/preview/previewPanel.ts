@@ -36,7 +36,7 @@ function layoutKey(viewMode: ViewMode, nodeId: string): string {
 
 const panels = new Map<string, PanelState>();
 
-function uiStrings(kind: DocumentKindName): UiStrings {
+export function uiStrings(kind: DocumentKindName): UiStrings {
   const base: UiStrings = {
     loading: vscode.l10n.t("Loading diagram..."),
     parseError: vscode.l10n.t("This file has a syntax error — showing the last valid diagram."),

@@ -39,7 +39,10 @@ export function createActionsController(deps: ActionsControllerDeps): ActionsCon
       return;
     }
     cy.nodes().removeClass(HIGHLIGHT_CLASS);
-    for (const id of selected?.affectedTypeIds ?? []) {
+    // The highlight belongs to the open panel: closing it clears the outline
+    // (the selection is kept, so reopening restores it).
+    const visibleSelection = panel?.isVisible() ? selected : undefined;
+    for (const id of visibleSelection?.affectedTypeIds ?? []) {
       cy.getElementById(id).addClass(HIGHLIGHT_CLASS);
     }
   };
@@ -50,6 +53,7 @@ export function createActionsController(deps: ActionsControllerDeps): ActionsCon
     }
     panel.setVisible(visible);
     deps.toggleButton.setAttribute("aria-pressed", String(visible));
+    reapply();
     if (visible) {
       deps.onOpen();
     }
