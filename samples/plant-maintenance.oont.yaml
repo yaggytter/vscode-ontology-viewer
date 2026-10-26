@@ -1,0 +1,200 @@
+# Scenario: vibration sensor SN-301 on press M-03 reports anomaly R-9002.
+# Following links shows that line L-02 is affected, that bearing kit SP-12 fits
+# M-03 and that technician T-02 has the vibrationAnalysis skill. M-03 has no
+# open work order, so an agent can call createWorkOrder, assignTechnician and
+# reserveSparePart.
+objectOntology: 1
+name: Riverside Plant Maintenance
+description: >-
+  Machines, sensors and maintenance work at a fictional riverside factory,
+  with the actions a maintenance planner or AI agent may call.
+
+interfaces:
+  MaintainableAsset:
+    description: Equipment that is serviced on a schedule and can be taken out of service.
+    properties:
+      operatingState: { type: string, enum: [running, degraded, stopped] }
+      lastServicedOn: { type: date }
+
+objectTypes:
+  ProductionLine:
+    displayName: Production line
+    primaryKey: lineId
+    titleProperty: name
+    implements: [MaintainableAsset]
+    properties:
+      lineId: { type: string }
+      name: { type: string }
+      operatingState: { type: string, enum: [running, degraded, stopped] }
+      lastServicedOn: { type: date }
+
+  Machine:
+    primaryKey: machineId
+    titleProperty: name
+    implements: [MaintainableAsset]
+    properties:
+      machineId: { type: string }
+      name: { type: string }
+      lineId: { type: string }
+      operatingState: { type: string, enum: [running, degraded, stopped] }
+      lastServicedOn: { type: date }
+
+  Sensor:
+    primaryKey: sensorId
+    titleProperty: sensorId
+    properties:
+      sensorId: { type: string }
+      measure: { type: string, enum: [vibration, temperature, pressure] }
+      unit: { type: string }
+      alarmThreshold: { type: double }
+
+  SensorReading:
+    displayName: Sensor reading
+    description: One measurement, flagged when it crosses the sensor's alarm threshold.
+    primaryKey: readingId
+    titleProperty: readingId
+    properties:
+      readingId: { type: string }
+      takenAt: { type: timestamp }
+      value: { type: double }
+      isAnomaly: { type: boolean }
+
+  WorkOrder:
+    displayName: Work order
+    description: A unit of maintenance work on one machine.
+    primaryKey: workOrderId
+    titleProperty: title
+    properties:
+      workOrderId: { type: string }
+      title: { type: string }
+      status: { type: string, enum: [open, inProgress, closed] }
+      priority: { type: string, enum: [low, medium, high] }
+      openedAt: { type: timestamp }
+      resolution: { type: string }
+
+  SparePart:
+    displayName: Spare part
+    description: A stocked part that fits one or more machines.
+    primaryKey: partId
+    titleProperty: name
+    properties:
+      partId: { type: string }
+      name: { type: string }
+      onHand: { type: integer }
+      reserved: { type: integer }
+
+  Technician:
+    primaryKey: technicianId
+    titleProperty: name
+    properties:
+      technicianId: { type: string }
+      name: { type: string }
+      skills: { type: "string[]" }
+      onShift: { type: boolean }
+
+linkTypes:
+  lineMachines:
+    foreignKey: Machine.lineId
+    from: { objectType: Machine, name: line, cardinality: one }
+    to: { objectType: ProductionLine, name: machines, cardinality: many }
+  machineSensors:
+    from: { objectType: Machine, name: sensors, cardinality: many }
+    to: { objectType: Sensor, name: machine, cardinality: one }
+  sensorReadings:
+    from: { objectType: Sensor, name: readings, cardinality: many }
+    to: { objectType: SensorReading, name: sensor, cardinality: one }
+  workOrderMachine:
+    from: { objectType: WorkOrder, name: machine, cardinality: one }
+    to: { objectType: Machine, name: workOrders, cardinality: many }
+  workOrderTrigger:
+    from: { objectType: WorkOrder, name: triggeredBy, cardinality: one }
+    to: { objectType: SensorReading, name: workOrders, cardinality: many }
+  workOrderTechnician:
+    from: { objectType: WorkOrder, name: technician, cardinality: one }
+    to: { objectType: Technician, name: workOrders, cardinality: many }
+  workOrderParts:
+    from: { objectType: WorkOrder, name: reservedParts, cardinality: many }
+    to: { objectType: SparePart, name: reservedFor, cardinality: many }
+  partFitsMachine:
+    from: { objectType: SparePart, name: fits, cardinality: many }
+    to: { objectType: Machine, name: compatibleParts, cardinality: many }
+
+actionTypes:
+  createWorkOrder:
+    displayName: Create work order
+    parameters:
+      workOrderId: { type: string, required: true }
+      machine: { type: objectRef, objectType: Machine, required: true }
+      title: { type: string, required: true }
+      priority: { type: string, required: true, enum: [low, medium, high] }
+      reading: { type: objectRef, objectType: SensorReading }
+    rules:
+      - { op: createObject, objectType: WorkOrder, set: { workOrderId: $workOrderId, title: $title, priority: $priority, status: open } }
+      - { op: createLink, linkType: workOrderMachine, from: workOrderId, to: machine }
+      - { op: createLink, linkType: workOrderTrigger, from: workOrderId, to: reading }
+    validations:
+      - description: The machine must not already have an open or in-progress work order.
+        expr: "none(machine.workOrders, w => w.status != 'closed')"
+
+  assignTechnician:
+    displayName: Assign technician
+    parameters:
+      workOrder: { type: objectRef, objectType: WorkOrder, required: true }
+      technician: { type: objectRef, objectType: Technician, required: true }
+    rules:
+      - { op: createLink, linkType: workOrderTechnician, from: workOrder, to: technician }
+      - { op: modifyObject, objectType: WorkOrder, object: workOrder, set: { status: inProgress } }
+    validations:
+      - description: The work order must be open.
+        expr: "workOrder.status == 'open'"
+      - description: The technician must be on shift.
+        expr: "technician.onShift"
+    sideEffects:
+      - The technician receives the work order on their handheld.
+
+  reserveSparePart:
+    displayName: Reserve spare part
+    parameters:
+      workOrder: { type: objectRef, objectType: WorkOrder, required: true }
+      part: { type: objectRef, objectType: SparePart, required: true }
+      quantity: { type: integer, required: true, description: New total number of units reserved for this part. }
+    rules:
+      - { op: createLink, linkType: workOrderParts, from: workOrder, to: part }
+      - { op: modifyObject, objectType: SparePart, object: part, set: { reserved: $quantity } }
+    validations:
+      - description: The part must fit the work order's machine.
+        expr: "contains(part.fits, workOrder.machine)"
+      - description: The reserved total must not exceed the units on hand.
+        expr: "quantity <= part.onHand"
+
+  closeWorkOrder:
+    displayName: Close work order
+    parameters:
+      workOrder: { type: objectRef, objectType: WorkOrder, required: true }
+      resolution: { type: string, required: true }
+    rules:
+      - { op: modifyObject, objectType: WorkOrder, object: workOrder, set: { status: closed, resolution: $resolution } }
+    validations:
+      - description: The work order must be in progress.
+        expr: "workOrder.status == 'inProgress'"
+
+objects:
+  ProductionLine:
+    - { lineId: L-01, name: Bottling line, operatingState: running, lastServicedOn: "2026-03-02" }
+    - { lineId: L-02, name: Cap pressing line, operatingState: degraded, lastServicedOn: "2026-02-14" }
+  Machine:
+    - { machineId: M-01, name: Filler 1, lineId: L-01, operatingState: running, lastServicedOn: "2026-03-02" }
+    - { machineId: M-03, name: Cap press 3, lineId: L-02, operatingState: degraded, lastServicedOn: "2026-01-20", sensors: [SN-301] }
+    - { machineId: M-04, name: Cap press 4, lineId: L-02, operatingState: running, lastServicedOn: "2026-02-14" }
+  Sensor:
+    - { sensorId: SN-301, measure: vibration, unit: mm/s, alarmThreshold: 7.1, readings: [R-9001, R-9002] }
+  SensorReading:
+    - { readingId: R-9001, takenAt: "2026-05-12T09:00:00+09:00", value: 3.2, isAnomaly: false }
+    - { readingId: R-9002, takenAt: "2026-05-12T09:15:00+09:00", value: 11.8, isAnomaly: true }
+  SparePart:
+    - { partId: SP-12, name: Press bearing kit, onHand: 4, reserved: 1, fits: [M-03, M-04] }
+  Technician:
+    - { technicianId: T-01, name: Hana Sato, skills: [electrical, plc], onShift: true }
+    - { technicianId: T-02, name: Omar Lind, skills: [mechanical, vibrationAnalysis], onShift: true }
+  WorkOrder:
+    - { workOrderId: WO-415, title: Recalibrate filler, status: open, priority: medium, openedAt: "2026-05-11T08:00:00+09:00", machine: M-01 }

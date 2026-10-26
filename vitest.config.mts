@@ -8,7 +8,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["src/rdf/**", "src/edit/**"],
+      include: ["src/rdf/**", "src/edit/**", "src/objectOntology/**"],
+      // VS Code-bound glue is exercised by the integration suite instead.
+      exclude: ["src/objectOntology/commands.ts"],
       thresholds: {
         lines: 80,
         statements: 80,

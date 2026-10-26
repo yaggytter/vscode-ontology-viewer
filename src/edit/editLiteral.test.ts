@@ -120,3 +120,24 @@ describe("planAndVerifyLabelEdit — round trip preserves file structure", () =>
     expect(result.proposedText).toContain('"Human"');
   });
 });
+
+describe("planAndVerifyLabelEdit — bilingual labels", () => {
+  const ttl =
+    `@prefix ex: <http://ex.org/> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n` +
+    `ex:Part rdfs:label "Component"@en, "部品"@ja .\n`;
+
+  it("rewrites the label in the display language and keeps its tag", async () => {
+    const ja = await planAndVerifyLabelEdit(ttl, BASE, "http://ex.org/Part", "パーツ", "ja");
+    expect(ja.verified, ja.verifyReason).toBe(true);
+    expect(ja.proposedText).toContain('"Component"@en, "パーツ"@ja');
+
+    const en = await planAndVerifyLabelEdit(ttl, BASE, "http://ex.org/Part", "Part", "en-us");
+    expect(en.verified, en.verifyReason).toBe(true);
+    expect(en.proposedText).toContain('"Part"@en, "部品"@ja');
+  });
+
+  it("still edits the first label when no language is given", async () => {
+    const result = await planAndVerifyLabelEdit(ttl, BASE, "http://ex.org/Part", "Part");
+    expect(result.proposedText).toContain('"Part"@en, "部品"@ja');
+  });
+});

@@ -8,9 +8,11 @@
 
 OWL、RDF、RDFS、SKOSを、VS Codeから離れずに見やすいスキーマ図で探索できる拡張機能です。検索しやすいキャンバスと安全なTurtle編集を組み合わせ、既存オントロジーの把握にも、考えながら設計する作業にも使えます。
 
+**Object Ontology**（`*.oont.yaml`）にも対応しています。Palantir Foundry などの業務プラットフォームのオントロジーに着想を得た、オブジェクト中心の形式です。オブジェクト型、リンク型、インターフェースに加えて**アクション型**を定義でき、アクションは AI エージェント用のツール定義としてエクスポートできます。
+
 > Ontology Viewerはプレビュー版です。大切なオントロジーではソース管理を有効にし、図から生成された変更をコミット前に確認してください。
 
-![アイコン・色・カーディナリティを備えたHarbor Marketのスキーマ、検索、Inspectorを表示したOntology Viewer](media/ontology-viewer-overview.png)
+![部品互換サンプルを表示した Ontology Viewer。自転車部品のクラス階層で「部品」を選択し、インスペクターにプロパティと関係を表示している](media/ontology-viewer-overview.ja.png)
 
 ## 触ってわかる使いやすさ
 
@@ -23,6 +25,49 @@ OWL、RDF、RDFS、SKOSを、VS Codeから離れずに見やすいスキーマ�
 - **安全なTurtle書き戻し**: 図からの編集は、生成結果を再パースしてから反映します。クラスや関係の作成、名前変更、プロパティや説明の編集ができます。
 - **英語・日本語UI**: VS Codeの表示言語に合わせて切り替わります。
 - **ローカル処理**: 拡張機能からオントロジーの内容や利用状況のテレメトリを送信しません。
+
+## 2つの方式のオントロジーを1つのビューアーで
+
+| | Semantic Web（OWL / RDF / SKOS） | Object Ontology（`*.oont.yaml`） |
+| --- | --- | --- |
+| 表すもの | 物事が何であり、どう関係するか | 業務で何を扱い、それをどう変更してよいか |
+| 識別子 | 世界で一意の IRI。W3C の語彙を再利用できる | システム内の主キー |
+| 変更操作 | モデル化しない（SPARQL Update は別の仕組み） | パラメーター・ルール・検証を持つ**アクション型**として定義する |
+| AI との相性 | 回答の裏付け（GraphRAG、用語集、来歴） | 安全な実行（アクションがガードレール付きのエージェント用ツールになる） |
+
+使い分けと組み合わせ方は、[使い分けガイド](docs/ja/choosing-ontology-style.md)と[ユースケース集](docs/ja/use-cases.md)で説明しています。
+
+### Object Ontology の概要
+
+![Harbor City Delivery Ops サンプルでアクションパネルを開いた画面。Assign vehicle のパラメーター、変更内容、拒否条件、副作用が表示され、関係する Shipment と Vehicle が図上で強調されている](media/object-ontology-actions.ja.png)
+
+```yaml
+objectOntology: 1
+name: Corner Cafe Orders
+objectTypes:
+  Order:
+    primaryKey: orderId
+    properties:
+      orderId: { type: string }
+      status: { type: string, enum: [open, preparing, served, cancelled] }
+actionTypes:
+  markServed:
+    parameters:
+      order: { type: objectRef, objectType: Order, required: true }
+    rules:
+      - { op: modifyObject, objectType: Order, object: order, set: { status: served } }
+    validations:
+      - description: Only an order that is being prepared can be served.
+```
+
+- **表示・編集・クエリ**を同じキャンバスで行えます。オブジェクト型、インターフェース（六角形）、カーディナリティ付きのリンク型を描き、**アクション**パネルで操作の定義を確認できます。図からの編集は YAML の該当箇所だけを書き換え、反映前に再パースして確認します。コメントも残ります。
+- **「問題」パネルとアウトライン**: 参照切れ、未知のフィールド、サンプルオブジェクトのキー重複を、該当箇所に表示します。同梱の JSON Schema により、`*.oont.json`（Red Hat の YAML 拡張機能を入れれば `*.oont.yaml` も）で補完が効きます。
+- **SPARQL** は RDF に変換したモデル（OWL と `oont:` 語彙）に対して実行します。「各型に対して何ができるか」「オブジェクト間のリンクをたどる」など、Object Ontology 用のクエリ例を8つ用意しています。
+- **AI エージェント向けのエクスポート**は、確認しやすいよう無題のドキュメントとして開きます。アクション型の**ツール定義**（MCP や function calling で使われる JSON Schema 形式）、LLM のコンテキストに入れる Markdown の**要約**、Semantic Web のデータと組み合わせるための **Turtle** の3種類です。拡張機能自体は LLM もネットワークも呼び出しません。
+
+![Corner Cafe Orders サンプルで Order 型を選択した画面。インスペクターに説明、サンプルオブジェクトの数、型付きのプロパティ（主キーに鍵マーク）、リンクが表示されている](media/object-ontology-inspector.ja.png)
+
+この形式は本拡張機能独自のものです。Palantir のファイル形式ではなく、Foundry とも接続しません。
 
 ## 1分ではじめる
 
@@ -56,6 +101,8 @@ SPARQL がはじめての方へ: パネルには、どのオントロジーで�
 - **絞り込み**: 一致しなかったものを淡色化します。検索ボックスやダブルクリックのフォーカスと組み合わせられます。
 - **グラフに反映しない**: テキストの結果のみを表示します。
 
+![配送サンプルに SPARQL クエリを実行し、オブジェクト型ごとに変更できるアクションを一覧した画面。一致した Shipment と Vehicle が図上でハイライトされている](media/object-ontology-sparql.ja.png)
+
 クエリは拡張機能ホスト内（[Comunica](https://comunica.dev/) を利用）でローカルに実行され、オントロジーの内容が外部に送信されることはありません。
 
 ### 安全に編集する
@@ -78,8 +125,10 @@ RDF/XMLとJSON-LDはそのまま表示できます。図から編集したい場
 | Notation3 | `.n3` | 対応 | 非対応 |
 | RDF/XML / OWL/XML | `.rdf`, `.owl` | 対応 | 変換後に対応 |
 | JSON-LD | `.jsonld` | 対応 | 変換後に対応 |
+| Object Ontology（YAML） | `.oont.yaml`, `.oont.yml` | 対応 | 対応 |
+| Object Ontology（JSON） | `.oont.json` | 対応 | YAML へ変換後に対応 |
 
-SPARQL による問い合わせは、この表のすべての形式で利用できます。パース済みのトリプルに対して実行されるため、変換は不要です。Turtle のみに限られるのは書き戻しだけです。
+SPARQL による問い合わせは、この表のすべての形式で利用できます。パース済みのトリプル（Object Ontology の場合は RDF に変換したモデル）に対して実行されるため、変換は不要です。
 
 パーサーや編集範囲の詳細は[対応形式](docs/ja/format-support.md)をご覧ください。
 
@@ -91,6 +140,10 @@ SPARQL による問い合わせは、この表のすべての形式で利用で�
 | Ontology Viewer: 編集用にTurtleへ変換... | — |
 | Ontology Viewer: 図のレイアウトをJSONでエクスポート... | — |
 | Ontology Viewer: サンプルオントロジーを作成... | — |
+| Ontology Viewer: アクションを AI エージェント用ツール定義 (JSON Schema) としてエクスポート... | — |
+| Ontology Viewer: LLM コンテキスト用のオントロジー要約をエクスポート... | — |
+| Ontology Viewer: Object Ontology を Turtle (OWL) としてエクスポート... | — |
+| Ontology Viewer: Object Ontology の JSON を編集用に YAML へ変換... | — |
 
 `Cmd+Shift+O` / `Ctrl+Shift+O`は、VS Code標準の**エディター内のシンボルへ移動**に割り当てたままです。
 
@@ -109,6 +162,10 @@ SPARQL による問い合わせは、この表のすべての形式で利用で�
 - [図から編集する](docs/ja/tutorial-2-editing-from-diagram.md)
 - [既存のOWLファイルを取り込む](docs/ja/tutorial-3-importing-owl.md)
 - [SPARQLで問い合わせる](docs/ja/tutorial-4-sparql.md)
+- [はじめての Object Ontology](docs/ja/tutorial-5-object-ontology.md)
+- [Object Ontology × AI エージェント](docs/ja/tutorial-6-object-ontology-ai-agents.md)
+- [Semantic Web オントロジー × LLM](docs/ja/tutorial-7-semantic-web-llm.md)
+- [オントロジー方式の選び方](docs/ja/choosing-ontology-style.md)・[ユースケース集](docs/ja/use-cases.md)
 - [対応形式](docs/ja/format-support.md)
 - [トラブルシューティング](docs/ja/troubleshooting.md)
 - [サポート](SUPPORT.ja.md)・[プライバシー](PRIVACY.ja.md)・[セキュリティ](SECURITY.ja.md)

@@ -1,5 +1,23 @@
 import * as vscode from "vscode";
 import { ALL_ONTOLOGY_LANGUAGES, EDITABLE_LANGUAGES } from "./util/languages";
+import { detectDocumentObjectOntology } from "./objectOntology/detectDocument";
+
+/**
+ * `ontologyViewer.isObjectOntology` covers what a `resourceFilename` when-clause
+ * cannot: an untitled YAML document (e.g. a freshly opened sample) whose first
+ * key is `objectOntology`.
+ */
+let lastObjectOntologyContext: boolean | undefined;
+
+function updateObjectOntologyContext(editor: vscode.TextEditor | undefined): void {
+  const document = editor?.document;
+  const isObjectOntology = document !== undefined && detectDocumentObjectOntology(document) !== undefined;
+  if (isObjectOntology === lastObjectOntologyContext) {
+    return;
+  }
+  lastObjectOntologyContext = isObjectOntology;
+  void vscode.commands.executeCommand("setContext", "ontologyViewer.isObjectOntology", isObjectOntology);
+}
 
 export function activate(context: vscode.ExtensionContext): void {
   // Drives the `editorLangId in ontologyViewer.viewableLanguages` / `...editableLanguages`
@@ -29,7 +47,32 @@ export function activate(context: vscode.ExtensionContext): void {
       const { createSampleOntology } = await import("./util/samples");
       await createSampleOntology(context.extensionUri);
     }),
+    vscode.commands.registerCommand("ontologyViewer.exportAgentTools", async (uri?: vscode.Uri) => {
+      const { exportAgentTools } = await import("./objectOntology/commands");
+      await exportAgentTools(uri instanceof vscode.Uri ? uri : undefined);
+    }),
+    vscode.commands.registerCommand("ontologyViewer.exportContextSummary", async (uri?: vscode.Uri) => {
+      const { exportContextSummary } = await import("./objectOntology/commands");
+      await exportContextSummary(uri instanceof vscode.Uri ? uri : undefined);
+    }),
+    vscode.commands.registerCommand("ontologyViewer.exportObjectOntologyTurtle", async (uri?: vscode.Uri) => {
+      const { exportTurtle } = await import("./objectOntology/commands");
+      await exportTurtle(uri instanceof vscode.Uri ? uri : undefined);
+    }),
+    vscode.commands.registerCommand("ontologyViewer.convertObjectOntologyToYaml", async (uri?: vscode.Uri) => {
+      const { convertToYaml } = await import("./objectOntology/commands");
+      await convertToYaml(uri instanceof vscode.Uri ? uri : undefined);
+    }),
+    vscode.window.onDidChangeActiveTextEditor(updateObjectOntologyContext),
+    vscode.workspace.onDidChangeTextDocument((e) => {
+      // Only untitled documents can change kind by editing (the marker sniff);
+      // a named file's kind is fixed by its file name.
+      if (e.document.isUntitled && e.document === vscode.window.activeTextEditor?.document) {
+        updateObjectOntologyContext(vscode.window.activeTextEditor);
+      }
+    }),
   );
+  updateObjectOntologyContext(vscode.window.activeTextEditor);
 
   registerLanguageFeatures(context);
 }

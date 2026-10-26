@@ -1,0 +1,200 @@
+# Scenario: two customers report damaged items. Ticket TK-301 (customer CU-01,
+# order OR-7001) is about earbuds worth 4,800 JPY: under the 10,000 JPY limit,
+# so an agent may call issueRefund directly. Ticket TK-302 (customer CU-02,
+# order OR-7002) is about a 24,800 JPY speaker: issueRefund is rejected, so the
+# agent must call requestRefundApproval and let lead SS-02 decide.
+objectOntology: 1
+name: Lumen Gadgets Support Desk
+description: >-
+  Customer support for a fictional gadget shop: orders, tickets, refunds and
+  the guard-railed actions an AI support agent may call.
+
+objectTypes:
+  Customer:
+    primaryKey: customerId
+    titleProperty: name
+    properties:
+      customerId: { type: string }
+      name: { type: string }
+      email: { type: string }
+
+  Product:
+    primaryKey: sku
+    titleProperty: name
+    properties:
+      sku: { type: string }
+      name: { type: string }
+      priceYen: { type: integer, unit: JPY }
+
+  Order:
+    description: A paid online order.
+    primaryKey: orderId
+    titleProperty: orderId
+    properties:
+      orderId: { type: string }
+      placedOn: { type: date }
+      totalYen: { type: integer, unit: JPY }
+      refundedYen: { type: integer, unit: JPY }
+      customerId: { type: string }
+
+  Ticket:
+    description: One customer request handled by the support desk.
+    primaryKey: ticketId
+    titleProperty: subject
+    properties:
+      ticketId: { type: string }
+      subject: { type: string }
+      status: { type: string, enum: [open, waitingOnCustomer, escalated, closed] }
+      priority: { type: string, enum: [low, normal, high] }
+      openedAt: { type: timestamp }
+
+  Refund:
+    description: Money returned to a customer for an order.
+    primaryKey: refundId
+    titleProperty: refundId
+    properties:
+      refundId: { type: string }
+      amountYen: { type: integer, unit: JPY }
+      reason: { type: string, enum: [damaged, wrongItem, lateDelivery, other] }
+      status: { type: string, enum: [pendingApproval, approved, rejected, issued] }
+
+  SupportStaff:
+    displayName: Support staff
+    description: A human member of the support team.
+    primaryKey: staffId
+    titleProperty: name
+    properties:
+      staffId: { type: string }
+      name: { type: string }
+      role: { type: string, enum: [agent, lead] }
+
+linkTypes:
+  orderCustomer:
+    foreignKey: Order.customerId
+    from: { objectType: Order, name: customer, cardinality: one }
+    to: { objectType: Customer, name: orders, cardinality: many }
+  orderProducts:
+    from: { objectType: Order, name: products, cardinality: many }
+    to: { objectType: Product, name: orders, cardinality: many }
+  ticketCustomer:
+    from: { objectType: Ticket, name: customer, cardinality: one }
+    to: { objectType: Customer, name: tickets, cardinality: many }
+  ticketOrder:
+    displayName: About order
+    from: { objectType: Ticket, name: order, cardinality: one }
+    to: { objectType: Order, name: tickets, cardinality: many }
+  ticketAssignee:
+    displayName: Assigned to
+    from: { objectType: Ticket, name: assignee, cardinality: one }
+    to: { objectType: SupportStaff, name: tickets, cardinality: many }
+  refundOrder:
+    from: { objectType: Refund, name: order, cardinality: one }
+    to: { objectType: Order, name: refunds, cardinality: many }
+  refundTicket:
+    from: { objectType: Refund, name: ticket, cardinality: one }
+    to: { objectType: Ticket, name: refunds, cardinality: many }
+
+actionTypes:
+  issueRefund:
+    displayName: Issue refund
+    description: Refund a small amount immediately. Use requestRefundApproval for anything over 10,000 JPY.
+    parameters:
+      refundId: { type: string, required: true }
+      ticket: { type: objectRef, objectType: Ticket, required: true }
+      order: { type: objectRef, objectType: Order, required: true }
+      amountYen: { type: integer, required: true }
+      reason: { type: string, required: true, enum: [damaged, wrongItem, lateDelivery, other] }
+    rules:
+      - { op: createObject, objectType: Refund, set: { refundId: $refundId, amountYen: $amountYen, reason: $reason, status: issued } }
+      - { op: createLink, linkType: refundOrder, from: refundId, to: order }
+      - { op: createLink, linkType: refundTicket, from: refundId, to: ticket }
+    validations:
+      - description: The amount must not exceed what is left of the order total after earlier refunds.
+        expr: "amountYen <= order.totalYen - order.refundedYen"
+      - description: The order must have been placed within the last 30 days.
+        expr: "daysSince(order.placedOn) <= 30"
+      - description: The amount must be 10,000 JPY or less; larger refunds need requestRefundApproval.
+        expr: "amountYen <= 10000"
+    sideEffects:
+      - The customer's original payment method is credited and a receipt is emailed.
+
+  requestRefundApproval:
+    displayName: Request refund approval
+    description: Ask a support lead to approve a refund over 10,000 JPY.
+    parameters:
+      refundId: { type: string, required: true }
+      ticket: { type: objectRef, objectType: Ticket, required: true }
+      order: { type: objectRef, objectType: Order, required: true }
+      amountYen: { type: integer, required: true }
+      reason: { type: string, required: true, enum: [damaged, wrongItem, lateDelivery, other] }
+    rules:
+      - { op: createObject, objectType: Refund, set: { refundId: $refundId, amountYen: $amountYen, reason: $reason, status: pendingApproval } }
+      - { op: createLink, linkType: refundOrder, from: refundId, to: order }
+      - { op: createLink, linkType: refundTicket, from: refundId, to: ticket }
+    validations:
+      - description: The amount must not exceed what is left of the order total after earlier refunds.
+        expr: "amountYen <= order.totalYen - order.refundedYen"
+      - description: The order must have been placed within the last 30 days.
+        expr: "daysSince(order.placedOn) <= 30"
+    sideEffects:
+      - A support lead is asked to approve or reject the refund. No money moves until they do.
+
+  escalateTicket:
+    displayName: Escalate ticket
+    parameters:
+      ticket: { type: objectRef, objectType: Ticket, required: true }
+      lead: { type: objectRef, objectType: SupportStaff, required: true }
+      note: { type: string, required: true }
+    rules:
+      - { op: createLink, linkType: ticketAssignee, from: ticket, to: lead }
+      - { op: modifyObject, objectType: Ticket, object: ticket, set: { status: escalated, priority: high } }
+    validations:
+      - description: Tickets can only be escalated to a support lead.
+        expr: "lead.role == 'lead'"
+    sideEffects:
+      - The lead is notified with the escalation note.
+
+  replyToCustomer:
+    displayName: Reply to customer
+    parameters:
+      ticket: { type: objectRef, objectType: Ticket, required: true }
+      message: { type: string, required: true }
+    rules:
+      - { op: modifyObject, objectType: Ticket, object: ticket, set: { status: waitingOnCustomer } }
+    validations:
+      - description: The ticket must not be closed.
+        expr: "ticket.status != 'closed'"
+    sideEffects:
+      - The message is emailed to the customer who raised the ticket.
+
+  closeTicket:
+    displayName: Close ticket
+    parameters:
+      ticket: { type: objectRef, objectType: Ticket, required: true }
+    rules:
+      - { op: modifyObject, objectType: Ticket, object: ticket, set: { status: closed } }
+    validations:
+      - description: No refund on the ticket may still be waiting for approval.
+        expr: "none(ticket.refunds, r => r.status == 'pendingApproval')"
+
+objects:
+  Customer:
+    - { customerId: CU-01, name: Mio Tanaka, email: mio@example.org }
+    - { customerId: CU-02, name: Sam Rivera, email: sam@example.org }
+  Product:
+    - { sku: LG-EB2, name: Lumen Buds 2, priceYen: 4800 }
+    - { sku: LG-SP1, name: Lumen Home Speaker, priceYen: 24800 }
+    - { sku: LG-CB1, name: USB-C cable, priceYen: 1200 }
+  Order:
+    - { orderId: OR-7001, placedOn: "2026-05-02", totalYen: 6000, refundedYen: 0, customerId: CU-01, products: [LG-EB2, LG-CB1] }
+    - { orderId: OR-6890, placedOn: "2026-03-28", totalYen: 1200, refundedYen: 1200, customerId: CU-01, products: [LG-CB1] }
+    - { orderId: OR-7002, placedOn: "2026-05-05", totalYen: 24800, refundedYen: 0, customerId: CU-02, products: [LG-SP1] }
+  SupportStaff:
+    - { staffId: SS-01, name: Yuki Mori, role: agent }
+    - { staffId: SS-02, name: Ada Brooks, role: lead }
+  Ticket:
+    - { ticketId: TK-280, subject: Cable never arrived, status: closed, priority: low, openedAt: "2026-04-02T09:30:00+09:00", customer: CU-01, order: OR-6890, assignee: SS-01 }
+    - { ticketId: TK-301, subject: Earbuds arrived cracked, status: open, priority: normal, openedAt: "2026-05-10T10:05:00+09:00", customer: CU-01, order: OR-7001, assignee: SS-01 }
+    - { ticketId: TK-302, subject: Speaker box crushed in transit, status: open, priority: normal, openedAt: "2026-05-10T11:20:00+09:00", customer: CU-02, order: OR-7002, assignee: SS-01 }
+  Refund:
+    - { refundId: RF-100, amountYen: 1200, reason: lateDelivery, status: issued, order: OR-6890, ticket: TK-280 }

@@ -8,5 +8,9 @@
   "command.newSample.title": "Create Sample Ontology...",
   "config.autoRefreshDebounceMs.description": "Delay (in milliseconds) before the diagram preview refreshes after you edit the source file.",
   "config.defaultView.description": "Which diagram view opens by default: 'schema' (class-centric ER diagram) or 'triples' (raw triple graph).",
-  "config.layout.description": "Automatic layout algorithm used to arrange diagram nodes."
+  "config.layout.description": "Automatic layout algorithm used to arrange diagram nodes.",
+  "command.exportAgentTools.title": "Export Actions as AI Agent Tools (JSON Schema)...",
+  "command.exportContextSummary.title": "Export Ontology Summary for LLM Context...",
+  "command.exportObjectOntologyTurtle.title": "Export Object Ontology as Turtle (OWL)...",
+  "command.convertObjectOntologyToYaml.title": "Convert Object Ontology JSON to YAML for Editing..."
 }

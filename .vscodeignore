@@ -21,10 +21,13 @@ node_modules/.cache/**
 tsconfig.json
 eslint.config.mjs
 esbuild.mjs
-vitest.config.ts
+vitest.config.mts
 .eslintrc*
 .gitignore
 .vscodeignore
 DevPlan.md
 **/*.test.ts
 !CONTRIBUTING.md
+docs/plans/**
+# Japanese README screenshots: VS Code only renders README.md from the package.
+media/*.ja.png

@@ -33,7 +33,7 @@ export const provider: vscode.DocumentSymbolProvider = {
     if (parsed.errors.length > 0) {
       return [];
     }
-    const graph = buildGraphModel(parsed.quads);
+    const graph = buildGraphModel(parsed.quads, vscode.env.language);
 
     const index = isEditableLanguage(document.languageId) ? buildPositionIndex(text, baseIRI) : undefined;
     const rangeFor = (nodeId: string): vscode.Range => {

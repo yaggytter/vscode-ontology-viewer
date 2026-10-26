@@ -1,5 +1,6 @@
 import { isKnownVocabularyIri } from "../../src/rdf/vocabulary";
-import type { OntologyEdge, OntologyGraph, OntologyNode } from "../../src/rdf/graphModel";
+import { OONT } from "../../src/objectOntology/iris";
+import { LITERAL_NODE_PREFIX, type OntologyEdge, type OntologyGraph, type OntologyNode } from "../../src/rdf/graphModel";
 
 export interface CompactTriplesResult {
   nodes: OntologyNode[];
@@ -41,6 +42,13 @@ export interface CompactTriplesResult {
  * Condition 2 matters: a document that states `rdfs:Resource rdfs:subClassOf
  * ex:Thing` has said something about that term, so it keeps its node.
  *
+ * A literal-value node is also folded when every statement pointing at it uses
+ * the Object Ontology vocabulary (`oont:apiName`, `oont:dataType`,
+ * `oont:required`, ...). The projection emits these per property, link side and
+ * parameter so SPARQL can filter on them, which on samples/delivery-ops.oont.yaml
+ * made 269 of the 364 nodes plain values. Literals of the document's own
+ * properties (an object's `status`, say) are data and stay as nodes.
+ *
  * Pure, and never mutates the input — the underlying `OntologyGraph` stays a
  * faithful representation of the parsed triples, and this compaction is a view
  * concern the user can toggle off.
@@ -59,19 +67,23 @@ function factPredicateLabel(predicateLabel: string): string {
 export function compactTriples(graph: OntologyGraph): CompactTriplesResult {
   const hasOutgoing = new Set<string>();
   const hasIncoming = new Set<string>();
+  const hasNonVocabularyIncoming = new Set<string>();
   for (const edge of graph.edges) {
     hasOutgoing.add(edge.source);
     hasIncoming.add(edge.target);
+    if (!edge.predicate.startsWith(OONT)) {
+      hasNonVocabularyIncoming.add(edge.target);
+    }
   }
 
   const sinkIds = new Set<string>();
   for (const node of graph.nodes) {
-    if (
-      !node.isBlankNode &&
-      isKnownVocabularyIri(node.id) &&
-      !hasOutgoing.has(node.id) &&
-      hasIncoming.has(node.id)
-    ) {
+    if (!hasIncoming.has(node.id) || hasOutgoing.has(node.id)) {
+      continue;
+    }
+    const isVocabularySink = !node.isBlankNode && isKnownVocabularyIri(node.id);
+    const isVocabularyLiteral = node.id.startsWith(LITERAL_NODE_PREFIX) && !hasNonVocabularyIncoming.has(node.id);
+    if (isVocabularySink || isVocabularyLiteral) {
       sinkIds.add(node.id);
     }
   }

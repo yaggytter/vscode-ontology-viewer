@@ -49,6 +49,18 @@ That's by design — see [Format Support](format-support.md#why-only-turtle-is-e
 
 Node positions are stored in VS Code's workspace state, keyed by the file's location — not inside the ontology file itself, and not synced across machines by default. If you open the same file from a different machine or a different workspace folder, it'll start with an auto-arranged layout. Use **Ontology Viewer: Export Diagram Layout as JSON...** if you want to save (or share) a layout explicitly.
 
+## My YAML file doesn't get a diagram button
+
+The extension only treats a YAML or JSON file as an Object Ontology when its name ends in `.oont.yaml`, `.oont.yml`, or `.oont.json` (an untitled document also works if its first key is `objectOntology`). Rename `fleet.yaml` to `fleet.oont.yaml` and the diagram button, keybinding, and Problems-panel checks appear. Ordinary YAML files are deliberately left alone.
+
+## An Object Ontology edit from the diagram was refused
+
+The toast explains why. The usual causes are a YAML syntax error elsewhere in the file (fix the error shown in the Problems panel first), trying to delete a property that is the type's `primaryKey` or `titleProperty`, deleting a link type that an action's rule still uses, or editing a `.oont.json` file, which is view-only. Nothing is written when an edit is refused.
+
+## The exported agent tools don't enforce my validations
+
+That is expected. `validations` and their `expr` strings are written into the tool descriptions so the model knows the rules, but the extension does not evaluate them, and it never calls a model or a service. Enforce the same checks in the code that executes the tool (your MCP server or backend). See [Object Ontology × AI Agents](tutorial-6-object-ontology-ai-agents.md).
+
 ## Still stuck?
 
 Open an issue on the project's GitHub repository with:

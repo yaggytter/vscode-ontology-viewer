@@ -1,6 +1,6 @@
 # Original sample ontologies
 
-The bundled Turtle files listed below were authored from scratch for Ontology Viewer. Their domains, labels, fictional names, identifiers, and instance records are original and do not reproduce an external ontology or dataset. Standard RDF, RDFS, OWL, XSD, and SKOS vocabulary IRIs are used only for interoperability.
+The bundled Turtle and Object Ontology files listed below were authored from scratch for Ontology Viewer. Their domains, labels, fictional names, identifiers, and instance records are original and do not reproduce an external ontology or dataset. Standard RDF, RDFS, OWL, XSD, and SKOS vocabulary IRIs are used only for interoperability.
 
 The samples are distributed under the repository's [MIT License](../LICENSE). `example.org` IRIs and fictional records are intentionally non-production data.
 
@@ -13,5 +13,19 @@ The samples are distributed under the repository's [MIT License](../LICENSE). `e
 | `harbor-market.ttl` | Medium | Icons, colors, identifiers, cardinality, edge attributes |
 | `city-mobility.ttl` | Medium | Multi-domain operational graph with hierarchy and instances |
 | `community-event.rdf` | Small–medium | Original RDF/XML instance graph and Turtle conversion |
+| `product-compatibility.ttl` | Medium | Transitive `partOf`, symmetric `compatibleWith`; grounding LLM answers (GraphRAG) |
+| `glossary-skos.ttl` | Small–medium | Bilingual (en/ja) SKOS glossary; query expansion and term normalization |
+| `dataset-catalog.ttl` | Medium | DCAT + PROV-O lineage and licenses; answers that cite their sources |
+| `research-kg.ttl` | Medium | schema.org papers, people and organizations; `sameAs` entity linking |
+| `delivery-ops.ttl` | Medium | OWL counterpart of `delivery-ops.oont.yaml`, for comparing the two styles |
+
+### Object Ontology samples (`*.oont.yaml`)
+
+| Sample | Size | Focus |
+| --- | --- | --- |
+| `cafe-orders.oont.yaml` | Small | Starter: object types, link types, actions, example objects |
+| `delivery-ops.oont.yaml` | Medium | Dispatch agent scenario: a delayed shipment, links to an alternative vehicle, `assignVehicle` / `notifyCustomer` actions |
+| `plant-maintenance.oont.yaml` | Medium | Sensor anomaly → affected machine and line → spare part and technician → work order |
+| `support-desk.oont.yaml` | Medium | Refund guard rails: validations and an approval action for large refunds |
 
 All listed samples, including the RDF/XML interoperability example, follow the same original-content policy.

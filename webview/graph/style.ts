@@ -50,6 +50,12 @@ export function schemaStyle(): cytoscape.StylesheetStyle[] {
       style: { shape: "ellipse" },
     },
     {
+      // Interfaces are contracts, not things with instances: a distinct
+      // outline shape keeps them from reading as one more object type.
+      selector: "node[origin = 'interface']",
+      style: { shape: "round-hexagon", "border-style": "double", "border-width": 4 },
+    },
+    {
       selector: "node[origin = 'inferred']",
       style: { "border-style": "dashed", opacity: 0.85 },
     },
@@ -109,6 +115,37 @@ export function schemaStyle(): cytoscape.StylesheetStyle[] {
         "target-arrow-color": cssVar("--vscode-charts-purple", "#b180d7"),
         "target-arrow-shape": "triangle-tee",
         width: 2,
+      },
+    },
+    {
+      selector: "edge[kind = 'extends']",
+      style: {
+        "line-color": cssVar("--vscode-charts-purple", "#b180d7"),
+        "target-arrow-color": cssVar("--vscode-charts-purple", "#b180d7"),
+        "target-arrow-shape": "triangle-tee",
+        width: 2,
+      },
+    },
+    {
+      selector: "edge[kind = 'implements']",
+      style: {
+        "line-color": cssVar("--vscode-charts-blue", "#3794ff"),
+        "target-arrow-color": cssVar("--vscode-charts-blue", "#3794ff"),
+        "target-arrow-shape": "triangle-tee",
+        "line-style": "dashed",
+        width: 2,
+      },
+    },
+    {
+      // The object types the selected action (Actions panel) touches — see
+      // webview/controllers/actionsController.ts.
+      selector: "node.action-target",
+      style: {
+        "border-color": cssVar("--vscode-charts-orange", "#d18616"),
+        "border-width": 5,
+        "overlay-color": cssVar("--vscode-charts-orange", "#d18616"),
+        "overlay-opacity": 0.14,
+        "overlay-padding": 6,
       },
     },
     {

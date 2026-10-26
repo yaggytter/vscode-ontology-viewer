@@ -37,6 +37,12 @@ function relationLabel(strings: UiStrings, rel: SchemaRelation): string {
   if (rel.kind === "skosBroader") {
     return strings.legendSkosBroader;
   }
+  if (rel.kind === "implements") {
+    return strings.legendImplements;
+  }
+  if (rel.kind === "extends") {
+    return strings.legendExtends;
+  }
   return rel.name;
 }
 

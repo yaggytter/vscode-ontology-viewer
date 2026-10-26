@@ -17,8 +17,17 @@ VS Code Marketplace から **Ontology Viewer** をインストールします（
 | 港の朝市 | アイコン、色、カーディナリティ、関係属性 |
 | 都市モビリティ拠点 | 複数領域をつなぐ中規模の運用オントロジー |
 | 地域イベント（RDF/XML） | オリジナルの表示専用サンプルと「Turtle に変換」の流れ |
+| 自転車パーツの互換性 | LLM が推測せずに問い合わせて答えられる OWL の事実（GraphRAG） |
+| 物流用語集（英日） | 検索語の展開と用語の正規化に使う、英日 2 言語の SKOS 用語集 |
+| 来歴付きデータカタログ | 数値の出どころを示して答えるための DCAT + PROV-O |
+| 研究知識グラフ | `sameAs` で組織をまたいで統合した schema.org のエンティティ |
+| 配送オペレーション（OWL） | 配送サンプルを OWL で書いたもの。2つのスタイルの比較用 |
+| 街角カフェの注文（Object Ontology） | 入門用の Object Ontology。オブジェクト型、リンク、アクション |
+| 配送オペレーション（Object Ontology） | 荷物の遅延対応で、アクションを AI エージェントのツールとして使う |
+| 工場保全（Object Ontology） | センサーの警報からリンクをたどって作業指示を起票する |
+| サポートデスク（Object Ontology） | 検証ルールを、エージェントが行う返金のガードレールにする |
 
-もちろん、お手持ちの `.ttl` ファイルを開くだけでも構いません。特別な準備は不要です。
+もちろん、お手持ちの `.ttl` ファイルを開くだけでも構いません。特別な準備は不要です。Object Ontology のファイルは拡張子を `.oont.yaml` にしてください。詳しくは[はじめての Object Ontology](tutorial-5-object-ontology.md)で説明しています。
 
 ## 図を開く
 
@@ -48,5 +57,9 @@ VS Code Marketplace から **Ontology Viewer** をインストールします（
 - [チュートリアル2: 図から編集する](tutorial-2-editing-from-diagram.md)
 - [チュートリアル3: 既存の .owl ファイルを取り込む](tutorial-3-importing-owl.md)
 - [チュートリアル4: SPARQL で問い合わせる](tutorial-4-sparql.md)
+- [チュートリアル5: はじめての Object Ontology](tutorial-5-object-ontology.md)
+- [チュートリアル6: Object Ontology × AI エージェント](tutorial-6-object-ontology-ai-agents.md)
+- [チュートリアル7: Semantic Web オントロジー × LLM](tutorial-7-semantic-web-llm.md)
+- [オントロジー方式の選び方](choosing-ontology-style.md)・[ユースケース集](use-cases.md)
 - [対応形式](format-support.md)
 - [トラブルシューティング](troubleshooting.md)

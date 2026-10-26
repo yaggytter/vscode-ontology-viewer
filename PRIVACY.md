@@ -12,6 +12,8 @@ To provide its features, the extension reads the ontology document open in VS Co
 
 SPARQL queries you run from the diagram are executed inside the extension host on your machine, against an in-memory copy of the open document, using the bundled [Comunica](https://comunica.dev/) engine. The query text, the ontology it runs against, and the results stay on your machine. The extension does not query remote SPARQL endpoints and does not resolve `owl:imports` or other external IRIs over the network.
 
+Object Ontology exports (agent tool definitions, the LLM context summary, and Turtle) are generated locally and opened as untitled documents in your editor. The extension does not send them, or anything else, to an AI model or service; where you paste or save them is up to you.
+
 Dragged node positions and view preferences may be stored in VS Code workspace state. They remain under VS Code's storage controls and can be removed by uninstalling the extension and clearing its stored data or by using a fresh VS Code profile.
 
 ## Network access

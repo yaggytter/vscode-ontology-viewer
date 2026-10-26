@@ -1,5 +1,6 @@
 import type cytoscape from "cytoscape";
 import type {
+  DocumentKindName,
   HostToWebviewMessage,
   SparqlSample,
   UiStrings,
@@ -21,6 +22,8 @@ import { collectViewPositions, restorationPlan, savedLayoutKey } from "./graph/l
 import { applyDim, clearFocus, setSearchQuery, toggleFocusedNode } from "./graph/focus";
 import { createSearchPanel, type SearchPanel } from "./panels/search";
 import { createSparqlController } from "./controllers/sparqlController";
+import { createActionsController } from "./controllers/actionsController";
+import type { ActionView } from "../src/objectOntology/actionView";
 import { renderStats } from "./panels/stats";
 import { renderLegend } from "./panels/legend";
 import { renderEmptySelection, renderEntitySelection, renderRelationSelection, renderUnattached } from "./panels/inspector";
@@ -37,9 +40,10 @@ import { DEFAULT_ZOOM, readableFitZoom, zoomLabel, zoomStep } from "./viewportMo
  * 3->4 for commentEditableNodeIds (Phase 5 comment editing); 4->5 for the
  * resetZoomLabel chrome string; 5->6 for persisted layout restoration;
  * 6->7 for the SPARQL panel's cached example queries; 7->8 for the triples
- * view's compaction toggle.
+ * view's compaction toggle; 8->9 for Object Ontology documents (documentKind
+ * and action types).
  */
-const STATE_VERSION = 8;
+const STATE_VERSION = 9;
 
 interface WebviewState {
   stateVersion: number;
@@ -55,6 +59,8 @@ interface WebviewState {
   strings: UiStrings;
   sparqlSamples: SparqlSample[];
   compactTriplesEnabled: boolean;
+  documentKind: DocumentKindName;
+  actions: ActionView[];
 }
 
 function saveState(state: Omit<WebviewState, "stateVersion">): void {
@@ -82,6 +88,8 @@ function persistViewState(): void {
     strings,
     sparqlSamples,
     compactTriplesEnabled,
+    documentKind,
+    actions: lastActions,
   });
 }
 
@@ -111,6 +119,8 @@ const compactTriplesCheckbox = document.getElementById("compact-triples-checkbox
 const compactTriplesLabel = document.getElementById("compact-triples-label") as HTMLSpanElement;
 const sparqlToggleBtn = document.getElementById("sparql-toggle-btn") as HTMLButtonElement;
 const sparqlPanelMount = document.getElementById("sparql-panel-mount") as HTMLDivElement;
+const actionsToggleBtn = document.getElementById("actions-toggle-btn") as HTMLButtonElement;
+const actionsPanelMount = document.getElementById("actions-panel-mount") as HTMLDivElement;
 const searchContainer = document.getElementById("search-container") as HTMLDivElement;
 const stage = document.getElementById("stage") as HTMLDivElement;
 const cyContainer = document.getElementById("cy") as HTMLDivElement;
@@ -120,6 +130,7 @@ const canvasTitleEl = document.getElementById("canvas-title") as HTMLElement;
 const canvasMetaEl = document.getElementById("canvas-meta") as HTMLElement;
 const inspectorScrimEl = document.getElementById("inspector-scrim") as HTMLDivElement;
 const inspectorEl = document.getElementById("inspector") as HTMLDivElement;
+const inspectorEyebrowEl = document.getElementById("inspector-eyebrow") as HTMLDivElement;
 const inspectorHeadingEl = document.getElementById("inspector-heading") as HTMLHeadingElement;
 const overviewHeadingEl = document.getElementById("overview-heading") as HTMLHeadingElement;
 const inspectorSelectionEl = document.getElementById("inspector-selection") as HTMLDivElement;
@@ -173,6 +184,8 @@ let viewMode: ViewMode = "schema";
 let lastRenderedMode: ViewMode | undefined;
 let lastGraph: OntologyGraph = { nodes: [], edges: [] };
 let lastSchema: SchemaModel = { entities: [], relations: [], unattachedProperties: [], isEmpty: true };
+let lastActions: ActionView[] = [];
+let documentKind: DocumentKindName = "rdf";
 /** Saved node positions, keyed by `layoutKey(viewMode, nodeId)` — see WebviewToHostNodeMoved for why. */
 let layoutCache: DocumentLayout = {};
 
@@ -289,6 +302,14 @@ const sparqlController = createSparqlController({
   nextRequestId: () => `sparql-${++requestSeq}`,
 });
 
+const actionsController = createActionsController({
+  toggleButton: actionsToggleBtn,
+  mount: actionsPanelMount,
+  getCy: () => cy,
+  post,
+  onOpen: () => undefined,
+});
+
 function configureChrome(nextStrings: UiStrings): void {
   layoutLabel.textContent = nextStrings.layoutSelectLabel;
   viewSchemaBtn.textContent = nextStrings.schemaViewLabel;
@@ -296,6 +317,7 @@ function configureChrome(nextStrings: UiStrings): void {
   addClassBtn.textContent = nextStrings.addClassLabel;
   connectBtn.textContent = nextStrings.connectLabel;
   exportPngLabel.textContent = nextStrings.exportPngLabel;
+  inspectorEyebrowEl.textContent = nextStrings.inspectorEyebrowLabel;
   inspectorHeadingEl.textContent = nextStrings.detailsLabel;
   overviewHeadingEl.textContent = nextStrings.overviewLabel;
   inspectorToggleBtn.setAttribute("aria-label", nextStrings.showDetailsLabel);
@@ -318,6 +340,8 @@ function configureChrome(nextStrings: UiStrings): void {
   emptyEl.textContent = nextStrings.emptyGraph;
   installSearch(nextStrings);
   sparqlController.install(nextStrings, sparqlSamples);
+  actionsController.install(nextStrings, documentKind === "objectOntology");
+  actionsController.update(lastActions);
   updateCompactToggle(nextStrings);
 }
 
@@ -814,6 +838,7 @@ function render(
     // Re-applies the dim filter and re-paints any active SPARQL highlight or
     // filter, both of which a full element rebuild drops.
     sparqlController.reapply();
+    actionsController.reapply();
   }
 
   if (strings) {
@@ -942,6 +967,8 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     lastRenderedGeneration = message.generation;
     strings = message.strings;
     sparqlSamples = message.sparqlSamples;
+    documentKind = message.documentKind;
+    lastActions = message.actions;
     isEditableDocument = message.isEditableDocument;
     editableIds = new Set(message.editableNodeIds);
     commentEditableIds = new Set(message.commentEditableNodeIds);
@@ -968,6 +995,8 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
       strings: message.strings,
       sparqlSamples: message.sparqlSamples,
       compactTriplesEnabled,
+      documentKind,
+      actions: lastActions,
     });
   } else if (message.type === "update") {
     // Defends against a stale message (e.g. the cached-state fast path
@@ -982,6 +1011,8 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
     commentEditableIds = new Set(message.commentEditableNodeIds);
     lastGraph = message.graph;
     lastSchema = message.schema;
+    lastActions = message.actions;
+    actionsController.update(lastActions);
     if (pendingNewSelection) {
       const entity = lastSchema.entities.find((e) => e.id === pendingNewSelection);
       const relation = lastSchema.relations.find((r) => r.iri === pendingNewSelection);
@@ -1003,6 +1034,7 @@ window.addEventListener("message", (event: MessageEvent<HostToWebviewMessage>) =
         editableNodeIds: message.editableNodeIds,
         commentEditableNodeIds: message.commentEditableNodeIds,
         layoutCache,
+        actions: lastActions,
       });
     }
   } else if (message.type === "editResult") {
@@ -1169,6 +1201,8 @@ try {
     strings = cached.strings;
     sparqlSamples = cached.sparqlSamples;
     compactTriplesEnabled = cached.compactTriplesEnabled;
+    documentKind = cached.documentKind;
+    lastActions = cached.actions;
     isEditableDocument = cached.isEditableDocument;
     lastRenderedGeneration = cached.generation;
     viewMode = cached.viewMode;

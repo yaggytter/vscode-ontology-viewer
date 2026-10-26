@@ -53,3 +53,14 @@ describe("computeCommentEditableSubjects", () => {
     expect(editable.has("http://example.org/doc.ttl#Pizza")).toBe(true);
   });
 });
+
+describe("planAndVerifyCommentEdit — bilingual comments", () => {
+  it("rewrites the comment in the display language", async () => {
+    const ttl =
+      `@prefix ex: <http://ex.org/> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n` +
+      `ex:Part rdfs:comment "A part."@en, "部品。"@ja .\n`;
+    const result = await planAndVerifyCommentEdit(ttl, "http://example.org/doc.ttl", "http://ex.org/Part", "自転車の部品。", "ja");
+    expect(result.verified, result.verifyReason).toBe(true);
+    expect(result.proposedText).toContain('"A part."@en, "自転車の部品。"@ja');
+  });
+});

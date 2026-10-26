@@ -8,10 +8,12 @@
 | Notation3 | `.n3` | ✅ | ✅ | — | — |
 | RDF/XML | `.rdf`, `.owl` | ✅ | ✅ | Convert to Turtle first | — |
 | JSON-LD | `.jsonld` | ✅ | ✅ | Convert to Turtle first | — |
+| Object Ontology (YAML) | `.oont.yaml`, `.oont.yml` | ✅ | ✅ | ✅ | — |
+| Object Ontology (JSON) | `.oont.json` | ✅ | ✅ | Convert to YAML first | — |
 
-SPARQL querying works on every format the diagram can read, because it runs against the parsed triples rather than the source text — no conversion needed. Only *writing back* is Turtle-only.
+SPARQL querying works on every format the diagram can read, because it runs against the parsed triples rather than the source text — no conversion needed. Among the RDF formats, only *writing back* is Turtle-only; Object Ontology files are covered [below](#object-ontology-files).
 
-## Why only Turtle is editable
+## Why only Turtle is editable among RDF formats
 
 Writing a diagram edit back into a source file safely requires knowing the *exact character range* in the original text that corresponds to the piece being changed — not just "this triple changed," but "these specific characters, on this specific line." Turtle's grammar (and the tokenizer this extension builds on) makes that tractable to get right, including tricky cases like:
 
@@ -44,3 +46,13 @@ Every diagram edit and every F2 rename goes through the same check before it's w
 4. Only apply the edit if step 3 passes.
 
 If verification fails, nothing is written, and you'll see an error explaining why.
+
+## Object Ontology files
+
+Object Ontology documents are YAML (or JSON) files whose name ends in `.oont.yaml`, `.oont.yml`, or `.oont.json`. They keep VS Code's normal YAML/JSON language mode, so syntax highlighting and other YAML tooling keep working; the extension recognizes them by file name. An untitled YAML document whose first key is `objectOntology` is recognized too, which is how samples opened with **Create Sample Ontology...** work before you save them. Ordinary `.yaml`, `.json`, and `.jsonld` files are never treated as Object Ontologies.
+
+The top-level keys are `objectOntology` (the format version, `1`), `name`, `description`, `namespace` (optional IRI for the RDF projection), `objectTypes`, `interfaces`, `linkTypes`, `actionTypes`, and `objects` (optional example data). The full shape is defined by the bundled JSON Schema, `schemas/object-ontology.schema.json`, which VS Code applies to `*.oont.json` automatically and the Red Hat YAML extension applies to `*.oont.yaml`. [Your First Object Ontology](tutorial-5-object-ontology.md) walks through every section.
+
+Editing from the diagram works on YAML files only. JSON files are view-only; use **Convert Object Ontology JSON to YAML for Editing...** (or the link in the diagram banner). Diagram edits follow the same safety rule as Turtle: the change is a minimal text replacement at the exact YAML location, the proposed text is re-parsed, and the edit is applied only if the intended change is present. When an edit cannot be placed safely (for example, while the YAML has a syntax error, or when deleting a primary key that the type still names), it is refused with an explanation instead of rewriting the file.
+
+SPARQL on an Object Ontology runs against its RDF projection: object types become `owl:Class`, properties `owl:DatatypeProperty`, link sides `owl:ObjectProperty`, and the `oont:` vocabulary (`urn:object-ontology:vocab#`) describes link types, actions, parameters, and rules. Example objects become individuals. **Export Object Ontology as Turtle (OWL)...** writes the same projection as a Turtle file.

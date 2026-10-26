@@ -1,4 +1,5 @@
-import type { Quad } from "n3";
+import type { Literal, Quad } from "n3";
+import { pickByLanguage } from "./labelLanguage";
 import { findOverrideLiteral, localName } from "./opExtensions";
 import { readRdfList } from "./rdfList";
 import {
@@ -72,8 +73,8 @@ import {
 
 export type PropertyType = "string" | "integer" | "decimal" | "double" | "date" | "datetime" | "boolean" | "enum" | "other";
 export type Cardinality = "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many" | "unspecified";
-export type EntityOrigin = "owlClass" | "rdfsClass" | "skosConcept" | "inferred";
-export type RelationKind = "objectProperty" | "subClassOf" | "skosBroader";
+export type EntityOrigin = "owlClass" | "rdfsClass" | "skosConcept" | "inferred" | "objectType" | "interface";
+export type RelationKind = "objectProperty" | "subClassOf" | "skosBroader" | "linkType" | "implements" | "extends";
 
 /**
  * How a fact was arrived at. `"declared"` facts come straight from the text;
@@ -287,11 +288,19 @@ interface QuadIndex {
   commentOf: Map<string, string>;
 }
 
-function buildIndex(quads: Quad[]): QuadIndex {
+function buildIndex(quads: Quad[], preferredLanguage?: string): QuadIndex {
   const typesOf = new Map<string, Set<string>>();
-  const labelOf = new Map<string, string>();
-  const prefLabelOf = new Map<string, string>();
-  const commentOf = new Map<string, string>();
+  const labels = new Map<string, Literal[]>();
+  const prefLabels = new Map<string, Literal[]>();
+  const comments = new Map<string, Literal[]>();
+  const collect = (into: Map<string, Literal[]>, subject: string, literal: Literal): void => {
+    const existing = into.get(subject);
+    if (existing) {
+      existing.push(literal);
+    } else {
+      into.set(subject, [literal]);
+    }
+  };
 
   for (const quad of quads) {
     if (quad.subject.termType !== "NamedNode") {
@@ -306,15 +315,17 @@ function buildIndex(quads: Quad[]): QuadIndex {
       }
       types.add(quad.object.value);
     } else if (quad.predicate.value === RDFS_LABEL && quad.object.termType === "Literal") {
-      labelOf.set(subject, quad.object.value);
+      collect(labels, subject, quad.object);
     } else if (quad.predicate.value === SKOS_PREF_LABEL && quad.object.termType === "Literal") {
-      prefLabelOf.set(subject, quad.object.value);
+      collect(prefLabels, subject, quad.object);
     } else if (quad.predicate.value === RDFS_COMMENT && quad.object.termType === "Literal") {
-      commentOf.set(subject, quad.object.value);
+      collect(comments, subject, quad.object);
     }
   }
 
-  return { typesOf, labelOf, prefLabelOf, commentOf };
+  const pick = (from: Map<string, Literal[]>): Map<string, string> =>
+    new Map([...from].map(([subject, literals]) => [subject, pickByLanguage(literals, preferredLanguage)!.value]));
+  return { typesOf, labelOf: pick(labels), prefLabelOf: pick(prefLabels), commentOf: pick(comments) };
 }
 
 function humanize(name: string): string {
@@ -416,9 +427,11 @@ function deriveCardinality(quads: Quad[], idx: QuadIndex, predicateIri: string):
  * quads — the "Schema" diagram view, as opposed to `graphModel.ts`'s raw
  * triple-per-edge "Triples" view. Works identically for every RDF
  * serialization since it only touches `N3.Quad[]` (see `parseOntology`).
+ * `preferredLanguage` picks among language-tagged labels and comments (see
+ * ./labelLanguage.ts); without it the last one in the document wins.
  */
-export function buildSchemaModel(quads: Quad[]): SchemaModel {
-  const idx = buildIndex(quads);
+export function buildSchemaModel(quads: Quad[], preferredLanguage?: string): SchemaModel {
+  const idx = buildIndex(quads, preferredLanguage);
   const entityMap = new Map<string, SchemaEntity>();
   const relations: SchemaRelation[] = [];
   const unattachedProperties: UnattachedProperty[] = [];

@@ -1,0 +1,395 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:object-ontology:schema:1",
+  "title": "Object Ontology",
+  "description": "Object-centric ontology (object types, properties, link types, interfaces, action types) read by the Ontology Viewer VS Code extension.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "objectOntology"
+  ],
+  "definitions": {
+    "property": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(string|integer|decimal|double|boolean|date|timestamp|geopoint)(\\[\\])?$",
+          "description": "Property type; append [] for a list."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "pattern": "^(string|integer|decimal|double|boolean|date|timestamp|geopoint)(\\[\\])?$",
+              "description": "Property type; append [] for a list."
+            },
+            "displayName": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "unit": {
+              "type": "string"
+            },
+            "enum": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
+            },
+            "required": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "properties": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/property"
+      }
+    },
+    "side": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objectType",
+        "name"
+      ],
+      "properties": {
+        "objectType": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "cardinality": {
+          "enum": [
+            "one",
+            "many"
+          ],
+          "default": "many"
+        }
+      }
+    }
+  },
+  "properties": {
+    "objectOntology": {
+      "const": 1,
+      "description": "Format version marker."
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "namespace": {
+      "type": "string",
+      "description": "IRI used for the RDF projection; must end in #, / or :."
+    },
+    "objectTypes": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "primaryKey"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "pluralDisplayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "primaryKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+          },
+          "titleProperty": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+          },
+          "icon": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+          },
+          "implements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+            }
+          },
+          "properties": {
+            "$ref": "#/definitions/properties"
+          }
+        }
+      }
+    },
+    "interfaces": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "extends": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+            }
+          },
+          "properties": {
+            "$ref": "#/definitions/properties"
+          }
+        }
+      }
+    },
+    "linkTypes": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/definitions/side"
+          },
+          "to": {
+            "$ref": "#/definitions/side"
+          },
+          "foreignKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*\\.[A-Za-z][A-Za-z0-9_]*$"
+          }
+        }
+      }
+    },
+    "actionTypes": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "pattern": "^(string|integer|decimal|double|boolean|date|timestamp|geopoint|objectRef)(\\[\\])?$"
+                },
+                "objectType": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "enum": {
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "op"
+              ],
+              "properties": {
+                "op": {
+                  "enum": [
+                    "createObject",
+                    "modifyObject",
+                    "deleteObject",
+                    "createLink",
+                    "deleteLink"
+                  ]
+                },
+                "objectType": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+                },
+                "linkType": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+                },
+                "object": {
+                  "type": "string"
+                },
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "set": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ]
+                  },
+                  "description": "property: value or $parameter"
+                }
+              }
+            }
+          },
+          "validations": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "description"
+                  ],
+                  "properties": {
+                    "description": {
+                      "type": "string"
+                    },
+                    "expr": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "sideEffects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "objects": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      },
+      "description": "Optional example objects per object type, keyed by property API names and link-side names."
+    }
+  }
+}

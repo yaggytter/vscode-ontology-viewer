@@ -65,7 +65,7 @@ export async function handleEditLabel(
     return false;
   }
   const baseIRI = document.uri.toString();
-  const plan = await planAndVerifyLabelEdit(document.getText(), baseIRI, nodeId, newLabel);
+  const plan = await planAndVerifyLabelEdit(document.getText(), baseIRI, nodeId, newLabel, vscode.env.language);
   if (!plan.verified || !plan.edit) {
     await postEditResult(panel, requestId, false, plan.verifyReason ?? plan.reason ?? vscode.l10n.t("The edit could not be verified."));
     return false;
@@ -90,7 +90,7 @@ export async function handleEditComment(
     return false;
   }
   const baseIRI = document.uri.toString();
-  const plan = await planAndVerifyCommentEdit(document.getText(), baseIRI, subjectIri, newComment);
+  const plan = await planAndVerifyCommentEdit(document.getText(), baseIRI, subjectIri, newComment, vscode.env.language);
   if (!plan.verified || !plan.edit) {
     await postEditResult(panel, requestId, false, plan.verifyReason ?? plan.reason ?? vscode.l10n.t("The edit could not be verified."));
     return false;

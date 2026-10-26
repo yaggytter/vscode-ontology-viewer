@@ -1012,6 +1012,12 @@ summary:focus-visible {
   border-style: dashed;
 }
 
+.legend-swatch-interface {
+  border-style: double;
+  border-width: 3px;
+  border-radius: 4px;
+}
+
 .legend-line {
   display: inline-block;
   width: 18px;
@@ -1030,6 +1036,11 @@ summary:focus-visible {
 
 .legend-line-broader {
   border-color: var(--vscode-charts-green, #89d185);
+}
+
+.legend-line-implements {
+  border-color: var(--vscode-charts-blue, #3794ff);
+  border-top-style: dashed;
 }
 
 .legend-hint {
@@ -1464,4 +1475,97 @@ summary:focus-visible {
 
 .sparql-cell-namednode {
   color: var(--vscode-textLink-foreground, #4daafc);
+}
+
+/* --- Actions panel (Object Ontology documents) --- */
+/* Reuses the SPARQL panel's overlay card, docked on the left so both panels
+   can be open at once. */
+.actions-panel {
+  right: auto;
+  left: 16px;
+  top: 76px;
+  max-height: calc(100% - 92px);
+  width: min(360px, calc(100% - 32px));
+}
+
+.actions-panel .sparql-panel-title {
+  white-space: nowrap;
+}
+
+.actions-panel .sparql-panel-header .toolbar-btn {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.actions-hint {
+  margin: 0;
+  color: var(--ov-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.action-item {
+  border: 1px solid var(--ov-border);
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.action-item.selected {
+  border-color: var(--vscode-charts-orange, #d18616);
+}
+
+.action-item-header {
+  display: flex;
+  font-size: 12px;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.action-item-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.action-item-api {
+  color: var(--ov-muted);
+  font-size: 10px;
+}
+
+.action-details {
+  padding: 2px 8px 6px;
+  font-size: 11px;
+}
+
+.action-description {
+  margin: 2px 0 6px;
+}
+
+.action-section-title {
+  margin: 6px 0 2px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ov-muted);
+}
+
+.action-section-list {
+  margin: 0;
+  padding-left: 16px;
 }

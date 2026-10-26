@@ -19,7 +19,7 @@ function cardinalityBadge(cardinality: Cardinality): string {
 }
 
 function edgeLabel(relation: SchemaRelation): string {
-  if (relation.kind === "subClassOf") {
+  if (relation.kind === "subClassOf" || relation.kind === "implements" || relation.kind === "extends") {
     return "";
   }
   const badge = cardinalityBadge(relation.cardinality);

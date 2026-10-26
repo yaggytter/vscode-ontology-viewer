@@ -8,10 +8,12 @@
 | Notation3 | `.n3` | ✅ | ✅ | — | — |
 | RDF/XML | `.rdf`, `.owl` | ✅ | ✅ | まず Turtle に変換 | — |
 | JSON-LD | `.jsonld` | ✅ | ✅ | まず Turtle に変換 | — |
+| Object Ontology（YAML） | `.oont.yaml`, `.oont.yml` | ✅ | ✅ | ✅ | — |
+| Object Ontology（JSON） | `.oont.json` | ✅ | ✅ | まず YAML に変換 | — |
 
-SPARQL による問い合わせは、図で読み込めるすべての形式で利用できます。ソーステキストではなくパース済みのトリプルに対して実行されるため、変換は不要です。Turtle のみに限られるのは**書き戻し**だけです。
+SPARQL による問い合わせは、図で読み込めるすべての形式で利用できます。ソーステキストではなくパース済みのトリプルに対して実行されるため、変換は不要です。RDF の形式の中で、**書き戻し**だけは Turtle に限られます。Object Ontology のファイルについては[後述](#object-ontology-ファイル)します。
 
-## なぜ Turtle だけが編集可能なのか
+## RDF の形式の中で Turtle だけが編集可能な理由
 
 図での編集を安全にソースファイルへ書き戻すには、変更対象が元のテキストの**正確な文字範囲**のどこに対応するかを知る必要があります。「このトリプルが変わった」という粒度ではなく、「この行の、この文字からこの文字まで」という粒度です。Turtle の文法（および本拡張機能が基盤とするトークナイザ）は、以下のような厄介なケースを含めてもこれを正しく扱えます。
 
@@ -44,3 +46,13 @@ RDF/XML や JSON-LD で同じ保証を得るには、それぞれ専用の位置
 4. 3 を通過した場合にのみ、編集を適用する。
 
 検証に失敗した場合は何も書き込まれず、理由を説明するエラーが表示されます。
+
+## Object Ontology ファイル
+
+Object Ontology は、ファイル名が `.oont.yaml`、`.oont.yml`、`.oont.json` で終わる YAML（または JSON）のファイルです。VS Code の言語モードは通常の YAML / JSON のままなので、シンタックスハイライトなど YAML 用のツールはそのまま使えます。拡張機能はファイル名でこの形式を判別します。先頭のキーが `objectOntology` の無題の YAML ドキュメントも対象になるため、**サンプルオントロジーを作成...** で開いたサンプルは保存前から図で表示できます。一般の `.yaml`、`.json`、`.jsonld` のファイルを Object Ontology として扱うことはありません。
+
+トップレベルのキーは、`objectOntology`（形式のバージョン。`1`）、`name`、`description`、`namespace`（RDF に変換するときの IRI。省略可）、`objectTypes`、`interfaces`、`linkTypes`、`actionTypes`、`objects`（サンプルデータ。省略可）です。詳しい構造は同梱の JSON Schema（`schemas/object-ontology.schema.json`）で定義しています。`*.oont.json` には VS Code が自動で適用し、`*.oont.yaml` には Red Hat の YAML 拡張機能が適用します。各セクションの書き方は[はじめての Object Ontology](tutorial-5-object-ontology.md)で順に説明しています。
+
+図からの編集は YAML ファイルだけが対象です。JSON は表示のみなので、**Object Ontology の JSON を編集用に YAML へ変換...**（または図のバナーのリンク）で YAML にしてから編集してください。図からの編集は Turtle と同じ安全性の規則に従います。YAML の該当箇所だけを最小限のテキスト置換で書き換え、変更後のテキストを再パースし、意図した変更が反映されている場合にだけ適用します。安全に変更できない場合（YAML に構文エラーがあるときや、型がまだ主キーとして指定しているプロパティを削除しようとしたときなど）は、ファイルを書き換えずに理由を示して編集を断ります。
+
+Object Ontology への SPARQL は、RDF に変換したモデルに対して実行します。オブジェクト型は `owl:Class`、プロパティは `owl:DatatypeProperty`、リンクの各側は `owl:ObjectProperty` になり、リンク型・アクション・パラメーター・ルールは `oont:` 語彙（`urn:object-ontology:vocab#`）で表します。サンプルオブジェクトは個体（インスタンス）になります。**Object Ontology を Turtle (OWL) としてエクスポート...** を使うと、同じ内容を Turtle ファイルとして出力できます。

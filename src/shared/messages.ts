@@ -2,6 +2,10 @@ import type { OntologyGraph } from "../rdf/graphModel";
 import type { PropertyType, SchemaModel } from "../rdf/schemaModel";
 import type { DocumentLayout } from "../preview/layoutStore";
 import type { SparqlResult } from "../sparql/resultModel";
+import type { ActionView } from "../objectOntology/actionView";
+
+/** Which reader produced the model: RDF serializations, or an Object Ontology (`*.oont.yaml`). */
+export type DocumentKindName = "rdf" | "objectOntology";
 
 export type ViewMode = "schema" | "triples";
 
@@ -48,6 +52,7 @@ export interface UiStrings {
   clearSearchLabel: string;
   noSearchResultsLabel: string;
   exportPngLabel: string;
+  inspectorEyebrowLabel: string;
   detailsLabel: string;
   showDetailsLabel: string;
   closeDetailsLabel: string;
@@ -116,13 +121,32 @@ export interface UiStrings {
   /** Template with `{0}` for the node count; suggests the schema view for large graphs. */
   triplesLargeGraphBanner: string;
   switchToSchemaLabel: string;
+  // --- Object Ontology ---
+  legendObjectType: string;
+  legendInterface: string;
+  legendLinkType: string;
+  legendImplements: string;
+  legendExtends: string;
+  actionsToggleLabel: string;
+  actionsPanelTitle: string;
+  actionsEmpty: string;
+  actionsHint: string;
+  actionParametersLabel: string;
+  actionRulesLabel: string;
+  actionValidationsLabel: string;
+  actionSideEffectsLabel: string;
+  actionRequiredLabel: string;
+  actionExportToolsLabel: string;
 }
 
 export interface HostToWebviewInit {
   type: "init";
   generation: number;
+  documentKind: DocumentKindName;
   graph: OntologyGraph;
   schema: SchemaModel;
+  /** Action types (Object Ontology documents only; empty for RDF). */
+  actions: ActionView[];
   layout: DocumentLayout;
   editableNodeIds: string[];
   /** Subset of entities whose rdfs:comment is a simple single-line form the Inspector's comment field can safely overwrite. */
@@ -141,6 +165,7 @@ export interface HostToWebviewUpdate {
   generation: number;
   graph: OntologyGraph;
   schema: SchemaModel;
+  actions: ActionView[];
   editableNodeIds: string[];
   commentEditableNodeIds: string[];
   parseErrorMessage?: string;
@@ -289,6 +314,11 @@ export interface WebviewToHostRunSparql {
   query: string;
 }
 
+/** Asks the host to export the document's action types as agent tool definitions (Object Ontology only). */
+export interface WebviewToHostExportAgentTools {
+  type: "exportAgentTools";
+}
+
 export type WebviewToHostMessage =
   | WebviewToHostReady
   | WebviewToHostNodeMoved
@@ -304,4 +334,5 @@ export type WebviewToHostMessage =
   | WebviewToHostAddProperty
   | WebviewToHostUpdatePropertyType
   | WebviewToHostDeleteDeclaration
-  | WebviewToHostRunSparql;
+  | WebviewToHostRunSparql
+  | WebviewToHostExportAgentTools;

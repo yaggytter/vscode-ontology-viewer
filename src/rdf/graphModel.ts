@@ -1,4 +1,4 @@
-import type { Quad } from "n3";
+import type { Literal, Quad } from "n3";
 import {
   isClassTypeIri,
   isPropertyTypeIri,
@@ -9,6 +9,7 @@ import {
   RDFS_LABEL,
   RDFS_SUBCLASS_OF,
 } from "./vocabulary";
+import { pickByLanguage } from "./labelLanguage";
 
 export type NodeKind = "class" | "property" | "individual" | "resource";
 
@@ -35,6 +36,9 @@ export interface OntologyGraph {
   edges: OntologyEdge[];
 }
 
+/** Id prefix of the synthetic nodes that stand for literal values. */
+export const LITERAL_NODE_PREFIX = "_:literal:";
+
 /** Predicates rendered as edges rather than folded into a node's label/comment. */
 const LABEL_LIKE_PREDICATES = new Set([RDFS_LABEL, RDFS_COMMENT]);
 
@@ -44,10 +48,23 @@ const LABEL_LIKE_PREDICATES = new Set([RDFS_LABEL, RDFS_COMMENT]);
  * needs quads, so it works identically for Turtle, RDF/XML, and JSON-LD.
  * (Editability of a given node's label is decided separately, by whether a
  * Turtle position-index entry exists for it — see src/rdf/positionIndex.ts.)
+ *
+ * `preferredLanguage` picks among language-tagged labels and comments (see
+ * ./labelLanguage.ts); without it the last one in the document wins.
  */
-export function buildGraphModel(quads: Quad[]): OntologyGraph {
+export function buildGraphModel(quads: Quad[], preferredLanguage?: string): OntologyGraph {
   const nodes = new Map<string, OntologyNode>();
   const edges: OntologyEdge[] = [];
+  const labels = new Map<string, Literal[]>();
+  const comments = new Map<string, Literal[]>();
+  const collect = (into: Map<string, Literal[]>, id: string, literal: Literal): void => {
+    const existing = into.get(id);
+    if (existing) {
+      existing.push(literal);
+    } else {
+      into.set(id, [literal]);
+    }
+  };
 
   const nodeFor = (id: string, isBlankNode: boolean): OntologyNode => {
     let node = nodes.get(id);
@@ -72,17 +89,17 @@ export function buildGraphModel(quads: Quad[]): OntologyGraph {
 
     if (quad.object.termType === "Literal") {
       if (quad.predicate.value === RDFS_LABEL) {
-        subject.label = quad.object.value;
+        collect(labels, subject.id, quad.object);
         continue;
       }
       if (quad.predicate.value === RDFS_COMMENT) {
-        subject.comment = quad.object.value;
+        collect(comments, subject.id, quad.object);
         continue;
       }
       // Other literal-valued properties (e.g. dcterms:title) still become
       // edges, pointing at a synthetic literal "node" so they're visible in
       // the diagram without being mistaken for a resource.
-      const literalNodeId = `_:literal:${subjectId}:${quad.predicate.value}:${quad.object.value}`;
+      const literalNodeId = `${LITERAL_NODE_PREFIX}${subjectId}:${quad.predicate.value}:${quad.object.value}`;
       const literalNode = nodeFor(literalNodeId, true);
       literalNode.label = quad.object.value;
       literalNode.kind = "resource";
@@ -101,6 +118,13 @@ export function buildGraphModel(quads: Quad[]): OntologyGraph {
     }
 
     pushEdge(edges, subject.id, quad.predicate.value, objectId);
+  }
+
+  for (const [id, literals] of labels) {
+    nodes.get(id)!.label = pickByLanguage(literals, preferredLanguage)!.value;
+  }
+  for (const [id, literals] of comments) {
+    nodes.get(id)!.comment = pickByLanguage(literals, preferredLanguage)!.value;
   }
 
   return { nodes: [...nodes.values()], edges };
@@ -144,7 +168,7 @@ function objectKey(quad: Quad): string {
 /** Falls back to `prefix:local` style or the fragment/last-segment of an IRI. */
 function shortLabel(id: string, isBlankNode: boolean): string {
   if (isBlankNode) {
-    return id.startsWith("_:literal:") ? id : `[blank node ${id.slice(2)}]`;
+    return id.startsWith(LITERAL_NODE_PREFIX) ? id : `[blank node ${id.slice(2)}]`;
   }
   const known = lookupKnownTerm(id);
   if (known) {
