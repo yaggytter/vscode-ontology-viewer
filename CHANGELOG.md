@@ -4,7 +4,7 @@ All notable changes to the Ontology Viewer extension are documented in this file
 
 [日本語](CHANGELOG.ja.md)
 
-## [Unreleased] — Object Ontology and AI-agent workflows
+## [0.5.0] — Object Ontology and AI-agent workflows
 
 - **Object Ontology documents** (`*.oont.yaml`, `*.oont.yml`, `*.oont.json`) — a new, object-centric ontology format inspired by operational platforms such as Palantir Foundry: object types with typed properties and primary keys, link types with cardinality (optionally foreign-key backed), interfaces, **action types** (parameters, logic rules, validations, side effects), and optional example objects. The format is this extension's own; it is not Palantir's file format. Files keep their YAML/JSON language mode and are recognized by file name (or, for an untitled document, by an `objectOntology:` first key), so ordinary YAML and JSON files are never claimed.
 - **Diagram support** — object types, interfaces (hexagons), link types with cardinality badges, and implements/extends edges in the Schema view; the RDF view shows the document's RDF projection. With **Compact** on, the projection's `oont:` bookkeeping values (`apiName`, `dataType`, `required`, ...) are folded into the nodes they describe, which halves the node count of the bundled samples; example-object values stay as nodes. A new **Actions** panel lists action types with their parameters, effects, preconditions and side effects, and outlines the object types each one touches.
