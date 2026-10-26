@@ -130,6 +130,7 @@ const canvasTitleEl = document.getElementById("canvas-title") as HTMLElement;
 const canvasMetaEl = document.getElementById("canvas-meta") as HTMLElement;
 const inspectorScrimEl = document.getElementById("inspector-scrim") as HTMLDivElement;
 const inspectorEl = document.getElementById("inspector") as HTMLDivElement;
+const inspectorEyebrowEl = document.getElementById("inspector-eyebrow") as HTMLDivElement;
 const inspectorHeadingEl = document.getElementById("inspector-heading") as HTMLHeadingElement;
 const overviewHeadingEl = document.getElementById("overview-heading") as HTMLHeadingElement;
 const inspectorSelectionEl = document.getElementById("inspector-selection") as HTMLDivElement;
@@ -316,6 +317,7 @@ function configureChrome(nextStrings: UiStrings): void {
   addClassBtn.textContent = nextStrings.addClassLabel;
   connectBtn.textContent = nextStrings.connectLabel;
   exportPngLabel.textContent = nextStrings.exportPngLabel;
+  inspectorEyebrowEl.textContent = nextStrings.inspectorEyebrowLabel;
   inspectorHeadingEl.textContent = nextStrings.detailsLabel;
   overviewHeadingEl.textContent = nextStrings.overviewLabel;
   inspectorToggleBtn.setAttribute("aria-label", nextStrings.showDetailsLabel);

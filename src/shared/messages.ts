@@ -52,6 +52,7 @@ export interface UiStrings {
   clearSearchLabel: string;
   noSearchResultsLabel: string;
   exportPngLabel: string;
+  inspectorEyebrowLabel: string;
   detailsLabel: string;
   showDetailsLabel: string;
   closeDetailsLabel: string;

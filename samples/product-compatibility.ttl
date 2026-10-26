@@ -12,13 +12,14 @@
 
 <https://example.org/product-compatibility> a owl:Ontology ;
   rdfs:label "Velo Modular Parts Catalog"@en, "ヴェロ・モジュラー部品カタログ"@ja ;
-  rdfs:comment "A fictional modular bicycle parts catalog. Purpose: ground an LLM's 'is X compatible with Y / what else fits' answers in explicit, traversable facts (GraphRAG): compatibleWith is symmetric, partOf is transitive, and hasPart is its inverse, so a retriever can walk the graph instead of relying on the model's memory."@en .
+  rdfs:comment "A fictional modular bicycle parts catalog. Purpose: ground an LLM's 'is X compatible with Y / what else fits' answers in explicit, traversable facts (GraphRAG): compatibleWith is symmetric, partOf is transitive, and hasPart is its inverse, so a retriever can walk the graph instead of relying on the model's memory."@en,
+    "架空のモジュラー自転車部品カタログ。目的は、LLM が答える「X は Y と互換か」「ほかに何が合うか」を、明示的にたどれる事実で裏付けること（GraphRAG）。compatibleWith は対称、partOf は推移的、hasPart はその逆なので、検索側はモデルの記憶に頼らずグラフをたどれる。"@ja .
 
 # --- Class hierarchy ---
 :Component a owl:Class ; rdfs:label "Component"@en, "部品"@ja ;
-  rdfs:comment "Any part that can be fitted to a bicycle or to another assembly."@en .
+  rdfs:comment "Any part that can be fitted to a bicycle or to another assembly."@en, "自転車や別の組立品に取り付けられる部品。"@ja .
 :Assembly a owl:Class ; rdfs:subClassOf :Component ; rdfs:label "Assembly"@en, "組立品"@ja ;
-  rdfs:comment "A component made of other components."@en .
+  rdfs:comment "A component made of other components."@en, "ほかの部品から組み立てられた部品。"@ja .
 :Drivetrain a owl:Class ; rdfs:subClassOf :Component ; rdfs:label "Drivetrain"@en, "駆動系"@ja .
 :Chain a owl:Class ; rdfs:subClassOf :Drivetrain ; rdfs:label "Chain"@en, "チェーン"@ja .
 :Cassette a owl:Class ; rdfs:subClassOf :Drivetrain ; rdfs:label "Cassette"@en, "カセット"@ja .
@@ -31,28 +32,28 @@
 # --- Object properties ---
 :partOf a owl:ObjectProperty, owl:TransitiveProperty ;
   rdfs:label "part of"@en, "の一部"@ja ;
-  rdfs:comment "Transitive: a part of a part of X is also a part of X."@en ;
+  rdfs:comment "Transitive: a part of a part of X is also a part of X."@en, "推移的：X の一部の一部は、X の一部でもある。"@ja ;
   rdfs:domain :Component ; rdfs:range :Assembly .
 :hasPart a owl:ObjectProperty ;
-  rdfs:label "has part"@en ; owl:inverseOf :partOf ;
+  rdfs:label "has part"@en, "を含む"@ja ; owl:inverseOf :partOf ;
   rdfs:domain :Assembly ; rdfs:range :Component .
 :compatibleWith a owl:ObjectProperty, owl:SymmetricProperty ;
   rdfs:label "compatible with"@en, "互換"@ja ;
-  rdfs:comment "Symmetric: if A fits B then B fits A."@en ;
+  rdfs:comment "Symmetric: if A fits B then B fits A."@en, "対称：A が B に合うなら、B も A に合う。"@ja ;
   rdfs:domain :Component ; rdfs:range :Component .
 :replaces a owl:ObjectProperty ;
-  rdfs:label "replaces"@en ; rdfs:domain :Component ; rdfs:range :Component .
+  rdfs:label "replaces"@en, "の後継"@ja ; rdfs:domain :Component ; rdfs:range :Component .
 :madeBy a owl:ObjectProperty ;
-  rdfs:label "made by"@en ; rdfs:domain :Component ; rdfs:range :Brand .
+  rdfs:label "made by"@en, "製造元"@ja ; rdfs:domain :Component ; rdfs:range :Brand .
 
 # --- Datatype properties ---
 :partNumber a owl:DatatypeProperty, owl:FunctionalProperty ;
-  rdfs:label "part number"@en ; rdfs:domain :Component ; rdfs:range xsd:string .
+  rdfs:label "part number"@en, "品番"@ja ; rdfs:domain :Component ; rdfs:range xsd:string .
 :speedCount a owl:DatatypeProperty ;
-  rdfs:label "speed count"@en ; rdfs:comment "Number of gears the drivetrain part is designed for."@en ;
+  rdfs:label "speed count"@en, "変速段数"@ja ; rdfs:comment "Number of gears the drivetrain part is designed for."@en, "駆動系の部品が対応するギアの段数。"@ja ;
   rdfs:domain :Drivetrain ; rdfs:range xsd:integer .
 :weightGrams a owl:DatatypeProperty ;
-  rdfs:label "weight (g)"@en ; rdfs:domain :Component ; rdfs:range xsd:decimal .
+  rdfs:label "weight (g)"@en, "重量 (g)"@ja ; rdfs:domain :Component ; rdfs:range xsd:decimal .
 
 # --- Instances ---
 :larkCycles a :Brand ; rdfs:label "Lark Cycles"@en .

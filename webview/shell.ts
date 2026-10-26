@@ -70,7 +70,7 @@ export const APP_TEMPLATE = `
     <aside id="inspector" class="inspector">
       <div class="inspector-toolbar">
         <div>
-          <div class="inspector-eyebrow">Ontology</div>
+          <div id="inspector-eyebrow" class="inspector-eyebrow"></div>
           <h2 id="inspector-heading"></h2>
         </div>
         <button id="inspector-close-btn" type="button" class="icon-btn inspector-close-btn">×</button>

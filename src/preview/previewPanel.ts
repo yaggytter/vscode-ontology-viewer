@@ -63,6 +63,7 @@ export function uiStrings(kind: DocumentKindName): UiStrings {
     clearSearchLabel: vscode.l10n.t("Clear search"),
     noSearchResultsLabel: vscode.l10n.t("No matching ontology elements"),
     exportPngLabel: vscode.l10n.t("Export PNG"),
+    inspectorEyebrowLabel: vscode.l10n.t("Ontology"),
     detailsLabel: vscode.l10n.t("Details"),
     showDetailsLabel: vscode.l10n.t("Show details"),
     closeDetailsLabel: vscode.l10n.t("Close details"),
