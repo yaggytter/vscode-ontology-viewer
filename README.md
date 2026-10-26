@@ -12,7 +12,7 @@ It also reads **Object Ontology** files (`*.oont.yaml`): an object-centric forma
 
 > Ontology Viewer is in preview. Keep source control enabled for important ontologies and review diagram-generated changes before committing them.
 
-![Ontology Viewer showing the product-compatibility sample: a class hierarchy of bicycle parts with the Part class selected and its properties and relations in the Inspector](media/ontology-viewer-overview.png)
+![Ontology Viewer showing the product-compatibility sample: a class hierarchy of bicycle parts with the Component class selected and its properties and relations in the Inspector](media/ontology-viewer-overview.png)
 
 ## Why you will enjoy using it
 

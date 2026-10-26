@@ -29,3 +29,5 @@ DevPlan.md
 **/*.test.ts
 !CONTRIBUTING.md
 docs/plans/**
+# Japanese README screenshots: VS Code only renders README.md from the package.
+media/*.ja.png
