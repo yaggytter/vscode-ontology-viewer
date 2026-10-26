@@ -119,7 +119,7 @@ For completion while you type, `*.oont.json` uses the bundled JSON Schema direct
 Click **Actions** in the toolbar. A panel opens on the left with every action type. Select **Mark order served** to see:
 
 - **Parameters**: `order`, of type Order, required.
-- **Effects**: `modifyObject Order · sets status`.
+- **Effects**: `modifyObject Order · set: status`.
 - **Rejected unless**: Only an order that is being prepared can be served. The `expr` appears next to it in parentheses.
 
 Mark order served has no side effects. Select **Restock ingredient** to see one.

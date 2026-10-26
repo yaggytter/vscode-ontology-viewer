@@ -64,7 +64,7 @@ describe("buildActionViews", () => {
     expect(view).toMatchObject({
       id: "urn:object-ontology:fleet#action/assignVehicle",
       name: "assignVehicle",
-      rules: ["createLink shipmentVehicle (shipment → vehicles)", "modifyObject Shipment · sets shipmentId"],
+      rules: ["createLink shipmentVehicle (shipment → vehicles)", "modifyObject Shipment · set: shipmentId"],
       validations: ["Vehicle must be available.", "Fits (a <= b)"],
       sideEffects: ["Driver is notified"],
       affectedTypeIds: ["urn:object-ontology:fleet#Shipment", "urn:object-ontology:fleet#Vehicle"],

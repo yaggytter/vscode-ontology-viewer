@@ -16,7 +16,7 @@ const ACTION: ActionView = {
   name: "Mark order served",
   description: "Close out an order.",
   parameters: [{ id: "order", name: "order", type: "Order", required: true, objectTypeId: "urn:x#Order", objectTypeName: "Order" }],
-  rules: ["modifyObject Order · sets status"],
+  rules: ["modifyObject Order · set: status"],
   validations: ["<img src=x onerror=alert(1)>"],
   sideEffects: [],
   affectedTypeIds: ["urn:x#Order"],
@@ -26,7 +26,7 @@ describe("renderActionDetails", () => {
   it("lists parameters, effects and validations as text", () => {
     const el = renderActionDetails(ACTION, strings);
     expect(el.textContent).toContain("order: Order (required)");
-    expect(el.textContent).toContain("modifyObject Order · sets status");
+    expect(el.textContent).toContain("modifyObject Order · set: status");
     // Document content is rendered as text, never parsed as markup.
     expect(el.querySelector("img")).toBeNull();
     expect(el.textContent).toContain("<img src=x onerror=alert(1)>");

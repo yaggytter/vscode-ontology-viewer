@@ -119,7 +119,7 @@ Unknown field "descripton" in object type Ingredient. Expected one of: displayNa
 ツールバーの **アクション** を押すと、左側にアクション型の一覧が開きます。**Mark order served** を選ぶと次の内容が表示されます。
 
 - **パラメーター**: `order`。型は Order で、必須です。
-- **変更内容**: `modifyObject Order · sets status`。
+- **変更内容**: `modifyObject Order · set: status`。
 - **実行条件（満たさない場合は拒否）**: Only an order that is being prepared can be served. 後ろの括弧内に `expr` も表示されます。
 
 Mark order served には副作用がありません。**副作用** の表示を見たい場合は **Restock ingredient** を選んでください。

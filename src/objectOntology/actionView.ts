@@ -23,7 +23,7 @@ export interface ActionView {
   name: string;
   description?: string;
   parameters: ActionParameterView[];
-  /** One human-readable line per logic rule, e.g. "modifyObject Order · sets status". */
+  /** One human-readable line per logic rule, e.g. "modifyObject Order · set: status" (the YAML key, so it reads the same in any UI language). */
   rules: string[];
   validations: string[];
   sideEffects: string[];
@@ -34,7 +34,7 @@ function describeRule(rule: OoRule): string {
   const target = rule.objectType ?? rule.linkType ?? "";
   const sets = Object.keys(rule.set);
   const ends = rule.from || rule.to ? ` (${rule.from ?? "?"} → ${rule.to ?? "?"})` : "";
-  return `${rule.op} ${target}${ends}${sets.length > 0 ? ` · sets ${sets.join(", ")}` : ""}`.trim();
+  return `${rule.op} ${target}${ends}${sets.length > 0 ? ` · set: ${sets.join(", ")}` : ""}`.trim();
 }
 
 export function buildActionViews(ontology: ObjectOntology): ActionView[] {
