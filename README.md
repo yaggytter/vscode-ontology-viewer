@@ -12,7 +12,7 @@ It also reads **Object Ontology** files (`*.oont.yaml`): an object-centric forma
 
 > Ontology Viewer is in preview. Keep source control enabled for important ontologies and review diagram-generated changes before committing them.
 
-![Ontology Viewer showing the Harbor Market schema with icons, colors, cardinality, search, and Inspector](media/ontology-viewer-overview.png)
+![Ontology Viewer showing the product-compatibility sample: a class hierarchy of bicycle parts with the Part class selected and its properties and relations in the Inspector](media/ontology-viewer-overview.png)
 
 ## Why you will enjoy using it
 
@@ -39,7 +39,7 @@ The [choosing guide](docs/en/choosing-ontology-style.md) and the [use-case catal
 
 ### Object Ontology at a glance
 
-![The Harbor City Delivery Ops sample: object types, an interface, link types with cardinality, and the Actions panel](media/object-ontology-actions.png)
+![The Harbor City Delivery Ops sample with the Actions panel open: Assign vehicle lists its parameters, effects, rejection rules and side effects, and the Shipment and Vehicle types it touches are outlined](media/object-ontology-actions.png)
 
 ```yaml
 objectOntology: 1
@@ -64,6 +64,8 @@ actionTypes:
 - **Problems and outline**: broken references, unknown fields, and duplicate example keys are reported at their exact location. A bundled JSON Schema adds completion for `*.oont.json` (and for `*.oont.yaml` with the Red Hat YAML extension).
 - **SPARQL** runs over an RDF projection (OWL + an `oont:` vocabulary), with eight Object-Ontology example queries such as "what can be done to each type?" and "follow links between objects".
 - **AI-agent exports** open as untitled documents for you to review: action types as **tool definitions** (JSON Schema, the shape used by MCP and function-calling APIs), a compact **LLM context summary** in Markdown, and **Turtle** for combining with Semantic Web data. The extension itself never calls an LLM or the network.
+
+![The Corner Cafe Orders sample with the Order type selected: the Inspector shows its description, example-object count, typed properties with the primary key marked, and its links](media/object-ontology-inspector.png)
 
 The format is this extension's own; it is not Palantir's file format and does not connect to Foundry.
 
@@ -98,6 +100,8 @@ Results show as text — a table of bindings for SELECT, a boolean for ASK, or s
 - **Highlight** accents matching nodes and their connecting edges while keeping the rest of the graph visible.
 - **Filter** dims everything the query did not match, and composes with the search box and double-click focus.
 - **No graph effect** shows the text result only.
+
+![A SPARQL query over the delivery sample listing which actions may change each object type; the matching Shipment and Vehicle types are highlighted on the diagram](media/object-ontology-sparql.png)
 
 Queries execute locally in the extension host (powered by [Comunica](https://comunica.dev/)); no ontology contents leave your machine.
 

@@ -12,7 +12,7 @@ OWL、RDF、RDFS、SKOSを、VS Codeから離れずに見やすいスキーマ�
 
 > Ontology Viewerはプレビュー版です。大切なオントロジーではソース管理を有効にし、図から生成された変更をコミット前に確認してください。
 
-![アイコン・色・カーディナリティを備えたHarbor Marketのスキーマ、検索、Inspectorを表示したOntology Viewer](media/ontology-viewer-overview.png)
+![部品互換サンプルを表示した Ontology Viewer。自転車部品のクラス階層で「部品」を選択し、インスペクターにプロパティと関係を表示している](media/ontology-viewer-overview.png)
 
 ## 触ってわかる使いやすさ
 
@@ -39,7 +39,7 @@ OWL、RDF、RDFS、SKOSを、VS Codeから離れずに見やすいスキーマ�
 
 ### Object Ontology の概要
 
-![Harbor City Delivery Ops サンプル。オブジェクト型、インターフェース、カーディナリティ付きのリンク型、アクションパネル](media/object-ontology-actions.png)
+![Harbor City Delivery Ops サンプルでアクションパネルを開いた画面。Assign vehicle のパラメーター、変更内容、拒否条件、副作用が表示され、関係する Shipment と Vehicle が図上で強調されている](media/object-ontology-actions.png)
 
 ```yaml
 objectOntology: 1
@@ -64,6 +64,8 @@ actionTypes:
 - **「問題」パネルとアウトライン**: 参照切れ、未知のフィールド、サンプルオブジェクトのキー重複を、該当箇所に表示します。同梱の JSON Schema により、`*.oont.json`（Red Hat の YAML 拡張機能を入れれば `*.oont.yaml` も）で補完が効きます。
 - **SPARQL** は RDF に変換したモデル（OWL と `oont:` 語彙）に対して実行します。「各型に対して何ができるか」「オブジェクト間のリンクをたどる」など、Object Ontology 用のクエリ例を8つ用意しています。
 - **AI エージェント向けのエクスポート**は、確認しやすいよう無題のドキュメントとして開きます。アクション型の**ツール定義**（MCP や function calling で使われる JSON Schema 形式）、LLM のコンテキストに入れる Markdown の**要約**、Semantic Web のデータと組み合わせるための **Turtle** の3種類です。拡張機能自体は LLM もネットワークも呼び出しません。
+
+![Corner Cafe Orders サンプルで Order 型を選択した画面。インスペクターに説明、サンプルオブジェクトの数、型付きのプロパティ（主キーに鍵マーク）、リンクが表示されている](media/object-ontology-inspector.png)
 
 この形式は本拡張機能独自のものです。Palantir のファイル形式ではなく、Foundry とも接続しません。
 
@@ -98,6 +100,8 @@ SPARQL がはじめての方へ: パネルには、どのオントロジーで�
 - **ハイライト**: 一致したノードと接続エッジを強調し、他のグラフはそのまま表示します。
 - **絞り込み**: 一致しなかったものを淡色化します。検索ボックスやダブルクリックのフォーカスと組み合わせられます。
 - **グラフに反映しない**: テキストの結果のみを表示します。
+
+![配送サンプルに SPARQL クエリを実行し、オブジェクト型ごとに変更できるアクションを一覧した画面。一致した Shipment と Vehicle が図上でハイライトされている](media/object-ontology-sparql.png)
 
 クエリは拡張機能ホスト内（[Comunica](https://comunica.dev/) を利用）でローカルに実行され、オントロジーの内容が外部に送信されることはありません。
 
