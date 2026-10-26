@@ -4,11 +4,14 @@ import { buildPositionIndex } from "../rdf/positionIndex";
 import { lookupKnownTerm, RDFS_COMMENT, RDFS_LABEL } from "../rdf/vocabulary";
 import { isEditableLanguage } from "../util/languages";
 import { findNamedTermAt, spanToRange } from "./termAt";
-import type { Quad } from "n3";
+import type { Literal, Quad } from "n3";
+import { pickByLanguage } from "../rdf/labelLanguage";
 
 function findLiteralObject(quads: Quad[], subject: string, predicate: string): string | undefined {
-  return quads.find((q) => q.subject.value === subject && q.predicate.value === predicate && q.object.termType === "Literal")
-    ?.object.value;
+  const literals = quads
+    .filter((q) => q.subject.value === subject && q.predicate.value === predicate && q.object.termType === "Literal")
+    .map((q) => q.object as Literal);
+  return literals.length > 0 ? pickByLanguage(literals, vscode.env.language)?.value : undefined;
 }
 
 export const provider: vscode.HoverProvider = {

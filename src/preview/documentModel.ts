@@ -50,8 +50,9 @@ async function loadRdf(document: vscode.TextDocument, kind: { kind: "rdf"; forma
   const text = document.getText();
   const baseIRI = document.uri.toString();
   const parsed = await parseOntology(text, kind.format, baseIRI);
-  const graph = buildGraphModel(parsed.quads);
-  const schema = buildSchemaModel(parsed.quads);
+  // Language-tagged labels and comments follow the VS Code display language.
+  const graph = buildGraphModel(parsed.quads, vscode.env.language);
+  const schema = buildSchemaModel(parsed.quads, vscode.env.language);
   const editableNodeIds = isEditableDocument
     ? [...computeEditableSubjects(text, baseIRI, graph.nodes.map((n) => n.id))]
     : [];

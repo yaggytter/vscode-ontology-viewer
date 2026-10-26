@@ -5,8 +5,14 @@ import { computeEditablePredicateSubjects, planSetLiteralPredicate, type SetLite
 export type CommentEditPlan = SetLiteralPlan;
 
 /** `rdfs:comment`-specific entry point over the shared `planSetLiteralPredicate` — mirrors `editLiteral.ts`. */
-export function planCommentEdit(documentText: string, baseIRI: string, subjectIri: string, newComment: string): CommentEditPlan {
-  return planSetLiteralPredicate(documentText, baseIRI, subjectIri, RDFS_COMMENT, newComment);
+export function planCommentEdit(
+  documentText: string,
+  baseIRI: string,
+  subjectIri: string,
+  newComment: string,
+  preferredLanguage?: string,
+): CommentEditPlan {
+  return planSetLiteralPredicate(documentText, baseIRI, subjectIri, RDFS_COMMENT, newComment, preferredLanguage);
 }
 
 export async function planAndVerifyCommentEdit(
@@ -14,8 +20,9 @@ export async function planAndVerifyCommentEdit(
   baseIRI: string,
   subjectIri: string,
   newComment: string,
+  preferredLanguage?: string,
 ): Promise<CommentEditPlan & { verified: boolean; verifyReason?: string }> {
-  const plan = planCommentEdit(documentText, baseIRI, subjectIri, newComment);
+  const plan = planCommentEdit(documentText, baseIRI, subjectIri, newComment, preferredLanguage);
   if (!plan.ok || !plan.proposedText) {
     return { ...plan, verified: false, verifyReason: plan.reason };
   }

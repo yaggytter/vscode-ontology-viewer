@@ -1,3 +1,4 @@
+import { pickByLanguage } from "../rdf/labelLanguage";
 import { buildPositionIndex, type Span } from "../rdf/positionIndex";
 import { endOfDocument, escapeTurtleShortString, splice, type TextEdit } from "./textEdit";
 
@@ -25,6 +26,10 @@ export interface SetLiteralPlan {
  * wrong or colliding shorthand. Generalizes the original `planLabelEdit` —
  * see `editLiteral.ts`/`editComment.ts` for the (predicate-specific) public
  * entry points this backs.
+ *
+ * When the subject has several values (e.g. `"Component"@en, "部品"@ja`),
+ * `preferredLanguage` selects the one the diagram shows, with the same rule
+ * (src/rdf/labelLanguage.ts); without it the first value is edited.
  */
 export function planSetLiteralPredicate(
   documentText: string,
@@ -32,6 +37,7 @@ export function planSetLiteralPredicate(
   subjectIri: string,
   predicateIri: string,
   newValue: string,
+  preferredLanguage?: string,
 ): SetLiteralPlan {
   const index = buildPositionIndex(documentText, baseIRI);
   if (index.degraded) {
@@ -39,7 +45,10 @@ export function planSetLiteralPredicate(
   }
 
   const forSubject = index.statements.filter((s) => s.subject.value === subjectIri);
-  const existing = forSubject.find((s) => s.predicate.value === predicateIri);
+  const values = forSubject.filter((s) => s.predicate.value === predicateIri);
+  const existing = preferredLanguage
+    ? pickByLanguage(values.map((s) => ({ statement: s, language: s.object.language })), preferredLanguage)?.statement
+    : values[0];
 
   if (existing) {
     if (!existing.editable) {

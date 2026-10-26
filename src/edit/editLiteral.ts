@@ -8,8 +8,14 @@ export { escapeTurtleShortString } from "./textEdit";
 export type LabelEditPlan = SetLiteralPlan;
 
 /** `rdfs:label`-specific entry point over the shared `planSetLiteralPredicate` — see that module for the actual logic. */
-export function planLabelEdit(documentText: string, baseIRI: string, subjectIri: string, newLabel: string): LabelEditPlan {
-  return planSetLiteralPredicate(documentText, baseIRI, subjectIri, RDFS_LABEL, newLabel);
+export function planLabelEdit(
+  documentText: string,
+  baseIRI: string,
+  subjectIri: string,
+  newLabel: string,
+  preferredLanguage?: string,
+): LabelEditPlan {
+  return planSetLiteralPredicate(documentText, baseIRI, subjectIri, RDFS_LABEL, newLabel, preferredLanguage);
 }
 
 /** Runs the full plan → verify pipeline; only a caller-applied `edit` that passed verification should ever be written. */
@@ -18,8 +24,9 @@ export async function planAndVerifyLabelEdit(
   baseIRI: string,
   subjectIri: string,
   newLabel: string,
+  preferredLanguage?: string,
 ): Promise<LabelEditPlan & { verified: boolean; verifyReason?: string }> {
-  const plan = planLabelEdit(documentText, baseIRI, subjectIri, newLabel);
+  const plan = planLabelEdit(documentText, baseIRI, subjectIri, newLabel, preferredLanguage);
   if (!plan.ok || !plan.proposedText) {
     return { ...plan, verified: false, verifyReason: plan.reason };
   }
