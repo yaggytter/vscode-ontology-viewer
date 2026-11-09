@@ -2,7 +2,7 @@
 
 [チュートリアル6](tutorial-6-object-ontology-ai-agents.md) では、Object Ontology をエージェントのコンテキストとツール一覧に変える方法を説明しました。このチュートリアルでは、それを実際に動かします。エージェント役は **Claude Code** です。バックエンド役は小さな **MCP サーバー**で、ビューワーから書き出したツールを公開し、実行条件をすべて確認し、何が変わったかを記録します。エージェントがデータを読み、アクションを呼び、拒否されて別の手を選ぶところを、手元で確かめられます。
 
-> **はじめての方へ:** 先に[イラスト付きの予習ノート](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html)を読むと、場面、課題、進め方がつかめます。動画の見どころもまとめています。
+> **はじめての方へ:** 先に[イラスト付きの予習ノート](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html)を読むと、場面、課題、進め方がつかめます。ターミナル部分の[字幕付きの動画](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html#video)と、その見どころも載せています。
 
 サーバーは、このリポジトリに完成品として同梱しています。コードを書く必要はありません。5章で Claude Code に確認処理を1つ書いてもらうだけです。
 

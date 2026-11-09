@@ -2,7 +2,7 @@
 
 [Tutorial 6](tutorial-6-object-ontology-ai-agents.md) explains how an Object Ontology becomes an agent's context and tool list. This tutorial runs that setup for real. **Claude Code** plays the agent. A small **MCP server** plays your backend: it serves the tools you export from the viewer, checks every precondition, and records what changed. You watch the agent read the data, call an action, get refused, and pick something else.
 
-> **New to these ideas?** Read the [illustrated primer](https://yaggytter.github.io/vscode-ontology-viewer/index.en.html) first. It walks through the scenario, the problem and the steps with pictures, and lists what to watch for in the videos.
+> **New to these ideas?** Read the [illustrated primer](https://yaggytter.github.io/vscode-ontology-viewer/index.en.html) first. It walks through the scenario, the problem and the steps with pictures, and has [captioned videos](https://yaggytter.github.io/vscode-ontology-viewer/index.en.html#video) of the terminal parts, with what to watch for.
 
 The server is a ready-made example in this repository. You don't have to write any code, except in section 5, where Claude Code writes a check for you.
 

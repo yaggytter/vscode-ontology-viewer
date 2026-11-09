@@ -2,7 +2,7 @@
 
 [Tutorial 7](tutorial-7-semantic-web-llm.md) shows how an LLM can answer from a Semantic Web ontology instead of from memory: it writes SPARQL, runs it, and answers only from the rows. This tutorial runs that loop for real, with **Claude Code** as the assistant.
 
-> **New to these ideas?** Read the [illustrated primer](https://yaggytter.github.io/vscode-ontology-viewer/index.en.html) first. It walks through the scenario, the problem and the steps with pictures, and lists what to watch for in the videos.
+> **New to these ideas?** Read the [illustrated primer](https://yaggytter.github.io/vscode-ontology-viewer/index.en.html) first. It walks through the scenario, the problem and the steps with pictures, and has [captioned videos](https://yaggytter.github.io/vscode-ontology-viewer/index.en.html#video) of the terminal parts, with what to watch for.
 
 No server is involved this time. The example gives Claude Code one local command, `npm run sparql`, which runs a query over Turtle files with **the same engine as the viewer's SPARQL panel**. Claude Code reads the files, writes a query, runs it, and answers. You then paste its query into the panel and check the result on the diagram.
 

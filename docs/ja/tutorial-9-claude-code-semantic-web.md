@@ -2,7 +2,7 @@
 
 [チュートリアル7](tutorial-7-semantic-web-llm.md) では、LLM が記憶ではなく Semantic Web オントロジーをもとに答える方法を説明しました。LLM が SPARQL を書いて実行し、結果の行だけを根拠に答えるという流れです。このチュートリアルでは、その流れを **Claude Code** で実際に動かします。
 
-> **はじめての方へ:** 先に[イラスト付きの予習ノート](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html)を読むと、場面、課題、進め方がつかめます。動画の見どころもまとめています。
+> **はじめての方へ:** 先に[イラスト付きの予習ノート](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html)を読むと、場面、課題、進め方がつかめます。ターミナル部分の[字幕付きの動画](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html#video)と、その見どころも載せています。
 
 今回はサーバーを使いません。サンプルは Claude Code に `npm run sparql` というローカルのコマンドを1つ渡します。このコマンドは、**ビューワーの SPARQL パネルと同じエンジン**で Turtle ファイルに問い合わせます。Claude Code はファイルを読み、クエリを書いて実行し、答えます。あなたはそのクエリを SPARQL パネルに貼り付けて、図の上で結果を確かめます。
 

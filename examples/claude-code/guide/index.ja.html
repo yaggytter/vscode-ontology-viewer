@@ -234,6 +234,9 @@ pre.q { margin: 0; background: var(--bg); border: 1px solid var(--line); border-
 pre.q b { color: var(--accent); }
 
 /* video timeline */
+.tl-video { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); background: #0d1117; aspect-ratio: 1600 / 1096; }
+.tl-list li[data-t] { cursor: pointer; border-radius: 6px; }
+.tl-list li[data-t]:hover .tm, .tl-list li[data-t]:focus-visible .tm { color: var(--accent); text-decoration: underline; }
 .timeline { display: grid; gap: 12px; }
 .tl-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
 .tl-bar span { border-right: 1px solid var(--bg); display: grid; place-items: center; font-family: var(--f-mono); font-size: 11px; color: var(--ink); overflow: hidden; white-space: nowrap; }
@@ -809,12 +812,16 @@ footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line)
   <div class="chapter-head">
     <div class="chapter-num">▶</div>
     <h2>動画の見どころ</h2>
-    <p class="sub">字幕と同じ区切りです。バーの長さは実際の時間に比例しています。</p>
+    <p class="sub">字幕と同じ区切りです。バーの長さは実際の時間に比例しています。各行をクリックすると、その場面から再生します。</p>
   </div>
 
   <div class="stack-lg">
     <div class="panel timeline">
       <h3>チュートリアル8（1分59秒）</h3>
+      <video class="tl-video" controls preload="metadata" playsinline poster="videos/tutorial-8.ja.jpg" aria-label="チュートリアル8の動画（ターミナル部分、日本語字幕）">
+        <source src="videos/tutorial-8.ja.mp4" type="video/mp4">
+        <p>お使いのブラウザでは動画を再生できません。 <a href="videos/tutorial-8.ja.mp4">動画をダウンロード</a></p>
+      </video>
       <div class="tl-bar" aria-hidden="true">
         <span class="c0" style="width:5.05%"></span><span class="c0" style="width:8.41%">2章</span><span class="c1" style="width:12.62%">3章</span><span class="c1" style="width:7.57%">承認</span><span class="c2" style="width:6.73%">適用</span><span class="c3" style="width:18.50%">4章 断る</span><span class="c3" style="width:18.50%">4章 拒否</span><span class="c0" style="width:22.62%">監査ログ</span>
       </div>
@@ -832,6 +839,10 @@ footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line)
 
     <div class="panel timeline">
       <h3>チュートリアル9（1分25秒）</h3>
+      <video class="tl-video" controls preload="metadata" playsinline poster="videos/tutorial-9.ja.jpg" aria-label="チュートリアル9の動画（ターミナル部分、日本語字幕）">
+        <source src="videos/tutorial-9.ja.mp4" type="video/mp4">
+        <p>お使いのブラウザでは動画を再生できません。 <a href="videos/tutorial-9.ja.mp4">動画をダウンロード</a></p>
+      </video>
       <div class="tl-bar" aria-hidden="true">
         <span class="c0" style="width:7.10%"></span><span class="c0" style="width:16.57%">1章 自分で実行</span><span class="c1" style="width:11.83%">2章</span><span class="c2" style="width:28.40%">3章 互換性</span><span class="c3" style="width:36.09%">9章 推移の落とし穴</span>
       </div>
@@ -902,6 +913,21 @@ footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line)
   direct.addEventListener('click', function () { set(false); });
   trans.addEventListener('click', function () { set(true); });
 })();
+
+// Clicking a timeline row plays the video from that point.
+document.querySelectorAll('.timeline').forEach(function (panel) {
+  var video = panel.querySelector('video');
+  if (!video) return;
+  panel.querySelectorAll('.tl-list li').forEach(function (li) {
+    var m = /^(\d+):(\d+)/.exec(li.querySelector('.tm').textContent.trim());
+    if (!m) return;
+    li.dataset.t = String(+m[1] * 60 + +m[2]);
+    li.tabIndex = 0;
+    var seek = function () { video.currentTime = +li.dataset.t; video.play().catch(function () {}); video.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+    li.addEventListener('click', seek);
+    li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seek(); } });
+  });
+});
 </script>
 </body>
 </html>
