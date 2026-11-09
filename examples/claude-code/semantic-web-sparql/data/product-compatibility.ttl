@@ -1,0 +1,86 @@
+# Velo Modular Parts — a fictional bicycle component compatibility catalog.
+# LLM/AI use: grounds "is X compatible with Y / what else fits" answers in explicit,
+# traversable facts (GraphRAG) instead of letting the model guess from text.
+#
+# Brands, part names, and codes are original and fictional.
+
+@prefix : <https://example.org/product-compatibility#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/product-compatibility> a owl:Ontology ;
+  rdfs:label "Velo Modular Parts Catalog"@en, "ヴェロ・モジュラー部品カタログ"@ja ;
+  rdfs:comment "A fictional modular bicycle parts catalog. Purpose: ground an LLM's 'is X compatible with Y / what else fits' answers in explicit, traversable facts (GraphRAG): compatibleWith is symmetric, partOf is transitive, and hasPart is its inverse, so a retriever can walk the graph instead of relying on the model's memory."@en,
+    "架空のモジュラー自転車部品カタログ。目的は、LLM が答える「X は Y と互換か」「ほかに何が合うか」を、明示的にたどれる事実で裏付けること（GraphRAG）。compatibleWith は対称、partOf は推移的、hasPart はその逆なので、検索側はモデルの記憶に頼らずグラフをたどれる。"@ja .
+
+# --- Class hierarchy ---
+:Component a owl:Class ; rdfs:label "Component"@en, "部品"@ja ;
+  rdfs:comment "Any part that can be fitted to a bicycle or to another assembly."@en, "自転車や別の組立品に取り付けられる部品。"@ja .
+:Assembly a owl:Class ; rdfs:subClassOf :Component ; rdfs:label "Assembly"@en, "組立品"@ja ;
+  rdfs:comment "A component made of other components."@en, "ほかの部品から組み立てられた部品。"@ja .
+:Drivetrain a owl:Class ; rdfs:subClassOf :Component ; rdfs:label "Drivetrain"@en, "駆動系"@ja .
+:Chain a owl:Class ; rdfs:subClassOf :Drivetrain ; rdfs:label "Chain"@en, "チェーン"@ja .
+:Cassette a owl:Class ; rdfs:subClassOf :Drivetrain ; rdfs:label "Cassette"@en, "カセット"@ja .
+:Crankset a owl:Class ; rdfs:subClassOf :Drivetrain ; rdfs:label "Crankset"@en, "クランクセット"@ja .
+:Derailleur a owl:Class ; rdfs:subClassOf :Drivetrain ; rdfs:label "Derailleur"@en, "ディレイラー"@ja .
+:Wheelset a owl:Class ; rdfs:subClassOf :Component ; rdfs:label "Wheelset"@en, "ホイールセット"@ja .
+:Frame a owl:Class ; rdfs:subClassOf :Component ; rdfs:label "Frame"@en, "フレーム"@ja .
+:Brand a owl:Class ; rdfs:label "Brand"@en, "ブランド"@ja .
+
+# --- Object properties ---
+:partOf a owl:ObjectProperty, owl:TransitiveProperty ;
+  rdfs:label "part of"@en, "の一部"@ja ;
+  rdfs:comment "Transitive: a part of a part of X is also a part of X."@en, "推移的：X の一部の一部は、X の一部でもある。"@ja ;
+  rdfs:domain :Component ; rdfs:range :Assembly .
+:hasPart a owl:ObjectProperty ;
+  rdfs:label "has part"@en, "を含む"@ja ; owl:inverseOf :partOf ;
+  rdfs:domain :Assembly ; rdfs:range :Component .
+:compatibleWith a owl:ObjectProperty, owl:SymmetricProperty ;
+  rdfs:label "compatible with"@en, "互換"@ja ;
+  rdfs:comment "Symmetric: if A fits B then B fits A."@en, "対称：A が B に合うなら、B も A に合う。"@ja ;
+  rdfs:domain :Component ; rdfs:range :Component .
+:replaces a owl:ObjectProperty ;
+  rdfs:label "replaces"@en, "の後継"@ja ; rdfs:domain :Component ; rdfs:range :Component .
+:madeBy a owl:ObjectProperty ;
+  rdfs:label "made by"@en, "製造元"@ja ; rdfs:domain :Component ; rdfs:range :Brand .
+
+# --- Datatype properties ---
+:partNumber a owl:DatatypeProperty, owl:FunctionalProperty ;
+  rdfs:label "part number"@en, "品番"@ja ; rdfs:domain :Component ; rdfs:range xsd:string .
+:speedCount a owl:DatatypeProperty ;
+  rdfs:label "speed count"@en, "変速段数"@ja ; rdfs:comment "Number of gears the drivetrain part is designed for."@en, "駆動系の部品が対応するギアの段数。"@ja ;
+  rdfs:domain :Drivetrain ; rdfs:range xsd:integer .
+:weightGrams a owl:DatatypeProperty ;
+  rdfs:label "weight (g)"@en, "重量 (g)"@ja ; rdfs:domain :Component ; rdfs:range xsd:decimal .
+
+# --- Instances ---
+:larkCycles a :Brand ; rdfs:label "Lark Cycles"@en .
+:ferroWorks a :Brand ; rdfs:label "Ferro Works"@en .
+
+:trailBike a :Assembly ; rdfs:label "Trailfinder Complete Bike"@en ; :partNumber "TB-900" .
+:drivetrainKit a :Assembly ; rdfs:label "Ridge 11 Drivetrain Kit"@en ; :partNumber "DK-11" ;
+  :partOf :trailBike .
+
+:chainR11 a :Chain ; rdfs:label "Ridge 11-speed Chain"@en ; :partNumber "CH-R11" ;
+  :speedCount 11 ; :weightGrams 257.0 ; :madeBy :larkCycles ; :partOf :drivetrainKit ;
+  :compatibleWith :cassetteR11, :crankR11 .
+:cassetteR11 a :Cassette ; rdfs:label "Ridge 11-speed Cassette 11-42"@en ; :partNumber "CS-R11" ;
+  :speedCount 11 ; :weightGrams 412.5 ; :madeBy :larkCycles ; :partOf :drivetrainKit ;
+  :compatibleWith :derailleurR11, :wheelsetBoost .
+:crankR11 a :Crankset ; rdfs:label "Ridge Crankset 32T"@en ; :partNumber "CR-R11" ;
+  :weightGrams 540.0 ; :madeBy :ferroWorks ; :partOf :drivetrainKit .
+:derailleurR11 a :Derailleur ; rdfs:label "Ridge 11 Rear Derailleur"@en ; :partNumber "RD-R11" ;
+  :speedCount 11 ; :weightGrams 298.0 ; :madeBy :larkCycles ; :partOf :drivetrainKit .
+:wheelsetBoost a :Wheelset ; rdfs:label "Boost 29 Wheelset"@en ; :partNumber "WS-B29" ;
+  :weightGrams 1820.0 ; :madeBy :ferroWorks ; :partOf :trailBike ;
+  :compatibleWith :frameTrail .
+:frameTrail a :Frame ; rdfs:label "Trailfinder Frame"@en ; :partNumber "FR-TF" ;
+  :weightGrams 2150.0 ; :madeBy :ferroWorks ; :partOf :trailBike .
+
+:chainR12 a :Chain ; rdfs:label "Ridge 12-speed Chain"@en ; :partNumber "CH-R12" ;
+  :speedCount 12 ; :weightGrams 248.0 ; :madeBy :larkCycles ; :replaces :chainR11 .
+:cassetteR12 a :Cassette ; rdfs:label "Ridge 12-speed Cassette 10-51"@en ; :partNumber "CS-R12" ;
+  :speedCount 12 ; :weightGrams 455.0 ; :madeBy :larkCycles ;
+  :compatibleWith :chainR12, :wheelsetBoost .

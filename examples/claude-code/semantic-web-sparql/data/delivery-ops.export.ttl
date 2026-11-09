@@ -1,0 +1,684 @@
+@prefix : <urn:object-ontology:harbor-city-delivery-ops#>.
+@prefix oont: <urn:object-ontology:vocab#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+<urn:object-ontology:harbor-city-delivery-ops#> a owl:Ontology;
+    rdfs:label "Harbor City Delivery Ops";
+    rdfs:comment "Last-mile delivery for a fictional harbor city: depots, vehicles, drivers, shipments and their stops, plus the dispatch actions an AI agent may call.".
+:Trackable a owl:Class, oont:Interface;
+    rdfs:label "Trackable";
+    rdfs:comment "Anything with a current position on the map.";
+    oont:apiName "Trackable".
+<urn:object-ontology:harbor-city-delivery-ops#Trackable.lat> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Trackable;
+    rdfs:range xsd:double;
+    rdfs:label "lat";
+    oont:apiName "lat";
+    oont:dataType "double";
+    oont:unit "deg".
+<urn:object-ontology:harbor-city-delivery-ops#Trackable.lon> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Trackable;
+    rdfs:range xsd:double;
+    rdfs:label "lon";
+    oont:apiName "lon";
+    oont:dataType "double";
+    oont:unit "deg".
+:Depot a owl:Class, oont:ObjectType;
+    rdfs:label "Depot";
+    rdfs:comment "A warehouse where vehicles are based and shipments are loaded.";
+    oont:apiName "Depot";
+    oont:primaryKey <urn:object-ontology:harbor-city-delivery-ops#Depot.depotId>;
+    oont:titleProperty <urn:object-ontology:harbor-city-delivery-ops#Depot.name>;
+    oont:implements :Trackable;
+    rdfs:subClassOf :Trackable.
+<urn:object-ontology:harbor-city-delivery-ops#Depot.depotId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Depot;
+    rdfs:range xsd:string;
+    rdfs:label "depotId";
+    oont:apiName "depotId";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#Depot.name> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Depot;
+    rdfs:range xsd:string;
+    rdfs:label "name";
+    oont:apiName "name";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#Depot.lat> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Depot;
+    rdfs:range xsd:double;
+    rdfs:label "lat";
+    oont:apiName "lat";
+    oont:dataType "double";
+    oont:unit "deg".
+<urn:object-ontology:harbor-city-delivery-ops#Depot.lon> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Depot;
+    rdfs:range xsd:double;
+    rdfs:label "lon";
+    oont:apiName "lon";
+    oont:dataType "double";
+    oont:unit "deg".
+:Vehicle a owl:Class, oont:ObjectType;
+    rdfs:label "Vehicle";
+    rdfs:comment "A delivery van, truck or cargo bike.";
+    oont:apiName "Vehicle";
+    oont:primaryKey <urn:object-ontology:harbor-city-delivery-ops#Vehicle.vehicleId>;
+    oont:titleProperty <urn:object-ontology:harbor-city-delivery-ops#Vehicle.plate>;
+    oont:implements :Trackable;
+    rdfs:subClassOf :Trackable.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.vehicleId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:string;
+    rdfs:label "vehicleId";
+    oont:apiName "vehicleId";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.plate> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:string;
+    rdfs:label "plate";
+    oont:apiName "plate";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.kind> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:string;
+    rdfs:label "kind";
+    oont:apiName "kind";
+    oont:dataType "string";
+    oont:enumValue "van", "truck", "cargoBike".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.status> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:string;
+    rdfs:label "status";
+    oont:apiName "status";
+    oont:dataType "string";
+    oont:enumValue "available", "onRoute", "maintenance".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.capacityKg> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:double;
+    rdfs:label "capacityKg";
+    oont:apiName "capacityKg";
+    oont:dataType "double";
+    oont:unit "kg".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.loadKg> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:double;
+    rdfs:label "loadKg";
+    rdfs:comment "Weight already assigned to this vehicle.";
+    oont:apiName "loadKg";
+    oont:dataType "double";
+    oont:unit "kg".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.depotId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:string;
+    rdfs:label "depotId";
+    oont:apiName "depotId";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.lat> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:double;
+    rdfs:label "lat";
+    oont:apiName "lat";
+    oont:dataType "double";
+    oont:unit "deg".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.lon> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Vehicle;
+    rdfs:range xsd:double;
+    rdfs:label "lon";
+    oont:apiName "lon";
+    oont:dataType "double";
+    oont:unit "deg".
+:Driver a owl:Class, oont:ObjectType;
+    rdfs:label "Driver";
+    rdfs:comment "A person licensed to drive a delivery vehicle.";
+    oont:apiName "Driver";
+    oont:primaryKey <urn:object-ontology:harbor-city-delivery-ops#Driver.driverId>;
+    oont:titleProperty <urn:object-ontology:harbor-city-delivery-ops#Driver.name>.
+<urn:object-ontology:harbor-city-delivery-ops#Driver.driverId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Driver;
+    rdfs:range xsd:string;
+    rdfs:label "driverId";
+    oont:apiName "driverId";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#Driver.name> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Driver;
+    rdfs:range xsd:string;
+    rdfs:label "name";
+    oont:apiName "name";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#Driver.onShift> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Driver;
+    rdfs:range xsd:boolean;
+    rdfs:label "onShift";
+    oont:apiName "onShift";
+    oont:dataType "boolean".
+:Customer a owl:Class, oont:ObjectType;
+    rdfs:label "Customer";
+    rdfs:comment "The business or person receiving a shipment.";
+    oont:apiName "Customer";
+    oont:primaryKey <urn:object-ontology:harbor-city-delivery-ops#Customer.customerId>;
+    oont:titleProperty <urn:object-ontology:harbor-city-delivery-ops#Customer.name>.
+<urn:object-ontology:harbor-city-delivery-ops#Customer.customerId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Customer;
+    rdfs:range xsd:string;
+    rdfs:label "customerId";
+    oont:apiName "customerId";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#Customer.name> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Customer;
+    rdfs:range xsd:string;
+    rdfs:label "name";
+    oont:apiName "name";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#Customer.email> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Customer;
+    rdfs:range xsd:string;
+    rdfs:label "email";
+    oont:apiName "email";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#Customer.preferredChannel> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Customer;
+    rdfs:range xsd:string;
+    rdfs:label "preferredChannel";
+    oont:apiName "preferredChannel";
+    oont:dataType "string";
+    oont:enumValue "email", "sms".
+:Shipment a owl:Class, oont:ObjectType;
+    rdfs:label "Shipment";
+    rdfs:comment "One parcel or pallet to be delivered.";
+    oont:apiName "Shipment";
+    oont:primaryKey <urn:object-ontology:harbor-city-delivery-ops#Shipment.shipmentId>;
+    oont:titleProperty <urn:object-ontology:harbor-city-delivery-ops#Shipment.shipmentId>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.shipmentId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:string;
+    rdfs:label "shipmentId";
+    oont:apiName "shipmentId";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.status> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:string;
+    rdfs:label "status";
+    oont:apiName "status";
+    oont:dataType "string";
+    oont:enumValue "pending", "assigned", "inTransit", "delayed", "delivered".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.weightKg> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:double;
+    rdfs:label "weightKg";
+    oont:apiName "weightKg";
+    oont:dataType "double";
+    oont:unit "kg".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.promisedBy> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:dateTime;
+    rdfs:label "promisedBy";
+    oont:apiName "promisedBy";
+    oont:dataType "timestamp".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.eta> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:dateTime;
+    rdfs:label "eta";
+    oont:apiName "eta";
+    oont:dataType "timestamp".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.delayReason> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:string;
+    rdfs:label "delayReason";
+    oont:apiName "delayReason";
+    oont:dataType "string";
+    oont:enumValue "vehicleMaintenance", "traffic", "weather", "addressIssue", "other".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.customerNotified> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:boolean;
+    rdfs:label "customerNotified";
+    oont:apiName "customerNotified";
+    oont:dataType "boolean".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.customerId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :Shipment;
+    rdfs:range xsd:string;
+    rdfs:label "customerId";
+    oont:apiName "customerId";
+    oont:dataType "string".
+:DeliveryStop a owl:Class, oont:ObjectType;
+    rdfs:label "Delivery stop";
+    rdfs:comment "A drop-off point on a shipment's route.";
+    oont:apiName "DeliveryStop";
+    oont:primaryKey <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.stopId>;
+    oont:titleProperty <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.address>.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.stopId> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :DeliveryStop;
+    rdfs:range xsd:string;
+    rdfs:label "stopId";
+    oont:apiName "stopId";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.address> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :DeliveryStop;
+    rdfs:range xsd:string;
+    rdfs:label "address";
+    oont:apiName "address";
+    oont:dataType "string".
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.sequence> a owl:DatatypeProperty, oont:Property;
+    rdfs:domain :DeliveryStop;
+    rdfs:range xsd:integer;
+    rdfs:label "sequence";
+    oont:apiName "sequence";
+    oont:dataType "integer".
+<urn:object-ontology:harbor-city-delivery-ops#link/vehicleDepot> a oont:LinkType;
+    rdfs:label "Based at";
+    oont:apiName "vehicleDepot";
+    oont:fromType :Vehicle;
+    oont:toType :Depot;
+    oont:fromSide <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depot>;
+    oont:toSide <urn:object-ontology:harbor-city-delivery-ops#Depot.vehicles>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.depot> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :Vehicle;
+    rdfs:range :Depot;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Depot.vehicles>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/vehicleDepot>;
+    rdfs:label "depot";
+    oont:apiName "depot";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#Depot.vehicles> a owl:ObjectProperty, oont:LinkSide;
+    rdfs:domain :Depot;
+    rdfs:range :Vehicle;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depot>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/vehicleDepot>;
+    rdfs:label "vehicles";
+    oont:apiName "vehicles";
+    oont:cardinality "many".
+<urn:object-ontology:harbor-city-delivery-ops#link/vehicleDriver> a oont:LinkType;
+    rdfs:label "vehicleDriver";
+    oont:apiName "vehicleDriver";
+    oont:fromType :Vehicle;
+    oont:toType :Driver;
+    oont:fromSide <urn:object-ontology:harbor-city-delivery-ops#Vehicle.driver>;
+    oont:toSide <urn:object-ontology:harbor-city-delivery-ops#Driver.vehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.driver> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :Vehicle;
+    rdfs:range :Driver;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Driver.vehicle>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/vehicleDriver>;
+    rdfs:label "driver";
+    oont:apiName "driver";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#Driver.vehicle> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :Driver;
+    rdfs:range :Vehicle;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Vehicle.driver>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/vehicleDriver>;
+    rdfs:label "vehicle";
+    oont:apiName "vehicle";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#link/shipmentCustomer> a oont:LinkType;
+    rdfs:label "Delivered to";
+    oont:apiName "shipmentCustomer";
+    oont:fromType :Shipment;
+    oont:toType :Customer;
+    oont:fromSide <urn:object-ontology:harbor-city-delivery-ops#Shipment.customer>;
+    oont:toSide <urn:object-ontology:harbor-city-delivery-ops#Customer.shipments>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.customer> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :Shipment;
+    rdfs:range :Customer;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Customer.shipments>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentCustomer>;
+    rdfs:label "customer";
+    oont:apiName "customer";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#Customer.shipments> a owl:ObjectProperty, oont:LinkSide;
+    rdfs:domain :Customer;
+    rdfs:range :Shipment;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Shipment.customer>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentCustomer>;
+    rdfs:label "shipments";
+    oont:apiName "shipments";
+    oont:cardinality "many".
+<urn:object-ontology:harbor-city-delivery-ops#link/shipmentOrigin> a oont:LinkType;
+    rdfs:label "shipmentOrigin";
+    oont:apiName "shipmentOrigin";
+    oont:fromType :Shipment;
+    oont:toType :Depot;
+    oont:fromSide <urn:object-ontology:harbor-city-delivery-ops#Shipment.originDepot>;
+    oont:toSide <urn:object-ontology:harbor-city-delivery-ops#Depot.outboundShipments>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.originDepot> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :Shipment;
+    rdfs:range :Depot;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Depot.outboundShipments>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentOrigin>;
+    rdfs:label "originDepot";
+    oont:apiName "originDepot";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#Depot.outboundShipments> a owl:ObjectProperty, oont:LinkSide;
+    rdfs:domain :Depot;
+    rdfs:range :Shipment;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Shipment.originDepot>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentOrigin>;
+    rdfs:label "outboundShipments";
+    oont:apiName "outboundShipments";
+    oont:cardinality "many".
+<urn:object-ontology:harbor-city-delivery-ops#link/shipmentVehicle> a oont:LinkType;
+    rdfs:label "Carried by";
+    oont:apiName "shipmentVehicle";
+    oont:fromType :Shipment;
+    oont:toType :Vehicle;
+    oont:fromSide <urn:object-ontology:harbor-city-delivery-ops#Shipment.vehicle>;
+    oont:toSide <urn:object-ontology:harbor-city-delivery-ops#Vehicle.shipments>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.vehicle> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :Shipment;
+    rdfs:range :Vehicle;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Vehicle.shipments>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentVehicle>;
+    rdfs:label "vehicle";
+    oont:apiName "vehicle";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle.shipments> a owl:ObjectProperty, oont:LinkSide;
+    rdfs:domain :Vehicle;
+    rdfs:range :Shipment;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Shipment.vehicle>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentVehicle>;
+    rdfs:label "shipments";
+    oont:apiName "shipments";
+    oont:cardinality "many".
+<urn:object-ontology:harbor-city-delivery-ops#link/shipmentStops> a oont:LinkType;
+    rdfs:label "shipmentStops";
+    oont:apiName "shipmentStops";
+    oont:fromType :Shipment;
+    oont:toType :DeliveryStop;
+    oont:fromSide <urn:object-ontology:harbor-city-delivery-ops#Shipment.stops>;
+    oont:toSide <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.shipment>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment.stops> a owl:ObjectProperty, oont:LinkSide;
+    rdfs:domain :Shipment;
+    rdfs:range :DeliveryStop;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.shipment>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentStops>;
+    rdfs:label "stops";
+    oont:apiName "stops";
+    oont:cardinality "many".
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.shipment> a owl:ObjectProperty, oont:LinkSide, owl:FunctionalProperty;
+    rdfs:domain :DeliveryStop;
+    rdfs:range :Shipment;
+    owl:inverseOf <urn:object-ontology:harbor-city-delivery-ops#Shipment.stops>;
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentStops>;
+    rdfs:label "shipment";
+    oont:apiName "shipment";
+    oont:cardinality "one".
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle> a oont:ActionType;
+    rdfs:label "Assign vehicle";
+    rdfs:comment "Put a pending or delayed shipment on a vehicle. Replaces any earlier vehicle assignment.";
+    oont:apiName "assignVehicle";
+    oont:affects :Shipment, :Vehicle;
+    oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/parameter/shipment>.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/parameter/shipment> a oont:Parameter;
+    rdfs:label "shipment";
+    oont:apiName "shipment";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Shipment.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle> oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/parameter/vehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/parameter/vehicle> a oont:Parameter;
+    rdfs:label "vehicle";
+    oont:apiName "vehicle";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Vehicle.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle> oont:rule <urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/rule/1>.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/rule/1> a oont:Rule;
+    oont:op "createLink";
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentVehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle> oont:rule <urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/rule/2>.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle/rule/2> a oont:Rule;
+    oont:op "modifyObject";
+    oont:objectType :Shipment;
+    oont:sets <urn:object-ontology:harbor-city-delivery-ops#Shipment.status>.
+<urn:object-ontology:harbor-city-delivery-ops#action/assignVehicle> oont:validation "The vehicle must be available (not on route or in maintenance).", "The shipment must fit in the vehicle's remaining capacity.", "The vehicle must be based at the shipment's origin depot.";
+    oont:sideEffect "The vehicle's driver receives the updated route.".
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment> a oont:ActionType;
+    rdfs:label "Reassign shipment";
+    rdfs:comment "Move a shipment from one vehicle to another.";
+    oont:apiName "reassignShipment";
+    oont:affects :Shipment, :Vehicle;
+    oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/parameter/shipment>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/parameter/shipment> a oont:Parameter;
+    rdfs:label "shipment";
+    oont:apiName "shipment";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Shipment.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment> oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/parameter/fromVehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/parameter/fromVehicle> a oont:Parameter;
+    rdfs:label "fromVehicle";
+    oont:apiName "fromVehicle";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Vehicle.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment> oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/parameter/toVehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/parameter/toVehicle> a oont:Parameter;
+    rdfs:label "toVehicle";
+    oont:apiName "toVehicle";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Vehicle.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment> oont:rule <urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/rule/1>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/rule/1> a oont:Rule;
+    oont:op "deleteLink";
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentVehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment> oont:rule <urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/rule/2>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment/rule/2> a oont:Rule;
+    oont:op "createLink";
+    oont:linkType <urn:object-ontology:harbor-city-delivery-ops#link/shipmentVehicle>.
+<urn:object-ontology:harbor-city-delivery-ops#action/reassignShipment> oont:validation "The shipment must not be delivered yet.", "The target vehicle must be available and have room for the shipment.".
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed> a oont:ActionType;
+    rdfs:label "Mark shipment delayed";
+    oont:apiName "markDelayed";
+    oont:affects :Shipment;
+    oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/parameter/shipment>.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/parameter/shipment> a oont:Parameter;
+    rdfs:label "shipment";
+    oont:apiName "shipment";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Shipment.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed> oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/parameter/reason>.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/parameter/reason> a oont:Parameter;
+    rdfs:label "reason";
+    oont:apiName "reason";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed> oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/parameter/newEta>.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/parameter/newEta> a oont:Parameter;
+    rdfs:label "newEta";
+    rdfs:comment "Best estimate of the new arrival time.";
+    oont:apiName "newEta";
+    oont:dataType "timestamp";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed> oont:rule <urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/rule/1>.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed/rule/1> a oont:Rule;
+    oont:op "modifyObject";
+    oont:objectType :Shipment;
+    oont:sets <urn:object-ontology:harbor-city-delivery-ops#Shipment.status>, <urn:object-ontology:harbor-city-delivery-ops#Shipment.delayReason>, <urn:object-ontology:harbor-city-delivery-ops#Shipment.eta>.
+<urn:object-ontology:harbor-city-delivery-ops#action/markDelayed> oont:validation "The shipment must not be delivered yet.";
+    oont:sideEffect "The customer is notified of the delay and the new ETA on their preferred channel.".
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer> a oont:ActionType;
+    rdfs:label "Notify customer";
+    rdfs:comment "Send a short status message about a shipment to its customer.";
+    oont:apiName "notifyCustomer";
+    oont:affects :Shipment;
+    oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer/parameter/shipment>.
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer/parameter/shipment> a oont:Parameter;
+    rdfs:label "shipment";
+    oont:apiName "shipment";
+    oont:dataType "objectRef";
+    oont:required true;
+    oont:objectType :Shipment.
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer> oont:parameter <urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer/parameter/message>.
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer/parameter/message> a oont:Parameter;
+    rdfs:label "message";
+    rdfs:comment "Plain-text message, at most 300 characters.";
+    oont:apiName "message";
+    oont:dataType "string";
+    oont:required true.
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer> oont:rule <urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer/rule/1>.
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer/rule/1> a oont:Rule;
+    oont:op "modifyObject";
+    oont:objectType :Shipment;
+    oont:sets <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerNotified>.
+<urn:object-ontology:harbor-city-delivery-ops#action/notifyCustomer> oont:validation "The message must be between 1 and 300 characters.";
+    oont:sideEffect "An email or SMS is sent to the customer, using their preferred channel.".
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-01> a :Depot;
+    rdfs:label "Harbor North Depot";
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.depotId> "D-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.name> "Harbor North Depot";
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.lat> "35.4521"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.lon> "139.6402"^^xsd:double.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-02> a :Depot;
+    rdfs:label "Eastside Depot";
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.depotId> "D-02";
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.name> "Eastside Depot";
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.lat> "35.4389"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Depot.lon> "139.6655"^^xsd:double.
+<urn:object-ontology:harbor-city-delivery-ops#Driver/DR-01> a :Driver;
+    rdfs:label "Ren Ishida";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.driverId> "DR-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.name> "Ren Ishida";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.onShift> false.
+<urn:object-ontology:harbor-city-delivery-ops#Driver/DR-02> a :Driver;
+    rdfs:label "Lena Ortiz";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.driverId> "DR-02";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.name> "Lena Ortiz";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.onShift> true.
+<urn:object-ontology:harbor-city-delivery-ops#Driver/DR-03> a :Driver;
+    rdfs:label "Kai Morgan";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.driverId> "DR-03";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.name> "Kai Morgan";
+    <urn:object-ontology:harbor-city-delivery-ops#Driver.onShift> true.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-101> a :Vehicle;
+    rdfs:label "HC-101";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.vehicleId> "V-101";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.plate> "HC-101";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.kind> "van";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.status> "maintenance";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.capacityKg> "800"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.loadKg> "120"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depotId> "D-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.lat> "35.4521"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.lon> "139.6402"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.driver> <urn:object-ontology:harbor-city-delivery-ops#Driver/DR-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Driver/DR-01> <urn:object-ontology:harbor-city-delivery-ops#Driver.vehicle> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-101>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-102> a :Vehicle;
+    rdfs:label "HC-102";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.vehicleId> "V-102";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.plate> "HC-102";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.kind> "van";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.status> "available";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.capacityKg> "1000"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.loadKg> "350"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depotId> "D-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.lat> "35.4524"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.lon> "139.6398"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.driver> <urn:object-ontology:harbor-city-delivery-ops#Driver/DR-02>.
+<urn:object-ontology:harbor-city-delivery-ops#Driver/DR-02> <urn:object-ontology:harbor-city-delivery-ops#Driver.vehicle> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-102>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-201> a :Vehicle;
+    rdfs:label "HC-201";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.vehicleId> "V-201";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.plate> "HC-201";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.kind> "truck";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.status> "onRoute";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.capacityKg> "3000"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.loadKg> "2900"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depotId> "D-02";
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.lat> "35.4467"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.lon> "139.6581"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Vehicle.driver> <urn:object-ontology:harbor-city-delivery-ops#Driver/DR-03>.
+<urn:object-ontology:harbor-city-delivery-ops#Driver/DR-03> <urn:object-ontology:harbor-city-delivery-ops#Driver.vehicle> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-201>.
+<urn:object-ontology:harbor-city-delivery-ops#Customer/C-01> a :Customer;
+    rdfs:label "Bayview Bakery";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.customerId> "C-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.name> "Bayview Bakery";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.email> "orders@bayview-bakery.example.org";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.preferredChannel> "email".
+<urn:object-ontology:harbor-city-delivery-ops#Customer/C-02> a :Customer;
+    rdfs:label "Pier 7 Bike Shop";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.customerId> "C-02";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.name> "Pier 7 Bike Shop";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.email> "hello@pier7-bikes.example.org";
+    <urn:object-ontology:harbor-city-delivery-ops#Customer.preferredChannel> "sms".
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001> a :Shipment;
+    rdfs:label "S-5001";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.shipmentId> "S-5001";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.status> "delayed";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.weightKg> "120"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.promisedBy> "2026-05-12T11:00:00+09:00"^^xsd:dateTime;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.eta> "2026-05-12T15:30:00+09:00"^^xsd:dateTime;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.delayReason> "vehicleMaintenance";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerNotified> false;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerId> "C-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.originDepot> <urn:object-ontology:harbor-city-delivery-ops#Depot/D-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-01> <urn:object-ontology:harbor-city-delivery-ops#Depot.outboundShipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001> <urn:object-ontology:harbor-city-delivery-ops#Shipment.vehicle> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-101>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-101> <urn:object-ontology:harbor-city-delivery-ops#Vehicle.shipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001> <urn:object-ontology:harbor-city-delivery-ops#Shipment.stops> <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-01>.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-01> <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.shipment> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002> a :Shipment;
+    rdfs:label "S-5002";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.shipmentId> "S-5002";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.status> "assigned";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.weightKg> "350"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.promisedBy> "2026-05-12T13:00:00+09:00"^^xsd:dateTime;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.eta> "2026-05-12T12:40:00+09:00"^^xsd:dateTime;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerNotified> false;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerId> "C-02";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.originDepot> <urn:object-ontology:harbor-city-delivery-ops#Depot/D-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-01> <urn:object-ontology:harbor-city-delivery-ops#Depot.outboundShipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002> <urn:object-ontology:harbor-city-delivery-ops#Shipment.vehicle> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-102>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-102> <urn:object-ontology:harbor-city-delivery-ops#Vehicle.shipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002> <urn:object-ontology:harbor-city-delivery-ops#Shipment.stops> <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-02>.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-02> <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.shipment> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003> a :Shipment;
+    rdfs:label "S-5003";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.shipmentId> "S-5003";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.status> "inTransit";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.weightKg> "2900"^^xsd:double;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.promisedBy> "2026-05-12T16:00:00+09:00"^^xsd:dateTime;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.eta> "2026-05-12T15:10:00+09:00"^^xsd:dateTime;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerNotified> true;
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.customerId> "C-01";
+    <urn:object-ontology:harbor-city-delivery-ops#Shipment.originDepot> <urn:object-ontology:harbor-city-delivery-ops#Depot/D-02>.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-02> <urn:object-ontology:harbor-city-delivery-ops#Depot.outboundShipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003> <urn:object-ontology:harbor-city-delivery-ops#Shipment.vehicle> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-201>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-201> <urn:object-ontology:harbor-city-delivery-ops#Vehicle.shipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003> <urn:object-ontology:harbor-city-delivery-ops#Shipment.stops> <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-03>.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-03> <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.shipment> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003>.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-01> a :DeliveryStop;
+    rdfs:label "3-1 Bayview Street";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.stopId> "ST-01";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.address> "3-1 Bayview Street";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.sequence> 1.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-02> a :DeliveryStop;
+    rdfs:label "7 Pier Road";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.stopId> "ST-02";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.address> "7 Pier Road";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.sequence> 1.
+<urn:object-ontology:harbor-city-delivery-ops#DeliveryStop/ST-03> a :DeliveryStop;
+    rdfs:label "12 Canal Lane";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.stopId> "ST-03";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.address> "12 Canal Lane";
+    <urn:object-ontology:harbor-city-delivery-ops#DeliveryStop.sequence> 1.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-101> <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depot> <urn:object-ontology:harbor-city-delivery-ops#Depot/D-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-01> <urn:object-ontology:harbor-city-delivery-ops#Depot.vehicles> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-101>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-102> <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depot> <urn:object-ontology:harbor-city-delivery-ops#Depot/D-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-01> <urn:object-ontology:harbor-city-delivery-ops#Depot.vehicles> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-102>.
+<urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-201> <urn:object-ontology:harbor-city-delivery-ops#Vehicle.depot> <urn:object-ontology:harbor-city-delivery-ops#Depot/D-02>.
+<urn:object-ontology:harbor-city-delivery-ops#Depot/D-02> <urn:object-ontology:harbor-city-delivery-ops#Depot.vehicles> <urn:object-ontology:harbor-city-delivery-ops#Vehicle/V-201>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001> <urn:object-ontology:harbor-city-delivery-ops#Shipment.customer> <urn:object-ontology:harbor-city-delivery-ops#Customer/C-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Customer/C-01> <urn:object-ontology:harbor-city-delivery-ops#Customer.shipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5001>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002> <urn:object-ontology:harbor-city-delivery-ops#Shipment.customer> <urn:object-ontology:harbor-city-delivery-ops#Customer/C-02>.
+<urn:object-ontology:harbor-city-delivery-ops#Customer/C-02> <urn:object-ontology:harbor-city-delivery-ops#Customer.shipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5002>.
+<urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003> <urn:object-ontology:harbor-city-delivery-ops#Shipment.customer> <urn:object-ontology:harbor-city-delivery-ops#Customer/C-01>.
+<urn:object-ontology:harbor-city-delivery-ops#Customer/C-01> <urn:object-ontology:harbor-city-delivery-ops#Customer.shipments> <urn:object-ontology:harbor-city-delivery-ops#Shipment/S-5003>.

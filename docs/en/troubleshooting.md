@@ -59,7 +59,7 @@ The toast explains why. The usual causes are a YAML syntax error elsewhere in th
 
 ## The exported agent tools don't enforce my validations
 
-That is expected. `validations` and their `expr` strings are written into the tool descriptions so the model knows the rules, but the extension does not evaluate them, and it never calls a model or a service. Enforce the same checks in the code that executes the tool (your MCP server or backend). See [Object Ontology × AI Agents](tutorial-6-object-ontology-ai-agents.md).
+That is expected. `validations` and their `expr` strings are written into the tool descriptions so the model knows the rules, but the extension does not evaluate them, and it never calls a model or a service. Enforce the same checks in the code that executes the tool (your MCP server or backend). See [Object Ontology × AI Agents](tutorial-6-object-ontology-ai-agents.md). [Tutorial 8](tutorial-8-claude-code-object-ontology.md) has a working MCP server that enforces them, and refuses an action whose check is not implemented yet.
 
 ## Still stuck?
 

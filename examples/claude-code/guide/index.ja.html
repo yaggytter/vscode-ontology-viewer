@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="チュートリアル8・9（Claude Code × オントロジー）の前提・状況・課題・進め方を、イラストと図で説明する予習ノート。">
+<title>オントロジー×Claude Code 予習ノート</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 1本の読み物の縦スクロール。章ごとに「舞台 → 課題 → 仕組み → 進め方 → 動画で見るところ」を図で並べる */
+:root {
+  --bg: #f3f6f7;
+  --surface: #ffffff;
+  --ink: #15222a;
+  --muted: #56656f;
+  --line: #c6d1d7;
+  --accent: #0a6c76;
+  --accent-bg: #e0f0f1;
+  --ok: #2b7a38;
+  --ok-bg: #e3f2e5;
+  --stop: #b8400f;
+  --stop-bg: #fbe9df;
+  --hl: #f2b632;
+  --hl-bg: #fdf3d6;
+  /* illustration palette */
+  --c-sky: #d7ebf1; --c-sea: #8fc7d3; --c-ground: #dfe4e6; --c-road: #aab6bc; --c-wall: #eef3f5;
+  --c-roof: #4f6f7e; --c-skin: #f0c4a2; --c-hair: #3a2d27; --c-van: #ffffff; --c-robot: #dfeef0; --c-box: #d4a468;
+  --f-display: "Dela Gothic One", "Hiragino Kaku Gothic StdN", "Yu Gothic", sans-serif;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e161b; --surface: #162128; --ink: #e2eaee; --muted: #93a3ad; --line: #2e3e47;
+    --accent: #4fc2cc; --accent-bg: #133037; --ok: #6cc47a; --ok-bg: #16301b;
+    --stop: #f08a5d; --stop-bg: #3a1f14; --hl: #f2c14e; --hl-bg: #3a3014; color-scheme: dark;
+    --c-sky: #16303a; --c-sea: #1d4a56; --c-ground: #1d2a30; --c-road: #33434b; --c-wall: #22313a;
+    --c-roof: #5a7e8e; --c-skin: #d8a888; --c-hair: #191311; --c-van: #cfdbe0; --c-robot: #2b444c; --c-box: #b88a52;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e161b; --surface: #162128; --ink: #e2eaee; --muted: #93a3ad; --line: #2e3e47;
+  --accent: #4fc2cc; --accent-bg: #133037; --ok: #6cc47a; --ok-bg: #16301b;
+  --stop: #f08a5d; --stop-bg: #3a1f14; --hl: #f2c14e; --hl-bg: #3a3014; color-scheme: dark;
+    --c-sky: #16303a; --c-sea: #1d4a56; --c-ground: #1d2a30; --c-road: #33434b; --c-wall: #22313a;
+    --c-roof: #5a7e8e; --c-skin: #d8a888; --c-hair: #191311; --c-van: #cfdbe0; --c-robot: #2b444c; --c-box: #b88a52;
+}
+/* standalone reset (the artifact viewer supplies the same) */
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.85;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 960px; margin: 0 auto; padding-block: 40px 80px; display: grid; gap: 64px; }
+.prose { max-width: 42em; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.4; margin: 0; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(30px, 5.4vw, 48px); letter-spacing: .01em; }
+h2 { font-size: clamp(24px, 3.4vw, 30px); font-weight: 700; }
+h3 { font-size: 19px; font-weight: 700; }
+p { margin: 0; }
+code, .mono { font-family: var(--f-mono); font-size: .88em; }
+code { background: var(--accent-bg); padding: 1px 6px; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--hl); outline-offset: 2px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--accent); }
+.stack { display: grid; gap: 16px; align-content: start; }
+.stack-lg { display: grid; gap: 28px; align-content: start; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; line-height: 1.7; }
+
+/* hero */
+.hero { display: grid; gap: 18px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+.hero .lead { font-size: 18px; max-width: 38em; }
+.howto { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; font-size: 15px; }
+.howto span.step { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; }
+.howto span.arrow { color: var(--muted); }
+nav.toc ol { margin: 0; padding-left: 1.4em; display: grid; gap: 2px; }
+
+/* chapter header */
+.chapter { display: grid; gap: 28px; }
+.chapter-head { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; align-items: center; }
+.chapter-num { font-family: var(--f-display); font-size: 56px; line-height: 1; color: var(--accent); grid-row: span 2; }
+.chapter-head .sub { color: var(--muted); }
+
+/* panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; min-width: 0; }
+.figure { display: grid; gap: 10px; }
+.figure .cap { font-size: 14px; color: var(--muted); }
+.scroll { overflow-x: auto; }
+.cols-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.cols-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.cols-2 > *, .cols-3 > * { min-width: 0; }
+
+/* problem/solution pair */
+.pain { border-left: 5px solid var(--stop); }
+.cure { border-left: 5px solid var(--ok); }
+.tag { justify-self: start; display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; padding: 1px 9px; border-radius: 4px; }
+.tag.stop { background: var(--stop-bg); color: var(--stop); }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.info { background: var(--accent-bg); color: var(--accent); }
+.tag.hl { background: var(--hl-bg); color: var(--ink); }
+
+/* overview two tracks */
+.track { display: grid; gap: 12px; align-content: start; }
+.topbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 14px; }
+.track .big { font-family: var(--f-display); font-size: 22px; line-height: 1.3; }
+.track ul { margin: 0; padding-left: 1.2em; }
+
+/* chat bubbles */
+.chat { display: grid; gap: 10px; }
+.bubble { border-radius: 12px; padding: 10px 14px; max-width: 34em; font-size: 15px; line-height: 1.7; }
+.bubble.user { background: var(--accent-bg); justify-self: end; }
+.bubble.llm { background: var(--surface); border: 1px solid var(--line); }
+.bubble .who { display: block; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+
+/* fleet board */
+.depots { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.depot { border: 2px dashed var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 12px; align-content: start; }
+.depot-name { font-weight: 700; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.vehicle { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.vehicle .row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+.vid { font-family: var(--f-mono); font-weight: 600; font-size: 16px; }
+.status { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 4px; }
+.status.maint { background: var(--stop-bg); color: var(--stop); }
+.status.avail { background: var(--ok-bg); color: var(--ok); }
+.status.route { background: var(--hl-bg); color: var(--ink); }
+.bar { height: 12px; border-radius: 3px; background: var(--bg); border: 1px solid var(--line); display: flex; overflow: hidden; }
+.bar .load { background: var(--muted); opacity: .55; }
+.bar .parcel { background: var(--hl); }
+.bar .over { background: var(--stop); }
+.kg { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.parcel-card { background: var(--hl-bg); border: 2px solid var(--hl); border-radius: 8px; padding: 10px 12px; font-size: 14px; line-height: 1.6; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+
+/* check matrix */
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { border-bottom: 1px solid var(--line); padding: 10px 10px; text-align: left; vertical-align: top; }
+th { font-size: 13px; color: var(--muted); font-weight: 700; }
+td.y, td.n { text-align: center; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.y { color: var(--ok); }
+td.n { color: var(--stop); background: var(--stop-bg); }
+td.y small, td.n small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+tr.verdict td { border-bottom: none; font-weight: 700; }
+
+/* gates */
+.gates { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.gate { padding: 18px; display: grid; gap: 8px; align-content: start; border-right: 1px solid var(--line); }
+.gate:last-child { border-right: none; }
+.gate .n { font-family: var(--f-display); font-size: 28px; color: var(--accent); line-height: 1; }
+
+/* steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.steps li { display: grid; grid-template-columns: 60px 1fr; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.steps li:last-child { border-bottom: 1px solid var(--line); }
+.steps .no { font-family: var(--f-mono); font-weight: 600; font-size: 14px; color: var(--accent); padding-top: 3px; }
+.steps .body { display: grid; gap: 4px; min-width: 0; }
+.steps .t { font-weight: 700; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.steps .see { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* cycle */
+.cycle { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; counter-reset: c; }
+.cycle > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.65; position: relative; }
+.cycle > div b { display: block; font-size: 15px; margin-bottom: 4px; }
+.cycle > div.rej { border-color: var(--stop); background: var(--stop-bg); }
+.cycle > div.app { border-color: var(--ok); background: var(--ok-bg); }
+
+/* svg */
+svg { display: block; max-width: none; }
+svg text { font-family: var(--f-body); fill: var(--ink); }
+svg .mono { font-family: var(--f-mono); }
+svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+svg .box.acc { stroke: var(--accent); stroke-width: 2; }
+svg .box.soft { fill: var(--accent-bg); stroke: var(--accent); }
+svg .box.warn { fill: var(--hl-bg); stroke: var(--hl); }
+svg .edge { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+svg .edge.acc { stroke: var(--accent); stroke-width: 2; }
+svg .edge.dash { stroke-dasharray: 6 5; }
+svg .edge.stop { stroke: var(--stop); }
+svg .lbl { font-size: 12px; fill: var(--muted); }
+svg .lbl.stop { fill: var(--stop); font-weight: 700; }
+svg .lbl.acc { fill: var(--accent); font-weight: 700; }
+svg .t1 { font-size: 15px; font-weight: 700; }
+svg .t2 { font-size: 12.5px; fill: var(--muted); }
+svg .arrowhead { fill: var(--muted); }
+svg .arrowhead.acc { fill: var(--accent); }
+svg .arrowhead.stop { fill: var(--stop); }
+
+/* illustrations */
+svg.ill { width: 100%; height: auto; max-width: 100%; }
+.ill-img { display: block; width: 100%; height: auto; max-width: 100%; }
+.gate .ill-img { border-radius: 8px; aspect-ratio: 1 / 1; object-fit: cover; }
+.ill-frame { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.s { stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.f-sky { fill: var(--c-sky); } .f-sea { fill: var(--c-sea); } .f-ground { fill: var(--c-ground); }
+.f-road { fill: var(--c-road); } .f-wall { fill: var(--c-wall); } .f-roof { fill: var(--c-roof); }
+.f-skin { fill: var(--c-skin); } .f-van { fill: var(--c-van); } .f-robot { fill: var(--c-robot); }
+.f-box { fill: var(--c-box); } .f-acc { fill: var(--accent); } .f-accbg { fill: var(--accent-bg); }
+.f-ok { fill: var(--ok); } .f-stop { fill: var(--stop); } .f-hl { fill: var(--hl); } .f-hlbg { fill: var(--hl-bg); }
+.f-surf { fill: var(--surface); } .f-ink { fill: var(--ink); } .f-muted { fill: var(--muted); } .nofill { fill: none; }
+svg text.inv { fill: var(--surface); font-weight: 700; }
+svg text.say { font-size: 14px; }
+svg text.note { font-size: 12px; fill: var(--muted); }
+svg text.warn { font-size: 12.5px; fill: var(--stop); font-weight: 700; }
+.bike .pp { fill: none; stroke: var(--muted); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; transition: stroke .25s, opacity .25s; }
+.bike .on .pp { stroke: var(--hl); stroke-width: 5; }
+.bike .dim { opacity: .35; }
+.bike .kit { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 7 6; }
+.bike .kitlbl { font-size: 13px; font-weight: 700; }
+.bike .teeth { stroke-dasharray: 3 3; }
+
+/* part tree interactive */
+.toggle { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toggle button {
+  font: inherit; font-size: 14px; padding: 6px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.toggle .count { font-family: var(--f-mono); font-weight: 600; margin-left: 6px; }
+#tree .node rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; transition: fill .25s, stroke .25s; }
+#tree .node.on rect { fill: var(--hl-bg); stroke: var(--hl); stroke-width: 2.5; }
+#tree .node.root rect { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 2; }
+#tree .node.dim text { fill: var(--muted); }
+pre.q { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: var(--f-mono); font-size: 13.5px; line-height: 1.6; }
+pre.q b { color: var(--accent); }
+
+/* video timeline */
+.timeline { display: grid; gap: 12px; }
+.tl-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.tl-bar span { border-right: 1px solid var(--bg); display: grid; place-items: center; font-family: var(--f-mono); font-size: 11px; color: var(--ink); overflow: hidden; white-space: nowrap; }
+.tl-bar span:last-child { border-right: none; }
+.c0 { background: var(--accent-bg); } .c1 { background: var(--hl-bg); } .c2 { background: var(--ok-bg); } .c3 { background: var(--stop-bg); }
+.tl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.tl-list li { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; line-height: 1.65; }
+.tl-list .tm { font-family: var(--f-mono); font-size: 13px; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.tl-list .look { color: var(--accent); font-weight: 700; }
+
+/* glossary */
+dl.gloss { display: grid; grid-template-columns: minmax(130px, max-content) 1fr; gap: 10px 20px; margin: 0; }
+dl.gloss dt { font-weight: 700; }
+dl.gloss dd { margin: 0; }
+@media (max-width: 560px) {
+  dl.gloss { grid-template-columns: 1fr; gap: 2px; }
+  dl.gloss dd { margin-bottom: 10px; }
+  .chapter-num { font-size: 40px; }
+  .tl-list li { grid-template-columns: 1fr; gap: 0; }
+  .gate { border-right: none; border-bottom: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="topbar">
+    <span class="eyebrow">チュートリアル 8・9 の予習ノート</span>
+    <a href="index.en.html" hreflang="en" lang="en">English</a>
+  </div>
+  <h1>オントロジーで、<br>AI エージェントに<br>ルールと事実を渡す</h1>
+  <p class="lead">チュートリアル8と9では、Claude Code に実際の作業をさせます。8では配送データを書き換え、9では部品カタログをもとに質問に答えます。このページでは、動画を見る前に知っておきたい前提、場面の状況、解決したい課題を図で説明します。</p>
+  <div class="howto" aria-label="おすすめの順番">
+    <span class="step">① このページ</span><span class="arrow">→</span>
+    <span class="step">② 動画</span><span class="arrow">→</span>
+    <span class="step">③ チュートリアルを手元で実行</span>
+  </div>
+  <p class="small">チュートリアルの本文: <a href="https://github.com/yaggytter/vscode-ontology-viewer/blob/main/docs/ja/tutorial-8-claude-code-object-ontology.md">チュートリアル8</a> ／ <a href="https://github.com/yaggytter/vscode-ontology-viewer/blob/main/docs/ja/tutorial-9-claude-code-semantic-web.md">チュートリアル9</a></p>
+  <nav class="toc small" aria-label="目次">
+    <ol>
+      <li><a href="#premise">共通の前提: LLM に何が足りないのか</a></li>
+      <li><a href="#t8">チュートリアル8: 配送エージェントにデータを変えさせる</a></li>
+      <li><a href="#t9">チュートリアル9: 部品カタログから根拠のある答えを出させる</a></li>
+      <li><a href="#video">動画の見どころ</a></li>
+      <li><a href="#gloss">用語集</a></li>
+    </ol>
+  </nav>
+</header>
+
+<!-- ============ PREMISE ============ -->
+<section class="chapter" id="premise">
+  <div class="chapter-head">
+    <div class="chapter-num">0</div>
+    <h2>共通の前提: LLM に何が足りないのか</h2>
+    <p class="sub">8と9は、同じ問題を別の側から解きます。</p>
+  </div>
+
+  <div class="prose stack">
+    <p>LLM は文章を書くのが得意です。ただ、仕事で使うと2つの問題にぶつかります。</p>
+  </div>
+
+  <div class="cols-2">
+    <div class="panel pain stack">
+      <span class="tag stop">問題 1　記憶で答える</span>
+      <div class="ill-frame">
+        <img class="ill-img" src="images/premise-memory.jpg" alt="お客さんがカセットを手に質問し、ロボットがカタログを見ないまま「はい、一般的に使えます」と答えている。">
+      </div>
+      <div class="chat">
+        <div class="bubble user"><span class="who">あなた</span>12速のカセットは、いまの11速チェーンで使える？</div>
+        <div class="bubble llm"><span class="who">LLM</span>はい、一般的に使えます。</div>
+      </div>
+      <p class="small">それらしい答えが返ってきますが、根拠はモデルの記憶です。自社の部品カタログに何が書いてあるかは知りません。</p>
+    </div>
+    <div class="panel pain stack">
+      <span class="tag stop">問題 2　ルールを知らずに動く</span>
+      <div class="ill-frame">
+        <img class="ill-img" src="images/premise-rules.jpg" alt="ロボットが荷物を、走行中で満載の別拠点のトラックに無理に載せようとしている。">
+      </div>
+      <p class="small muted">トラックの上の3つの札は「走行中」「満載」「別の拠点」です。</p>
+      <div class="chat">
+        <div class="bubble user"><span class="who">あなた</span>この荷物をトラック V-201 に載せて。</div>
+        <div class="bubble llm"><span class="who">エージェント</span>データを書き換えて、V-201 に載せました。</div>
+      </div>
+      <p class="small">データを書き換える道具を渡すと、エージェントは業務のルールを知らないまま実行します。V-201 は走行中で、荷台にも空きがないかもしれません。</p>
+    </div>
+  </div>
+
+  <div class="prose stack">
+    <p>どちらも、LLM が<strong>自分の外にある正しい情報</strong>を持っていないことが原因です。そこで、会社の知識を<strong>オントロジー</strong>として書き、エージェントに渡します。オントロジーは「何があり、どうつながり、何をしてよいか」を、機械が読める形で書いたものです。</p>
+  </div>
+
+  <div class="cols-2">
+    <div class="panel cure track">
+      <span class="tag ok">チュートリアル8　ルールを渡す</span>
+      <div class="big">Object Ontology</div>
+      <ul class="small">
+        <li>出荷・車両・ドライバーなどの<strong>オブジェクト</strong>と、それを変える<strong>アクション</strong>を定義します。</li>
+        <li>アクションには<strong>実行条件</strong>が付きます（例: 車両は空いていること）。</li>
+        <li>エージェントは決められたアクションでしかデータを変えられません。条件を満たさない呼び出しはサーバーが拒否します。</li>
+      </ul>
+      <p class="small muted">考え方はチュートリアル6、実際に動かすのがチュートリアル8です。</p>
+    </div>
+    <div class="panel cure track">
+      <span class="tag ok">チュートリアル9　事実を渡す</span>
+      <div class="big">Semantic Web（RDF / OWL）</div>
+      <ul class="small">
+        <li>「カセット CS-R12 は チェーン CH-R12 と互換」のような事実を、<strong>主語・述語・目的語の3つ組</strong>で書きます。</li>
+        <li>エージェントは <strong>SPARQL</strong> というクエリを書いて事実を検索し、返ってきた行だけを根拠に答えます。</li>
+        <li>書かれたクエリは、あなたがビューワーで同じように実行して確かめられます。</li>
+      </ul>
+      <p class="small muted">考え方はチュートリアル7、実際に動かすのがチュートリアル9です。</p>
+    </div>
+  </div>
+
+  <div class="prose stack">
+    <h3>Claude Code の役割</h3>
+    <p>どちらのチュートリアルでも、エージェント役は <strong>Claude Code</strong> です。ターミナルで動く AI で、ファイルを読み、許可された道具（ツールやコマンド）を使って作業します。道具を使う前にはあなたの許可を求めるので、何をしようとしているかを毎回確かめられます。</p>
+  </div>
+</section>
+
+<!-- ============ TUTORIAL 8 ============ -->
+<section class="chapter" id="t8">
+  <div class="chapter-head">
+    <div class="chapter-num">8</div>
+    <h2>配送エージェントにデータを変えさせる</h2>
+    <p class="sub">Object Ontology × MCP サーバー × Claude Code</p>
+  </div>
+
+  <div class="stack-lg">
+    <div class="prose stack">
+      <span class="eyebrow">舞台</span>
+      <h3>港町の配送会社、朝10時半</h3>
+      <p>架空の配送会社「Harbor City Delivery Ops」です。拠点が2つあり、車両が3台あります。パン屋「Bayview Bakery」宛ての出荷 <code>S-5001</code>（120 kg）は、11時に届ける約束でした。ところが、積まれている車両 <code>V-101</code> が整備に入ってしまい、出荷は遅延になっています。</p>
+    </div>
+
+    <figure class="figure" style="margin:0">
+      <div class="ill-frame">
+        <img class="ill-img" src="images/t8-harbor.jpg" alt="港町の朝10時半の情景。左の拠点 D-01 では、出荷 S-5001 を積んだバン V-101 が整備中で、隣に空いているバン V-102 と勤務中のドライバー Lena がいる。中央の道路を、別の拠点 D-02 のトラック V-201 が満載で走っている。右のパン屋 Bayview Bakery では、店主が11時に届くはずの荷物を待っている。">
+      </div>
+      <figcaption class="cap">5月12日（火）10:30 の港町です。左の拠点 D-01 では、S-5001 を積んだ V-101 が整備中で、隣に空いている V-102 と勤務中のドライバー Lena がいます。道路を走っているのは、別の拠点 D-02 のトラック V-201（満載）です。右のパン屋の店主は、11時に届くはずの荷物を待っています（到着予定は 15:30 にずれています）。どの車に載せ替えられるかは、下の図と表で確かめます。</figcaption>
+    </figure>
+
+    <div class="figure">
+      <div class="depots">
+        <div class="depot">
+          <div class="depot-name"><span>拠点 D-01　Harbor North</span><span class="muted small">S-5001 の出発地</span></div>
+          <div class="vehicle">
+            <div class="row"><span class="vid">V-101</span><span class="small">バン</span><span class="status maint">整備中</span></div>
+            <div class="bar" role="img" aria-label="積載 120 kg / 定員 800 kg"><span class="load" style="width:15%"></span></div>
+            <div class="kg">積載 120 / 800 kg　ドライバー Ren（勤務外）</div>
+            <div class="parcel-card"><b>S-5001</b>　120 kg　遅延中<br>宛先 Bayview Bakery　約束 11:00 → 予定 15:30<br>まだ顧客に連絡していない</div>
+          </div>
+          <div class="vehicle">
+            <div class="row"><span class="vid">V-102</span><span class="small">バン</span><span class="status avail">空いている</span></div>
+            <div class="bar" role="img" aria-label="積載 350 kg / 定員 1000 kg"><span class="load" style="width:35%"></span></div>
+            <div class="kg">積載 350 / 1,000 kg　ドライバー Lena（勤務中）</div>
+          </div>
+        </div>
+        <div class="depot">
+          <div class="depot-name"><span>拠点 D-02　Eastside</span><span class="muted small">別の拠点</span></div>
+          <div class="vehicle">
+            <div class="row"><span class="vid">V-201</span><span class="small">トラック</span><span class="status route">走行中</span></div>
+            <div class="bar" role="img" aria-label="積載 2900 kg / 定員 3000 kg"><span class="load" style="width:96.67%"></span></div>
+            <div class="kg">積載 2,900 / 3,000 kg　ドライバー Kai（勤務中）</div>
+          </div>
+        </div>
+      </div>
+      <div class="legend"><span><i style="background:var(--muted);opacity:.55"></i>すでに積んでいる重さ（バーは定員に対する割合）</span></div>
+      <p class="cap">データはオントロジーのファイル <code>delivery-ops.oont.yaml</code> に書かれています。時刻は 2026-05-12 10:30 に固定してあります。</p>
+    </div>
+
+    <figure class="figure" style="margin:0">
+      <div class="ill-frame">
+        <img class="ill-img" src="images/t8-dispatcher.jpg" alt="配車担当がヘッドセットでエージェントに依頼している。エージェントがデータベースに直接手を出すところは✕で止められ、正しい手段として4つのアクションのボタンが光っている。">
+      </div>
+      <figcaption class="cap">配車担当の依頼を受けたエージェントには、データを直接書き換えさせず、決められたアクション（割り当て・載せ替え・遅延の登録・顧客への連絡）だけを使わせます。</figcaption>
+    </figure>
+
+    <div class="cols-2">
+      <div class="panel pain stack">
+        <span class="tag stop">課題</span>
+        <p>「S-5001 が遅れている。直して、お客さんにも伝えて」とエージェントに頼みたい。ただし次のことは困ります。</p>
+        <ul class="small" style="margin:0;padding-left:1.2em">
+          <li>データのファイルを直接書き換えて、つじつまを合わせる</li>
+          <li>走行中の車や、別の拠点の車に載せる</li>
+          <li>新しい到着時刻を勝手に作って顧客に伝える</li>
+          <li>何をしたのか、あとから追えない</li>
+        </ul>
+      </div>
+      <div class="panel cure stack">
+        <span class="tag ok">解決の方針</span>
+        <ul class="small" style="margin:0;padding-left:1.2em">
+          <li>データを変える手段は、オントロジーに書いた<strong>アクション</strong>だけにする</li>
+          <li>アクションの<strong>実行条件</strong>をツールの説明文に入れ、モデルが呼ぶ前に読めるようにする</li>
+          <li>それでも条件を破る呼び出しは、<strong>サーバーが拒否</strong>する</li>
+          <li>書き込みのたびに<strong>人が承認</strong>し、結果はすべて<strong>監査ログ</strong>に残す</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">仕組み</span>
+      <h3>オントロジーから、エージェントの道具とルールを作る</h3>
+      <div class="panel scroll">
+        <svg viewBox="0 0 900 360" width="900" height="360" role="img" aria-label="構成図: VS Code でオントロジーからツール定義と要約をエクスポートし、Claude Code が要約を読み、MCP サーバー経由でアクションを呼ぶ。サーバーは実行条件を確認し、state.json と監査ログに記録する。書き込みは人が承認する。">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker>
+            <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead acc"/></marker>
+          </defs>
+          <!-- A: ontology -->
+          <rect class="box soft" x="10" y="100" width="180" height="110" rx="10"/>
+          <text class="t1" x="100" y="132" text-anchor="middle">オントロジー</text>
+          <text class="t2 mono" x="100" y="154" text-anchor="middle">delivery-ops.oont.yaml</text>
+          <text class="t2" x="100" y="178" text-anchor="middle">VS Code + 拡張機能で</text>
+          <text class="t2" x="100" y="196" text-anchor="middle">図として確認・編集</text>
+          <!-- B: exports -->
+          <rect class="box" x="250" y="50" width="190" height="78" rx="8"/>
+          <text class="t1" x="345" y="80" text-anchor="middle">ツール定義</text>
+          <text class="t2 mono" x="345" y="100" text-anchor="middle">tools.json</text>
+          <text class="t2" x="345" y="118" text-anchor="middle">説明文に実行条件が入る</text>
+          <rect class="box" x="250" y="182" width="190" height="78" rx="8"/>
+          <text class="t1" x="345" y="212" text-anchor="middle">要約と指示</text>
+          <text class="t2 mono" x="345" y="232" text-anchor="middle">CLAUDE.md</text>
+          <text class="t2" x="345" y="250" text-anchor="middle">型・リンク・アクションの一覧</text>
+          <path class="edge" d="M190,140 L248,95" marker-end="url(#ah)"/>
+          <path class="edge" d="M190,170 L248,215" marker-end="url(#ah)"/>
+          <text class="lbl" x="200" y="160">エクスポート</text>
+          <!-- C: Claude Code -->
+          <rect class="box acc" x="500" y="150" width="160" height="120" rx="10"/>
+          <text class="t1" x="580" y="190" text-anchor="middle">Claude Code</text>
+          <text class="t2" x="580" y="212" text-anchor="middle">エージェント役</text>
+          <text class="t2" x="580" y="232" text-anchor="middle">調べてから</text>
+          <text class="t2" x="580" y="250" text-anchor="middle">アクションを選ぶ</text>
+          <path class="edge" d="M440,221 L498,214" marker-end="url(#ah)"/>
+          <text class="lbl" x="452" y="206">読む</text>
+          <!-- D: MCP server -->
+          <rect class="box acc" x="720" y="30" width="170" height="240" rx="10"/>
+          <text class="t1" x="805" y="60" text-anchor="middle">MCP サーバー</text>
+          <text class="t2" x="805" y="80" text-anchor="middle">（サンプルに同梱）</text>
+          <text class="t2" x="735" y="112">1. 引数を確認</text>
+          <text class="t2" x="735" y="136">2. 実行条件を確認</text>
+          <text class="t2" x="735" y="160">3. ルールを適用</text>
+          <text class="t2" x="735" y="184">4. 記録する</text>
+          <text class="lbl acc" x="735" y="216">1つでも満たさなければ</text>
+          <text class="lbl acc" x="735" y="234">何も変えずに拒否</text>
+          <path class="edge" d="M440,80 L718,80" marker-end="url(#ah)"/>
+          <text class="lbl" x="520" y="72">ツールとして公開</text>
+          <!-- calls -->
+          <path class="edge acc" d="M660,185 L718,185" marker-end="url(#aha)"/>
+          <path class="edge acc" d="M718,235 L662,235" marker-end="url(#aha)"/>
+          <text class="lbl acc" x="664" y="178">呼ぶ</text>
+          <text class="lbl acc" x="664" y="252">結果</text>
+          <!-- human -->
+          <rect class="box warn" x="500" y="300" width="160" height="50" rx="25"/>
+          <text class="t1" x="580" y="331" text-anchor="middle">あなたが承認</text>
+          <path class="edge" d="M580,298 L580,272" marker-end="url(#ah)"/>
+          <text class="lbl" x="590" y="290">書き込みは毎回</text>
+          <!-- store -->
+          <rect class="box" x="720" y="300" width="170" height="50" rx="8"/>
+          <text class="t2 mono" x="805" y="321" text-anchor="middle">state.json</text>
+          <text class="t2" x="805" y="339" text-anchor="middle">データ・監査ログ・outbox</text>
+          <path class="edge" d="M805,270 L805,298" marker-end="url(#ah)"/>
+          <!-- server reads ontology -->
+          <path class="edge dash" d="M100,100 L100,16 L805,16 L805,28" marker-end="url(#ah)"/>
+          <text class="lbl" x="330" y="11">サーバーは呼び出しのたびにオントロジーを読み直す</text>
+        </svg>
+      </div>
+      <p class="cap"><strong>MCP</strong>（Model Context Protocol）は、AI に道具を渡すための共通の接続方法です。Claude Code は MCP サーバーが公開したツールを呼べるようになります。</p>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">見どころ 1</span>
+      <h3>なぜ V-201 には載せられないのか</h3>
+      <p class="prose">オントロジーには、<code>assignVehicle</code>（車両に割り当てる）の実行条件が3つ書かれています。3台を当てはめると、次のとおりです。</p>
+      <div class="panel scroll">
+        <table>
+          <thead>
+            <tr><th>実行条件</th><th>V-101</th><th>V-102</th><th>V-201</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>車両が空いている<br><span class="small muted">走行中・整備中ではない</span></td><td class="n">✗<small>整備中</small></td><td class="y">✓<small>空き</small></td><td class="n">✗<small>走行中</small></td></tr>
+            <tr><td>荷物が残りの容量に収まる<br><span class="small muted">積載 + 120 kg ≦ 定員</span></td><td class="y">✓<small>240 ≦ 800</small></td><td class="y">✓<small>470 ≦ 1,000</small></td><td class="n">✗<small>3,020 &gt; 3,000</small></td></tr>
+            <tr><td>出荷の出発地の拠点にいる<br><span class="small muted">S-5001 は D-01 から</span></td><td class="y">✓<small>D-01</small></td><td class="y">✓<small>D-01</small></td><td class="n">✗<small>D-02</small></td></tr>
+            <tr class="verdict"><td>結果</td><td class="n">拒否</td><td class="y">OK</td><td class="n">拒否（3つとも）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap">動画の前半では、エージェントが V-102 を選びます。後半では V-201 を頼まれて断り、それでも呼ばせるとサーバーがこの3つの理由で拒否します。</p>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">見どころ 2</span>
+      <h3>守りは二重にある</h3>
+      <div class="gates">
+        <div class="gate">
+          <img class="ill-img" src="images/gate-rulebook.jpg" alt="ロボットが机に向かい、実行条件の書かれた本を指でたどりながら読んでいる。">
+          <div class="n">1</div>
+          <b>モデルが自分で断る</b>
+          <p class="small">実行条件はツールの説明文に入っているので、モデルは呼ぶ前に読めます。動画では、V-201 の3つの問題を挙げて断り、V-102 を提案します。</p>
+        </div>
+        <div class="gate">
+          <img class="ill-img" src="images/gate-barrier.jpg" alt="ロボットが押す荷物が、遮断機で止められている。">
+          <div class="n">2</div>
+          <b>サーバーが拒否する</b>
+          <p class="small">モデルが判断を誤っても、サーバーが条件をすべて確認します。満たさない条件をまとめて返し、データは何も変えません。</p>
+        </div>
+        <div class="gate">
+          <img class="ill-img" src="images/gate-approval.jpg" alt="人が記録帳に承認の印を押している。">
+          <div class="n">3</div>
+          <b>人が承認し、記録が残る</b>
+          <p class="small">書き込みは実行前に毎回あなたが承認します。適用も拒否も、すべて監査ログに残ります。</p>
+        </div>
+      </div>
+      <p class="cap">モデルはたいてい正しく判断します。それでも、確実に止めるのはサーバーの役目です。</p>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">見どころ 3（5章・動画には含まれません）</span>
+      <h3>ルールを足すと、確認処理ができるまでサーバーは止まる</h3>
+      <div class="cycle">
+        <div><b>① ルールを足す</b>「ドライバーが勤務中であること」を <code>assignVehicle</code> の実行条件に追加</div>
+        <div><b>② エクスポートし直す</b>ツール定義が更新され、モデルも新しい条件を読める</div>
+        <div class="rej"><b>③ サーバーが拒否</b>この条件を確認するコードがまだないので、条件を満たす V-102 でも安全側に倒して拒否</div>
+        <div><b>④ 確認処理を実装</b>開発者役の Claude Code が1行を追加し、テストを通す</div>
+        <div class="app"><b>⑤ 適用される</b>同じ依頼が通る。再起動は要らない</div>
+      </div>
+      <p class="cap">ルールが黙って抜け落ちたまま、エージェントが動くことはありません。</p>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">進め方</span>
+      <h3>チュートリアル8の章立て</h3>
+      <ol class="steps">
+        <li><span class="no">0章</span><div class="body"><span class="t">サンプルを用意する</span><span class="see"><code>npm install</code> と <code>npm test</code>。11件のテストが通れば準備完了です。</span></div></li>
+        <li><span class="no">1章</span><div class="body"><span class="t">ツール定義と要約をエクスポートする <span class="tag info">任意</span></span><span class="see">同梱のファイルがビューワーの出力そのものであることを確かめます。</span></div></li>
+        <li><span class="no">2章</span><div class="body"><span class="t">Claude Code を起動する <span class="tag hl">動画あり</span></span><span class="see">最初に2つの確認が出ます。どちらも最初は「いいえ」側が選ばれているので、矢印キーで「Yes, I trust this folder」と「Use this MCP server」を選びます。</span></div></li>
+        <li><span class="no">3章</span><div class="body"><span class="t">遅れている出荷を直してもらう <span class="tag hl">動画あり</span></span><span class="see">エージェントは出荷・車両・ドライバーを調べ、承認を得て V-102 に移し、顧客に連絡します。新しい到着時刻は誰からも得られないので、作りません。</span></div></li>
+        <li><span class="no">4章</span><div class="body"><span class="t">ガードレールを確かめる <span class="tag hl">動画あり</span></span><span class="see">V-201 を頼むとモデルが断り、無理に呼ばせるとサーバーが3つの理由で拒否します。</span></div></li>
+        <li><span class="no">5章</span><div class="body"><span class="t">オントロジーを変える</span><span class="see">上の「見どころ 3」の流れを、自分の手で体験します。</span></div></li>
+        <li><span class="no">6章</span><div class="body"><span class="t">練習問題: サポートデスク</span><span class="see">返金とチケットのクローズ。1万円を超える返金は承認に回す、というルールをエージェントが守るかを見ます。</span></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TUTORIAL 9 ============ -->
+<section class="chapter" id="t9">
+  <div class="chapter-head">
+    <div class="chapter-num">9</div>
+    <h2>部品カタログから根拠のある答えを出させる</h2>
+    <p class="sub">Semantic Web × SPARQL × Claude Code</p>
+  </div>
+
+  <div class="stack-lg">
+    <div class="prose stack">
+      <span class="eyebrow">舞台</span>
+      <h3>自転車部品の通販サイトの問い合わせ窓口</h3>
+      <p>架空の部品カタログ（<code>product-compatibility.ttl</code>）です。どの部品がどれと互換か、どの部品が何に含まれるかが、3つ組の事実として書かれています。お客さんから「12速のカセットは、いま使っている11速のチェーンに合いますか？」という質問が来ました。</p>
+    </div>
+
+    <figure class="figure" style="margin:0">
+      <div class="ill-frame">
+        <img class="ill-img" src="images/t9-shop.jpg" alt="自転車部品店のカウンター。お客さんが12速のカセットと11速のチェーンを持って質問している。店員のノートパソコンではエージェントがカタログを調べている。後ろの棚に部品カタログのファイルがある。">
+      </div>
+      <figcaption class="cap">エージェント（Claude Code）は、店の部品カタログを検索した結果だけを根拠に答えます。</figcaption>
+    </figure>
+
+    <div class="figure">
+      <span class="eyebrow">状況</span>
+      <h3>カタログに書かれている事実（互換性のまわり）</h3>
+      <div class="panel scroll">
+        <svg viewBox="0 0 720 270" width="720" height="270" role="img" aria-label="互換性の図: カセット CS-R12 は チェーン CH-R12 とホイールセット WS-B29 に互換と書かれている。CH-R12 は CH-R11 の後継。CS-R12 と CH-R11 の間には記録がない。">
+          <defs>
+            <marker id="bh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker>
+            <marker id="bha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead acc"/></marker>
+          </defs>
+          <rect class="box acc" x="270" y="30" width="180" height="62" rx="8"/>
+          <text class="t1" x="360" y="57" text-anchor="middle">12速カセット</text>
+          <text class="t2 mono" x="360" y="78" text-anchor="middle">CS-R12</text>
+          <rect class="box" x="20" y="30" width="170" height="62" rx="8"/>
+          <text class="t1" x="105" y="57" text-anchor="middle">12速チェーン</text>
+          <text class="t2 mono" x="105" y="78" text-anchor="middle">CH-R12</text>
+          <rect class="box" x="530" y="30" width="170" height="62" rx="8"/>
+          <text class="t1" x="615" y="57" text-anchor="middle">ホイールセット</text>
+          <text class="t2 mono" x="615" y="78" text-anchor="middle">WS-B29</text>
+          <rect class="box warn" x="20" y="180" width="170" height="62" rx="8"/>
+          <text class="t1" x="105" y="207" text-anchor="middle">11速チェーン</text>
+          <text class="t2 mono" x="105" y="228" text-anchor="middle">CH-R11（お客さんの手元）</text>
+          <path class="edge acc" d="M270,61 L192,61" marker-end="url(#bha)"/>
+          <text class="lbl acc" x="196" y="52">compatibleWith</text>
+          <path class="edge acc" d="M450,61 L528,61" marker-end="url(#bha)"/>
+          <text class="lbl acc" x="456" y="52">compatibleWith</text>
+          <path class="edge" d="M105,92 L105,178" marker-end="url(#bh)"/>
+          <text class="lbl" x="114" y="140">replaces（後継）</text>
+          <path class="edge dash stop" d="M300,92 L192,190"/>
+          <text class="lbl stop" x="262" y="165">記録なし</text>
+          <text class="lbl stop" x="262" y="182">→ ASK は false</text>
+        </svg>
+      </div>
+      <p class="cap">矢印は、ファイルに書かれた向きです。<code>compatibleWith</code> は「対称」（A が B と互換なら B も A と互換）と定義されていますが、ファイルには片方向しか書かれていません。</p>
+    </div>
+
+    <div class="cols-2">
+      <div class="panel pain stack">
+        <span class="tag stop">課題</span>
+        <ul class="small" style="margin:0;padding-left:1.2em">
+          <li>LLM に聞くと、カタログではなく一般的な知識で「使えます」と答えかねない</li>
+          <li>カタログを読ませても、片方向にしか書かれていない事実を見落とす</li>
+          <li>「記録がない」を「互換でない」と言い切ってしまう</li>
+          <li>答えが正しいかを、人があとから確かめにくい</li>
+        </ul>
+      </div>
+      <div class="panel cure stack">
+        <span class="tag ok">解決の方針</span>
+        <ul class="small" style="margin:0;padding-left:1.2em">
+          <li>答える前に、必ず <strong>SPARQL を書いて実行</strong>させる</li>
+          <li>返ってきた<strong>結果の行だけ</strong>を根拠に答えさせ、実行したクエリも示させる</li>
+          <li>落とし穴（下の3つ）を、<code>CLAUDE.md</code> のルールとして渡す</li>
+          <li>同じクエリを<strong>ビューワーの SPARQL パネル</strong>で実行し、人が図の上で確かめる</li>
+        </ul>
+      </div>
+    </div>
+
+    <figure class="figure" style="margin:0">
+      <div class="ill-frame"><img class="ill-img" src="images/t9-graph.jpg" alt="ロボットが虫眼鏡を持ち、自転車の部品をつないだ知識グラフの上を、つながりをたどって歩いている。"></div>
+      <figcaption class="cap">エージェントは記憶ではなく、カタログの事実のつながり（グラフ）をたどって答えます。つながりが何段も続くこともあるので、たどり方をクエリで正しく書く必要があります。</figcaption>
+    </figure>
+
+    <div class="figure">
+      <span class="eyebrow">仕組み</span>
+      <h3>質問から、確かめられる答えまで</h3>
+      <div class="panel scroll">
+        <svg viewBox="0 0 900 220" width="900" height="220" role="img" aria-label="流れ図: 質問を受けた Claude Code が SPARQL を書き、npm run sparql で Turtle ファイルに問い合わせ、結果の行だけを根拠に答える。あなたは同じクエリをビューワーの SPARQL パネルで実行して確かめる。">
+          <defs>
+            <marker id="ch" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker>
+          </defs>
+          <rect class="box warn" x="10" y="40" width="140" height="70" rx="35"/>
+          <text class="t1" x="80" y="70" text-anchor="middle">質問</text>
+          <text class="t2" x="80" y="90" text-anchor="middle">日本語でも英語でも</text>
+          <rect class="box acc" x="190" y="30" width="160" height="90" rx="10"/>
+          <text class="t1" x="270" y="62" text-anchor="middle">Claude Code</text>
+          <text class="t2" x="270" y="84" text-anchor="middle">ファイルを読み</text>
+          <text class="t2" x="270" y="102" text-anchor="middle">SPARQL を書く</text>
+          <rect class="box" x="390" y="30" width="170" height="90" rx="10"/>
+          <text class="t1 mono" x="475" y="62" text-anchor="middle" style="font-size:14px">npm run sparql</text>
+          <text class="t2" x="475" y="84" text-anchor="middle">Turtle ファイルに問い合わせ</text>
+          <text class="t2" x="475" y="102" text-anchor="middle">ネットワークには出ない</text>
+          <rect class="box" x="600" y="30" width="120" height="90" rx="10"/>
+          <text class="t1" x="660" y="70" text-anchor="middle">結果の行</text>
+          <text class="t2" x="660" y="92" text-anchor="middle">表 / true・false</text>
+          <rect class="box acc" x="760" y="30" width="130" height="90" rx="10"/>
+          <text class="t1" x="825" y="62" text-anchor="middle">回答</text>
+          <text class="t2" x="825" y="84" text-anchor="middle">クエリと根拠の</text>
+          <text class="t2" x="825" y="102" text-anchor="middle">行を添える</text>
+          <path class="edge" d="M150,75 L188,75" marker-end="url(#ch)"/>
+          <path class="edge" d="M350,75 L388,75" marker-end="url(#ch)"/>
+          <path class="edge" d="M560,75 L598,75" marker-end="url(#ch)"/>
+          <path class="edge" d="M720,75 L758,75" marker-end="url(#ch)"/>
+          <rect class="box soft" x="390" y="160" width="330" height="50" rx="10"/>
+          <text class="t1" x="555" y="190" text-anchor="middle">あなた: SPARQL パネルで同じクエリを実行</text>
+          <path class="edge dash" d="M825,120 L825,185 L722,185" marker-end="url(#ch)"/>
+          <text class="lbl" x="735" y="176">クエリを貼る</text>
+          <path class="edge dash" d="M475,158 L475,122" marker-end="url(#ch)"/>
+          <text class="lbl" x="482" y="146">同じエンジンなので同じ結果</text>
+        </svg>
+      </div>
+      <p class="cap"><code>npm run sparql</code> は、ビューワーの SPARQL パネルと同じエンジン（Comunica）を使います。だから、パネルに貼れば同じ行が返り、該当する部品が図の上で光ります。</p>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">見どころ</span>
+      <h3>LLM が書く SPARQL の、3つの落とし穴</h3>
+      <p class="prose">このサンプルには<strong>推論器</strong>がありません。推論器は、「対称」「推移的」といった定義から、書かれていない事実を自動で補う仕組みです。それがないので、クエリの側で補う必要があります。</p>
+      <div class="cols-3">
+        <div class="panel stack">
+          <span class="tag info">対称プロパティ</span>
+          <b>両方向を調べる</b>
+          <p class="small">「A は B と互換」は片方向しか書かれていないことがあります。<code>{A 互換 B} UNION {B 互換 A}</code> のように、両方向を調べます。</p>
+        </div>
+        <div class="panel stack">
+          <span class="tag info">推移的プロパティ</span>
+          <b><code>+</code> を付けてたどる</b>
+          <p class="small">「チェーンはキットの一部、キットは自転車の一部」なら、チェーンも自転車の一部です。<code>:partOf+</code> のように <code>+</code> を付けないと、直接の部品しか見つかりません。</p>
+        </div>
+        <div class="panel stack">
+          <span class="tag info">false の読み方</span>
+          <b>false は「記録がない」</b>
+          <p class="small">ASK の <code>false</code> は「互換でない」ではなく「カタログに書かれていない」という意味です。言い切らずに、書かれている事実を伝えます。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="figure" id="trap">
+      <span class="eyebrow">試してみる</span>
+      <h3>推移の落とし穴: Trailfinder 完成車の部品は何個？</h3>
+      <div class="toggle" role="group" aria-label="クエリの切り替え">
+        <button type="button" id="btn-direct" aria-pressed="false">+ なし</button>
+        <button type="button" id="btn-trans" aria-pressed="true">+ あり</button>
+        <span>見つかる部品: <span class="count" id="count">7 件</span></span>
+      </div>
+      <pre class="q" id="query">SELECT ?part WHERE { ?part (:partOf|^:hasPart)<b>+</b> :trailBike }</pre>
+      <div class="ill-frame">
+        <svg class="ill bike" viewBox="0 0 640 340" role="img" aria-label="Trailfinder 完成車の絵。駆動系キットの点線の枠の中に、チェーン、カセット、クランク、ディレイラーがある。">
+          <rect class="f-surf" width="640" height="340"/>
+          <g class="on lv1"><g id="b-wheels">
+            <circle class="pp" cx="150" cy="220" r="82"/><circle class="pp" cx="490" cy="220" r="82"/>
+            <path class="pp" style="stroke-width:1.5" d="M150,138 V302 M68,220 H232 M490,138 V302 M408,220 H572"/>
+          </g></g>
+          <g class="on lv1">
+            <path class="pp" d="M150,220 L300,230 L275,105 Z M275,105 L430,100 L442,140 L300,230 M442,140 L490,220 M275,105 L268,84 M248,82 H290 M430,100 L424,78 H454"/>
+          </g>
+          <g class="on lv2"><circle class="pp teeth" cx="150" cy="220" r="20"/><circle class="pp" cx="150" cy="220" r="11"/></g>
+          <g class="on lv2"><circle class="pp teeth" cx="300" cy="230" r="28"/><path class="pp" d="M300,230 L322,272 M310,272 H336"/></g>
+          <g class="on lv2"><path class="pp" style="stroke-dasharray:4 3" d="M150,200 L300,202 M300,258 L168,266"/></g>
+          <g class="on lv2"><path class="pp" d="M152,232 L164,264"/><circle class="pp" style="stroke-width:3" cx="160" cy="252" r="5"/><circle class="pp" style="stroke-width:3" cx="168" cy="268" r="5"/></g>
+          <g class="on lv1"><rect class="kit" x="112" y="176" width="236" height="112" rx="18"/></g>
+          <text class="kitlbl" x="230" y="314" text-anchor="middle">駆動系キット（点線の中）</text>
+          <text class="note" x="225" y="194" text-anchor="middle">チェーン</text>
+          <text class="note" x="104" y="174" text-anchor="middle">カセット</text>
+          <text class="note" x="354" y="280">クランク</text>
+          <text class="note" x="180" y="282">ディレイラー</text>
+          <text class="note" x="560" y="318" text-anchor="middle">ホイールセット</text>
+          <text class="note" x="360" y="92" text-anchor="middle">フレーム</text>
+        </svg>
+      </div>
+      <div class="panel scroll">
+        <svg id="tree" viewBox="0 0 680 300" width="680" height="300" role="img" aria-label="部品の木: 完成車の直下に駆動系キット、ホイールセット、フレーム。駆動系キットの下にチェーン、カセット、クランク、ディレイラー。">
+          <g class="edges">
+            <path class="edge" d="M430,58 L250,122"/>
+            <path class="edge" d="M430,58 L470,122"/>
+            <path class="edge" d="M430,58 L610,122"/>
+            <path class="edge" d="M250,162 L70,232"/>
+            <path class="edge" d="M250,162 L190,232"/>
+            <path class="edge" d="M250,162 L310,232"/>
+            <path class="edge" d="M250,162 L430,232"/>
+          </g>
+          <text class="lbl" x="300" y="84">partOf</text>
+          <text class="lbl" x="120" y="196">partOf</text>
+          <g class="node root"><rect x="340" y="18" width="180" height="40" rx="8"/><text class="t1" x="430" y="44" text-anchor="middle">完成車 Trailfinder</text></g>
+          <g class="node lv1 on"><rect x="192" y="122" width="116" height="40" rx="8"/><text x="250" y="147" text-anchor="middle" style="font-size:14px">駆動系キット</text></g>
+          <g class="node lv1 on"><rect x="412" y="122" width="116" height="40" rx="8"/><text x="470" y="147" text-anchor="middle" style="font-size:14px">ホイールセット</text></g>
+          <g class="node lv1 on"><rect x="552" y="122" width="116" height="40" rx="8"/><text x="610" y="147" text-anchor="middle" style="font-size:14px">フレーム</text></g>
+          <g class="node lv2 on"><rect x="14" y="232" width="112" height="40" rx="8"/><text x="70" y="257" text-anchor="middle" style="font-size:14px">チェーン</text></g>
+          <g class="node lv2 on"><rect x="134" y="232" width="112" height="40" rx="8"/><text x="190" y="257" text-anchor="middle" style="font-size:14px">カセット</text></g>
+          <g class="node lv2 on"><rect x="254" y="232" width="112" height="40" rx="8"/><text x="310" y="257" text-anchor="middle" style="font-size:14px">クランク</text></g>
+          <g class="node lv2 on"><rect x="374" y="232" width="112" height="40" rx="8"/><text x="430" y="257" text-anchor="middle" style="font-size:14px">ディレイラー</text></g>
+        </svg>
+      </div>
+      <p class="cap" id="trap-note">黄色の枠が、クエリで見つかる部品です。<code>+</code> を付けると、キットの中の部品までたどって7件すべて見つかります。動画の最後で Claude Code が書くのは、このクエリです。</p>
+    </div>
+
+    <div class="figure">
+      <span class="eyebrow">進め方</span>
+      <h3>チュートリアル9の章立て</h3>
+      <ol class="steps">
+        <li><span class="no">0章</span><div class="body"><span class="t">サンプルを用意する <span class="tag hl">動画あり</span></span><span class="see"><code>npm test</code> で7件のテストが通れば準備完了です。</span></div></li>
+        <li><span class="no">1章</span><div class="body"><span class="t">まず自分でコマンドを実行する <span class="tag hl">動画あり</span></span><span class="see">互換性の ASK を自分で実行し、<code>false</code> が返るのを見ます。</span></div></li>
+        <li><span class="no">2章</span><div class="body"><span class="t">Claude Code を起動する <span class="tag hl">動画あり</span></span><span class="see">フォルダを信頼するかの確認が出ます。最初は「No」が選ばれているので、「Yes, I trust this folder」に動かします。</span></div></li>
+        <li><span class="no">3章</span><div class="body"><span class="t">互換性の質問 <span class="tag hl">動画あり</span></span><span class="see">両方向を調べ、「記録はない。12速カセットに合うと書かれているのは12速チェーン」と答えます。</span></div></li>
+        <li><span class="no">4章</span><div class="body"><span class="t">書かれたクエリをビューワーで確かめる</span><span class="see">SPARQL パネルに貼り、結果の行と図のハイライトを見ます。</span></div></li>
+        <li><span class="no">5〜8章</span><div class="body"><span class="t">日本語の質問、出典とライセンス、別名の著者、2つのファイルの組み合わせ</span><span class="see">言語タグ、由来のたどり方、同一人物の判定など、ほかの落とし穴を順に試します。</span></div></li>
+        <li><span class="no">9章</span><div class="body"><span class="t">練習問題: 推移の落とし穴 <span class="tag hl">動画あり</span></span><span class="see">上の「試してみる」と同じです。<code>+</code> の有無で7件と3件が入れ替わります。</span></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIDEO ============ -->
+<section class="chapter" id="video">
+  <div class="chapter-head">
+    <div class="chapter-num">▶</div>
+    <h2>動画の見どころ</h2>
+    <p class="sub">字幕と同じ区切りです。バーの長さは実際の時間に比例しています。</p>
+  </div>
+
+  <div class="stack-lg">
+    <div class="panel timeline">
+      <h3>チュートリアル8（1分59秒）</h3>
+      <div class="tl-bar" aria-hidden="true">
+        <span class="c0" style="width:5.05%"></span><span class="c0" style="width:8.41%">2章</span><span class="c1" style="width:12.62%">3章</span><span class="c1" style="width:7.57%">承認</span><span class="c2" style="width:6.73%">適用</span><span class="c3" style="width:18.50%">4章 断る</span><span class="c3" style="width:18.50%">4章 拒否</span><span class="c0" style="width:22.62%">監査ログ</span>
+      </div>
+      <ul class="tl-list">
+        <li><span class="tm">0:00–0:06</span><span>開始時点のデータ。S-5001 が整備中の V-101 に載ったままです。</span></li>
+        <li><span class="tm">0:06–0:16</span><span>起動時の2つの確認。<span class="look">矢印キーで「Yes」側を選んでいる</span>ところを見てください。</span></li>
+        <li><span class="tm">0:16–0:31</span><span>遅延を直すよう頼みます。<span class="look">書き込む前に、読み取り用ツールで調べている</span>点に注目です。</span></li>
+        <li><span class="tm">0:31–0:40</span><span>承認の画面。ツール名と引数を確かめてから許可します。</span></li>
+        <li><span class="tm">0:40–0:48</span><span>サーバーが適用。エージェントは変更内容と、決められなかったこと（新しい到着時刻）を報告します。</span></li>
+        <li><span class="tm">0:48–1:10</span><span>V-201 を頼むと、<span class="look">アクションを呼ばずに断ります</span>。上の表と同じ3つの理由です。</span></li>
+        <li><span class="tm">1:10–1:32</span><span>それでも呼ばせると、<span class="look">サーバーが3つの理由で拒否</span>します。データは変わりません。</span></li>
+        <li><span class="tm">1:32–1:59</span><span>監査ログ。適用も拒否も記録され、顧客への連絡は outbox に残ります（実際には送りません）。</span></li>
+      </ul>
+    </div>
+
+    <div class="panel timeline">
+      <h3>チュートリアル9（1分25秒）</h3>
+      <div class="tl-bar" aria-hidden="true">
+        <span class="c0" style="width:7.10%"></span><span class="c0" style="width:16.57%">1章 自分で実行</span><span class="c1" style="width:11.83%">2章</span><span class="c2" style="width:28.40%">3章 互換性</span><span class="c3" style="width:36.09%">9章 推移の落とし穴</span>
+      </div>
+      <ul class="tl-list">
+        <li><span class="tm">0:00–0:06</span><span>テスト。チュートリアル7のクエリが、書かれたとおりの結果になるかを確かめます。</span></li>
+        <li><span class="tm">0:06–0:20</span><span>コマンドを自分で実行。<span class="look">ASK が false を返す</span>ところを見てください。</span></li>
+        <li><span class="tm">0:20–0:30</span><span>Claude Code を起動。<code>CLAUDE.md</code> のルールを読み込みます。</span></li>
+        <li><span class="tm">0:30–0:54</span><span>互換性の質問。<span class="look">両方向を調べ、実行したクエリを示してから答えている</span>点に注目です。</span></li>
+        <li><span class="tm">0:54–1:25</span><span>Trailfinder の部品。<span class="look">クエリに <code>+</code> が付いていて、7件見つかる</span>ことを確かめてください。</span></li>
+      </ul>
+    </div>
+    <p class="small muted prose">Claude Code の言い回しは実行のたびに少し変わります。見るべきなのは、どのツールやクエリを使ったかと、サーバーやコマンドが何を返したかです。こちらは毎回同じです。</p>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section class="chapter" id="gloss">
+  <div class="chapter-head">
+    <div class="chapter-num">Aa</div>
+    <h2>用語集</h2>
+    <p class="sub">動画やチュートリアルで出てくる言葉</p>
+  </div>
+  <div class="panel">
+    <dl class="gloss">
+      <dt>オントロジー</dt><dd>「何があり、どうつながり、何をしてよいか」を機械が読める形で書いたもの。</dd>
+      <dt>Object Ontology</dt><dd>オブジェクト（出荷・車両など）、リンク、アクションで業務を表す書き方。この拡張機能では <code>.oont.yaml</code> ファイルです。</dd>
+      <dt>アクション</dt><dd>データを変える、決められた操作。例: <code>assignVehicle</code>（車両に割り当てる）。</dd>
+      <dt>実行条件</dt><dd>アクションを実行してよい条件。1つでも満たさなければ拒否されます。YAML では <code>validations</code>。</dd>
+      <dt>MCP サーバー</dt><dd>AI に道具（ツール）を渡すためのサーバー。このサンプルでは、アクションの確認と記録も担当します。</dd>
+      <dt>監査ログ / outbox</dt><dd>呼び出しの記録と、メール送信などの副作用の送信予定。どちらも <code>state.json</code> に入ります。</dd>
+      <dt>Semantic Web / RDF</dt><dd>事実を「主語・述語・目的語」の3つ組で書く標準。ファイル形式は Turtle（<code>.ttl</code>）。</dd>
+      <dt>SPARQL</dt><dd>RDF の事実を検索するクエリ言語。<code>ASK</code> は true/false、<code>SELECT</code> は表を返します。</dd>
+      <dt>推論器</dt><dd>「対称」「推移的」などの定義から、書かれていない事実を補う仕組み。今回は使わないので、クエリで補います。</dd>
+      <dt>GraphRAG</dt><dd>グラフ（つながった事実）を検索して、その結果を根拠に LLM に答えさせる方法。</dd>
+      <dt>CLAUDE.md</dt><dd>Claude Code が起動時に読む、プロジェクトの指示ファイル。</dd>
+    </dl>
+  </div>
+</section>
+
+<footer>
+  vscode-ontology-viewer のチュートリアル8・9（<code>docs/ja/</code>）と、<code>examples/claude-code/</code> のサンプルの内容をもとにしています。登場する会社・人物・製品はすべて架空です。
+</footer>
+</div>
+
+<script>
+(function () {
+  var direct = document.getElementById('btn-direct');
+  var trans = document.getElementById('btn-trans');
+  var count = document.getElementById('count');
+  var query = document.getElementById('query');
+  var note = document.getElementById('trap-note');
+  var lv2 = document.querySelectorAll('#tree .node.lv2, .bike .lv2');
+  function set(isTransitive) {
+    direct.setAttribute('aria-pressed', String(!isTransitive));
+    trans.setAttribute('aria-pressed', String(isTransitive));
+    lv2.forEach(function (n) {
+      n.classList.toggle('on', isTransitive);
+      n.classList.toggle('dim', !isTransitive);
+    });
+    count.textContent = isTransitive ? '7 件' : '3 件';
+    query.innerHTML = isTransitive
+      ? 'SELECT ?part WHERE { ?part (:partOf|^:hasPart)<b>+</b> :trailBike }'
+      : 'SELECT ?part WHERE { ?part (:partOf|^:hasPart) :trailBike }';
+    note.innerHTML = isTransitive
+      ? '黄色の枠が、クエリで見つかる部品です。<code>+</code> を付けると、キットの中の部品までたどって7件すべて見つかります。動画の最後で Claude Code が書くのは、このクエリです。'
+      : '<code>+</code> がないと、完成車の直下にある3つしか見つかりません。チェーンやカセットはキットの中にあるので漏れます。答えとしては「部品は3つ」になってしまいます。';
+  }
+  direct.addEventListener('click', function () { set(false); });
+  trans.addEventListener('click', function () { set(true); });
+})();
+</script>
+</body>
+</html>

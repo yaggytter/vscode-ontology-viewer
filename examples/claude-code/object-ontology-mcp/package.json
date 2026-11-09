@@ -1,0 +1,26 @@
+{
+  "name": "ontology-viewer-example-object-ontology-mcp",
+  "private": true,
+  "version": "0.0.0",
+  "description": "A small MCP server that serves an Object Ontology's exported action tools to Claude Code and enforces their preconditions. Companion to tutorial 8.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "server": "node --experimental-strip-types --no-warnings src/server.ts",
+    "reset": "node --experimental-strip-types --no-warnings src/reset.ts",
+    "show": "node --experimental-strip-types --no-warnings src/show.ts",
+    "test": "node --experimental-strip-types --no-warnings --test test/*.test.ts",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "typescript": "5.9.3"
+  }
+}

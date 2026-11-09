@@ -1,0 +1,7 @@
+{
+  "ontology": "delivery-ops.oont.yaml",
+  "tools": "delivery-ops.tools.json",
+  "guards": "delivery-ops",
+  "state": "state.json",
+  "now": "2026-05-12T10:30:00+09:00"
+}

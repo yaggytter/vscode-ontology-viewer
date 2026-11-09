@@ -1,0 +1,113 @@
+{
+  "source": {
+    "ontology": "Harbor City Delivery Ops",
+    "format": "object-ontology/1"
+  },
+  "tools": [
+    {
+      "name": "assignVehicle",
+      "description": "Assign vehicle\nPut a pending or delayed shipment on a vehicle. Replaces any earlier vehicle assignment.\nEffects: createLink shipmentVehicle (Shipment → Vehicle); modifyObject Shipment setting status.\nPreconditions (the call is rejected otherwise): The vehicle must be available (not on route or in maintenance). The shipment must fit in the vehicle's remaining capacity. The vehicle must be based at the shipment's origin depot.\nSide effects: The vehicle's driver receives the updated route.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "shipment": {
+            "type": "string",
+            "description": "Primary key (shipmentId) of the Shipment"
+          },
+          "vehicle": {
+            "type": "string",
+            "description": "Primary key (vehicleId) of the Vehicle"
+          }
+        },
+        "required": [
+          "shipment",
+          "vehicle"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "reassignShipment",
+      "description": "Reassign shipment\nMove a shipment from one vehicle to another.\nEffects: deleteLink shipmentVehicle (Shipment → Vehicle); createLink shipmentVehicle (Shipment → Vehicle).\nPreconditions (the call is rejected otherwise): The shipment must not be delivered yet. The target vehicle must be available and have room for the shipment.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "shipment": {
+            "type": "string",
+            "description": "Primary key (shipmentId) of the Shipment"
+          },
+          "fromVehicle": {
+            "type": "string",
+            "description": "Primary key (vehicleId) of the Vehicle"
+          },
+          "toVehicle": {
+            "type": "string",
+            "description": "Primary key (vehicleId) of the Vehicle"
+          }
+        },
+        "required": [
+          "shipment",
+          "fromVehicle",
+          "toVehicle"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "markDelayed",
+      "description": "Mark shipment delayed\nEffects: modifyObject Shipment setting status, delayReason, eta.\nPreconditions (the call is rejected otherwise): The shipment must not be delivered yet.\nSide effects: The customer is notified of the delay and the new ETA on their preferred channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "shipment": {
+            "type": "string",
+            "description": "Primary key (shipmentId) of the Shipment"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "vehicleMaintenance",
+              "traffic",
+              "weather",
+              "addressIssue",
+              "other"
+            ]
+          },
+          "newEta": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Best estimate of the new arrival time."
+          }
+        },
+        "required": [
+          "shipment",
+          "reason",
+          "newEta"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "notifyCustomer",
+      "description": "Notify customer\nSend a short status message about a shipment to its customer.\nEffects: modifyObject Shipment setting customerNotified.\nPreconditions (the call is rejected otherwise): The message must be between 1 and 300 characters.\nSide effects: An email or SMS is sent to the customer, using their preferred channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "shipment": {
+            "type": "string",
+            "description": "Primary key (shipmentId) of the Shipment"
+          },
+          "message": {
+            "type": "string",
+            "description": "Plain-text message, at most 300 characters."
+          }
+        },
+        "required": [
+          "shipment",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -60,6 +60,8 @@ The diagram opens beside your file in the **schema view** by default: one node p
 - [Tutorial 5: Your First Object Ontology](tutorial-5-object-ontology.md)
 - [Tutorial 6: Object Ontology × AI Agents](tutorial-6-object-ontology-ai-agents.md)
 - [Tutorial 7: Semantic Web Ontologies × LLMs](tutorial-7-semantic-web-llm.md)
+- [Tutorial 8: Run It with Claude Code — Object Ontology Agents](tutorial-8-claude-code-object-ontology.md)
+- [Tutorial 9: Run It with Claude Code — Semantic Web Answers](tutorial-9-claude-code-semantic-web.md)
 - [Choosing an Ontology Style](choosing-ontology-style.md) · [Use Cases](use-cases.md)
 - [Format Support](format-support.md)
 - [Troubleshooting](troubleshooting.md)

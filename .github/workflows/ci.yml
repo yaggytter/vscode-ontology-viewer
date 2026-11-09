@@ -47,3 +47,25 @@ jobs:
           cache: npm
       - run: npm ci
       - run: xvfb-run -a npm run test:integration
+
+  examples:
+    name: Claude Code examples (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [object-ontology-mcp, semantic-web-sparql]
+    defaults:
+      run:
+        working-directory: examples/claude-code/${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: examples/claude-code/${{ matrix.example }}/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev
+      - run: npm run typecheck
+      - run: npm test

@@ -20,6 +20,8 @@ coverage/
 
 # Local AI coding-tool configuration (not part of the extension)
 .claude/
+# The Claude Code examples ship their project settings (permissions) on purpose.
+!examples/claude-code/**/.claude/
 .codex/
 .entire/
 .serena/
@@ -31,3 +33,6 @@ pub-repo/
 local/
 
 docs/plans
+
+# Maintainer-only video recording tools for tutorials 8 and 9 (kept locally, not published)
+examples/claude-code/recordings/

@@ -8,6 +8,8 @@ LLM は、答えを知っていてもいなくても、同じように流暢に�
 - SPARQL は**開いているドキュメントだけ**を対象に実行されます。一度に扱えるのは1ファイルです。
 - **推論器はありません**。サンプルには `owl:TransitiveProperty`、`owl:SymmetricProperty`、`owl:inverseOf` が書かれていますが、そこから新しい事実は導かれません。推移や対称から導かれる関係は、`+` や `^` といったプロパティパス、または `UNION` でクエリに書く必要があります。LLM に SPARQL を書かせるときに最も重要な点です（2章で詳しく扱います）。
 
+これらの場面を Claude Code で実際に動かす手順は [チュートリアル9](tutorial-9-claude-code-semantic-web.md) にあります。
+
 各サンプルは **「Ontology Viewer: サンプルオントロジーを作成...」** から開けます。選択肢の名前は各章に書いてあります。表を短くするため、結果はローカル名（`:chainR11` など）で示します。
 
 ## 1. GraphRAG: 記憶ではなくグラフから答える
@@ -293,6 +295,7 @@ SELECT ?action ?property ?concept ?ja WHERE {
 
 ## 次のステップ
 
+- [チュートリアル9: Claude Code で動かす — Semantic Web と根拠のある回答](tutorial-9-claude-code-semantic-web.md) — これらのクエリを Claude Code に書かせて実行し、ビューワーで確かめます。
 - [チュートリアル4: SPARQL で問い合わせる](tutorial-4-sparql.md) — SPARQL パネルの詳しい使い方。
 - [チュートリアル5: はじめての Object Ontology](tutorial-5-object-ontology.md) と [チュートリアル6: Object Ontology × AI エージェント](tutorial-6-object-ontology-ai-agents.md) — ハイブリッド構成の業務側。
 - [ユースケース集](use-cases.md) — どの業務場面にどちらの方式が合うか。

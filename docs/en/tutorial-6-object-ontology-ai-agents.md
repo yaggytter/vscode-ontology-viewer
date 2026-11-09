@@ -6,6 +6,8 @@ We'll use **Harbor City Delivery Ops**. Run **Ontology Viewer: Create Sample Ont
 
 The extension makes no network calls and does not call any LLM. It produces text and JSON for you to hand to the agent of your choice.
 
+To run this setup end to end, with Claude Code as the agent and a ready-made MCP server, see [Tutorial 8](tutorial-8-claude-code-object-ontology.md).
+
 ## Why an ontology helps an agent
 
 - **Shared vocabulary.** The agent sees exact API names such as `Shipment`, `vehicleId` and `assignVehicle`, so it does not have to guess at field names.
@@ -252,6 +254,7 @@ The Actions panel shows the new line under **Rejected unless** right away. Re-ru
 
 ## Next steps
 
+- [Tutorial 8: Run It with Claude Code — Object Ontology Agents](tutorial-8-claude-code-object-ontology.md): run this tutorial's scenario with Claude Code and a working MCP server.
 - [Tutorial 7: Semantic Web Ontologies × LLMs](tutorial-7-semantic-web-llm.md): use the OWL/RDF samples for grounding, glossaries and provenance.
 - [Choosing an Ontology Style](choosing-ontology-style.md): when to use an Object Ontology, and when to use OWL/RDF.
 

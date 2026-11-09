@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__delivery-ops__list_objects",
+      "mcp__delivery-ops__get_object",
+      "mcp__delivery-ops__follow_link"
+    ],
+    "deny": [
+      "Edit(./state.json)",
+      "Edit(./delivery-ops.tools.json)",
+      "Edit(./delivery-ops.oont.yaml)"
+    ]
+  }
+}

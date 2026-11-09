@@ -6,6 +6,8 @@
 
 拡張機能はネットワーク通信を行わず、LLM も呼び出しません。作るのはテキストと JSON だけで、それをどのエージェントに渡すかは利用者が決めます。
 
+Claude Code をエージェントにして、完成品の MCP サーバーでこの構成を実際に動かす手順は [チュートリアル8](tutorial-8-claude-code-object-ontology.md) にあります。
+
 ## オントロジーがエージェントの役に立つ理由
 
 - **語彙をそろえられる。** エージェントは `Shipment`、`vehicleId`、`assignVehicle` といった正確な API 名を受け取るので、項目名を推測せずに済みます。
@@ -252,6 +254,7 @@ read the reason and choose another option instead of retrying unchanged.
 
 ## 次のステップ
 
+- [チュートリアル8: Claude Code で動かす — Object Ontology とエージェント](tutorial-8-claude-code-object-ontology.md): このチュートリアルのシナリオを、Claude Code と実際に動く MCP サーバーで試します。
 - [チュートリアル7: Semantic Web オントロジー × LLM](tutorial-7-semantic-web-llm.md): OWL/RDF のサンプルを、回答の裏付け、用語集、来歴の記録に使います。
 - [オントロジー方式の選び方](choosing-ontology-style.md): Object Ontology と OWL/RDF をどう使い分けるかを説明しています。
 

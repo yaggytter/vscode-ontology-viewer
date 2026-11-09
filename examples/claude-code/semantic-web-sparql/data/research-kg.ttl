@@ -1,0 +1,77 @@
+# Tidewater Research Graph — a schema.org-based scholarly knowledge graph.
+# LLM/AI use: entity linking and cross-organization integration — schema:sameAs ties
+# local records to global identifiers so the same person or paper merges across sources.
+#
+# People, institutes, papers, and identifiers are fictional; example.org/ids stands in
+# for a global identifier registry.
+
+@prefix : <https://example.org/research-kg#> .
+@prefix schema: <https://schema.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.org/research-kg> a owl:Ontology ;
+  rdfs:label "Tidewater Research Graph"@en, "タイドウォーター研究グラフ"@ja ;
+  rdfs:comment "A fictional scholarly knowledge graph using schema.org terms. Purpose: entity linking and cross-organization integration — every person, organization, and article carries schema:sameAs links to global IRIs, so records from different institutes can be joined and an LLM can disambiguate entities with the same name."@en .
+
+# --- Organizations ---
+:coastalInstitute a schema:Organization ;
+  schema:name "Coastal Systems Institute" ;
+  schema:sameAs <https://example.org/ids/org/0001> .
+:northHarborUniv a schema:Organization ;
+  schema:name "North Harbor University" ;
+  schema:sameAs <https://example.org/ids/org/0002> .
+:marineDataLab a schema:Organization ;
+  schema:name "Marine Data Lab" ;
+  schema:parentOrganization :northHarborUniv ;
+  schema:sameAs <https://example.org/ids/org/0003> .
+
+# --- People ---
+:aikoTanabe a schema:Person ;
+  schema:name "Aiko Tanabe" ; schema:alternateName "田辺 愛子"@ja ;
+  schema:affiliation :coastalInstitute ;
+  schema:sameAs <https://example.org/ids/person/0101> .
+:marcoVell a schema:Person ;
+  schema:name "Marco Vell" ;
+  schema:affiliation :marineDataLab ;
+  schema:sameAs <https://example.org/ids/person/0102> .
+:priyaRaman a schema:Person ;
+  schema:name "Priya Raman" ;
+  schema:affiliation :northHarborUniv, :coastalInstitute ;
+  schema:sameAs <https://example.org/ids/person/0103> .
+# A second record for the same researcher, as imported from a partner's system.
+# The shared sameAs IRI is what lets the two records be linked.
+:partnerRecordP0103 a schema:Person ;
+  schema:name "P. Raman" ;
+  schema:affiliation :marineDataLab ;
+  schema:sameAs <https://example.org/ids/person/0103> .
+
+# --- Datasets ---
+:tideGaugeSeries a schema:Dataset ;
+  schema:name "Tide Gauge Series 2015–2025" ;
+  schema:creator :marineDataLab ;
+  schema:license <https://example.org/licenses/open-research-1.0> ;
+  schema:sameAs <https://example.org/ids/dataset/0501> .
+
+# --- Articles ---
+:paperEstuary a schema:ScholarlyArticle ;
+  schema:name "Sediment Drift in Shallow Estuaries" ;
+  schema:datePublished "2024-05-14"^^xsd:date ;
+  schema:author :aikoTanabe, :priyaRaman ;
+  schema:about "estuary sediment transport" ;
+  schema:sameAs <https://example.org/ids/work/1001> .
+:paperTideModel a schema:ScholarlyArticle ;
+  schema:name "A Lightweight Tide Prediction Model" ;
+  schema:datePublished "2025-02-03"^^xsd:date ;
+  schema:author :marcoVell, :partnerRecordP0103 ;
+  schema:citation :paperEstuary ;
+  schema:isBasedOn :tideGaugeSeries ;
+  schema:sameAs <https://example.org/ids/work/1002> .
+:paperFloodRisk a schema:ScholarlyArticle ;
+  schema:name "Coastal Flood Risk from Combined Tide and Surge" ;
+  schema:datePublished "2026-01-20"^^xsd:date ;
+  schema:author :aikoTanabe, :marcoVell ;
+  schema:citation :paperEstuary, :paperTideModel ;
+  schema:isBasedOn :tideGaugeSeries ;
+  schema:sameAs <https://example.org/ids/work/1003> .
