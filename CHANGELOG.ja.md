@@ -4,6 +4,15 @@ Ontology Viewerの主な変更を記録しています。
 
 [English](CHANGELOG.md)
 
+## [Unreleased]
+
+## [0.5.1] — Claude Code で動かす実践チュートリアル
+
+拡張機能そのものは 0.5.0 から変わっていません。このリリースでは、ドキュメントとサンプルを追加しました。
+
+- **Claude Code で動かす実践チュートリアル** — [チュートリアル8](docs/ja/tutorial-8-claude-code-object-ontology.md) では、チュートリアル6の配送シナリオを、Claude Code をエージェントにし、完成品の MCP サーバー（`examples/claude-code/object-ontology-mcp`）で動かします。サーバーはエクスポートしたアクションを公開し、実行条件をすべて確認し、確認処理がまだない実行条件を持つアクションは拒否します。[チュートリアル9](docs/ja/tutorial-9-claude-code-semantic-web.md) では、チュートリアル7の質問に Claude Code が答えます。SPARQL パネルと同じエンジンを使うローカルのコマンド（`examples/claude-code/semantic-web-sparql`）で、クエリを書いて実行します。載せた会話の記録は、すべて実際に動かしたものです。サンプルには専用のテストと CI ジョブがあり、同梱サンプルとエクスポート結果のコピーが元と一致することをリポジトリ直下のテストで確かめています。公開する拡張機能には含まれません。
+- **実践チュートリアルのイラスト付き予習ノート** — `examples/claude-code/guide` で、チュートリアル8・9の場面、課題、進め方を、イラストと図で説明します。日本語版と英語版があり、推移的なクエリの落とし穴を操作して確かめられる図と、動画の見どころも含みます。[GitHub Pages](https://yaggytter.github.io/vscode-ontology-viewer/index.ja.html) で公開し、チュートリアル8・9からリンクしています。
+
 ## [0.5.0] — Object Ontology と AI エージェント連携
 
 - **Object Ontology ドキュメント**（`*.oont.yaml`、`*.oont.yml`、`*.oont.json`）に対応しました。Palantir Foundry などの業務プラットフォームに着想を得た、オブジェクト中心の新しい形式です。型付きプロパティと主キーを持つオブジェクト型、カーディナリティ付きのリンク型（外部キーでの定義も可）、インターフェース、**アクション型**（パラメーター、ルール、検証、副作用）、任意のサンプルオブジェクトを書けます。形式は本拡張機能独自のもので、Palantir のファイル形式ではありません。ファイルは YAML / JSON の言語モードのまま、ファイル名（無題のドキュメントでは先頭キーの `objectOntology:`）で判別するため、一般の YAML や JSON のファイルを奪うことはありません。
