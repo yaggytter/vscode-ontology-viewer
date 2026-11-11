@@ -1,0 +1,200 @@
+# Scenario: shipment S-5001 is delayed because its van V-101 went into
+# maintenance at depot D-01. Van V-102 at the same depot is available and has
+# spare capacity. An agent can detect the delay, follow Shipment -> vehicle ->
+# depot -> vehicles to find V-102, then call assignVehicle and notifyCustomer.
+objectOntology: 1
+name: Harbor City Delivery Ops
+description: >-
+  Last-mile delivery for a fictional harbor city: depots, vehicles, drivers,
+  shipments and their stops, plus the dispatch actions an AI agent may call.
+
+interfaces:
+  Trackable:
+    description: Anything with a current position on the map.
+    properties:
+      lat: { type: double, unit: deg }
+      lon: { type: double, unit: deg }
+
+objectTypes:
+  Depot:
+    description: A warehouse where vehicles are based and shipments are loaded.
+    primaryKey: depotId
+    titleProperty: name
+    implements: [Trackable]
+    properties:
+      depotId: { type: string }
+      name: { type: string }
+      lat: { type: double, unit: deg }
+      lon: { type: double, unit: deg }
+
+  Vehicle:
+    description: A delivery van, truck or cargo bike.
+    primaryKey: vehicleId
+    titleProperty: plate
+    implements: [Trackable]
+    properties:
+      vehicleId: { type: string }
+      plate: { type: string }
+      kind: { type: string, enum: [van, truck, cargoBike] }
+      status: { type: string, enum: [available, onRoute, maintenance] }
+      capacityKg: { type: double, unit: kg }
+      loadKg: { type: double, unit: kg, description: "Weight already assigned to this vehicle." }
+      depotId: { type: string }
+      lat: { type: double, unit: deg }
+      lon: { type: double, unit: deg }
+
+  Driver:
+    description: A person licensed to drive a delivery vehicle.
+    primaryKey: driverId
+    titleProperty: name
+    properties:
+      driverId: { type: string }
+      name: { type: string }
+      onShift: { type: boolean }
+
+  Customer:
+    description: The business or person receiving a shipment.
+    primaryKey: customerId
+    titleProperty: name
+    properties:
+      customerId: { type: string }
+      name: { type: string }
+      email: { type: string }
+      preferredChannel: { type: string, enum: [email, sms] }
+
+  Shipment:
+    description: One parcel or pallet to be delivered.
+    primaryKey: shipmentId
+    titleProperty: shipmentId
+    properties:
+      shipmentId: { type: string }
+      status: { type: string, enum: [pending, assigned, inTransit, delayed, delivered] }
+      weightKg: { type: double, unit: kg }
+      promisedBy: { type: timestamp }
+      eta: { type: timestamp }
+      delayReason: { type: string, enum: [vehicleMaintenance, traffic, weather, addressIssue, other] }
+      customerNotified: { type: boolean }
+      customerId: { type: string }
+
+  DeliveryStop:
+    displayName: Delivery stop
+    description: A drop-off point on a shipment's route.
+    primaryKey: stopId
+    titleProperty: address
+    properties:
+      stopId: { type: string }
+      address: { type: string }
+      sequence: { type: integer }
+
+linkTypes:
+  vehicleDepot:
+    displayName: Based at
+    foreignKey: Vehicle.depotId
+    from: { objectType: Vehicle, name: depot, cardinality: one }
+    to: { objectType: Depot, name: vehicles, cardinality: many }
+  vehicleDriver:
+    from: { objectType: Vehicle, name: driver, cardinality: one }
+    to: { objectType: Driver, name: vehicle, cardinality: one }
+  shipmentCustomer:
+    displayName: Delivered to
+    foreignKey: Shipment.customerId
+    from: { objectType: Shipment, name: customer, cardinality: one }
+    to: { objectType: Customer, name: shipments, cardinality: many }
+  shipmentOrigin:
+    from: { objectType: Shipment, name: originDepot, cardinality: one }
+    to: { objectType: Depot, name: outboundShipments, cardinality: many }
+  shipmentVehicle:
+    displayName: Carried by
+    from: { objectType: Shipment, name: vehicle, cardinality: one }
+    to: { objectType: Vehicle, name: shipments, cardinality: many }
+  shipmentStops:
+    from: { objectType: Shipment, name: stops, cardinality: many }
+    to: { objectType: DeliveryStop, name: shipment, cardinality: one }
+
+actionTypes:
+  assignVehicle:
+    displayName: Assign vehicle
+    description: Put a pending or delayed shipment on a vehicle. Replaces any earlier vehicle assignment.
+    parameters:
+      shipment: { type: objectRef, objectType: Shipment, required: true }
+      vehicle: { type: objectRef, objectType: Vehicle, required: true }
+    rules:
+      - { op: createLink, linkType: shipmentVehicle, from: shipment, to: vehicle }
+      - { op: modifyObject, objectType: Shipment, object: shipment, set: { status: assigned } }
+    validations:
+      - description: The vehicle must be available (not on route or in maintenance).
+        expr: "vehicle.status == 'available'"
+      - description: The shipment must fit in the vehicle's remaining capacity.
+        expr: "vehicle.loadKg + shipment.weightKg <= vehicle.capacityKg"
+      - description: The vehicle must be based at the shipment's origin depot.
+        expr: "vehicle.depot == shipment.originDepot"
+    sideEffects:
+      - The vehicle's driver receives the updated route.
+
+  reassignShipment:
+    displayName: Reassign shipment
+    description: Move a shipment from one vehicle to another.
+    parameters:
+      shipment: { type: objectRef, objectType: Shipment, required: true }
+      fromVehicle: { type: objectRef, objectType: Vehicle, required: true }
+      toVehicle: { type: objectRef, objectType: Vehicle, required: true }
+    rules:
+      - { op: deleteLink, linkType: shipmentVehicle, from: shipment, to: fromVehicle }
+      - { op: createLink, linkType: shipmentVehicle, from: shipment, to: toVehicle }
+    validations:
+      - description: The shipment must not be delivered yet.
+        expr: "shipment.status != 'delivered'"
+      - description: The target vehicle must be available and have room for the shipment.
+        expr: "toVehicle.status == 'available' && toVehicle.loadKg + shipment.weightKg <= toVehicle.capacityKg"
+
+  markDelayed:
+    displayName: Mark shipment delayed
+    parameters:
+      shipment: { type: objectRef, objectType: Shipment, required: true }
+      reason: { type: string, required: true, enum: [vehicleMaintenance, traffic, weather, addressIssue, other] }
+      newEta: { type: timestamp, required: true, description: "Best estimate of the new arrival time." }
+    rules:
+      - { op: modifyObject, objectType: Shipment, object: shipment, set: { status: delayed, delayReason: $reason, eta: $newEta } }
+    validations:
+      - description: The shipment must not be delivered yet.
+        expr: "shipment.status != 'delivered'"
+    sideEffects:
+      - The customer is notified of the delay and the new ETA on their preferred channel.
+
+  notifyCustomer:
+    displayName: Notify customer
+    description: Send a short status message about a shipment to its customer.
+    parameters:
+      shipment: { type: objectRef, objectType: Shipment, required: true }
+      message: { type: string, required: true, description: "Plain-text message, at most 300 characters." }
+    rules:
+      - { op: modifyObject, objectType: Shipment, object: shipment, set: { customerNotified: true } }
+    validations:
+      - description: The message must be between 1 and 300 characters.
+        expr: "len(message) > 0 && len(message) <= 300"
+    sideEffects:
+      - An email or SMS is sent to the customer, using their preferred channel.
+
+objects:
+  Depot:
+    - { depotId: D-01, name: Harbor North Depot, lat: 35.4521, lon: 139.6402 }
+    - { depotId: D-02, name: Eastside Depot, lat: 35.4389, lon: 139.6655 }
+  Driver:
+    - { driverId: DR-01, name: Ren Ishida, onShift: false }
+    - { driverId: DR-02, name: Lena Ortiz, onShift: true }
+    - { driverId: DR-03, name: Kai Morgan, onShift: true }
+  Vehicle:
+    - { vehicleId: V-101, plate: HC-101, kind: van, status: maintenance, capacityKg: 800, loadKg: 120, depotId: D-01, lat: 35.4521, lon: 139.6402, driver: DR-01 }
+    - { vehicleId: V-102, plate: HC-102, kind: van, status: available, capacityKg: 1000, loadKg: 350, depotId: D-01, lat: 35.4524, lon: 139.6398, driver: DR-02 }
+    - { vehicleId: V-201, plate: HC-201, kind: truck, status: onRoute, capacityKg: 3000, loadKg: 2900, depotId: D-02, lat: 35.4467, lon: 139.6581, driver: DR-03 }
+  Customer:
+    - { customerId: C-01, name: Bayview Bakery, email: orders@bayview-bakery.example.org, preferredChannel: email }
+    - { customerId: C-02, name: Pier 7 Bike Shop, email: hello@pier7-bikes.example.org, preferredChannel: sms }
+  Shipment:
+    - { shipmentId: S-5001, status: delayed, weightKg: 120, promisedBy: "2026-05-12T11:00:00+09:00", eta: "2026-05-12T15:30:00+09:00", delayReason: vehicleMaintenance, customerNotified: false, customerId: C-01, originDepot: D-01, vehicle: V-101, stops: [ST-01] }
+    - { shipmentId: S-5002, status: assigned, weightKg: 350, promisedBy: "2026-05-12T13:00:00+09:00", eta: "2026-05-12T12:40:00+09:00", customerNotified: false, customerId: C-02, originDepot: D-01, vehicle: V-102, stops: [ST-02] }
+    - { shipmentId: S-5003, status: inTransit, weightKg: 2900, promisedBy: "2026-05-12T16:00:00+09:00", eta: "2026-05-12T15:10:00+09:00", customerNotified: true, customerId: C-01, originDepot: D-02, vehicle: V-201, stops: [ST-03] }
+  DeliveryStop:
+    - { stopId: ST-01, address: 3-1 Bayview Street, sequence: 1 }
+    - { stopId: ST-02, address: 7 Pier Road, sequence: 1 }
+    - { stopId: ST-03, address: 12 Canal Lane, sequence: 1 }

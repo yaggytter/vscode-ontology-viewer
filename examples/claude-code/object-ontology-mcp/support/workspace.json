@@ -1,0 +1,7 @@
+{
+  "ontology": "support-desk.oont.yaml",
+  "tools": "support-desk.tools.json",
+  "guards": "support-desk",
+  "state": "state.json",
+  "now": "2026-05-10T12:00:00+09:00"
+}

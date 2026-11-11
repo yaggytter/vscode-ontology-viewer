@@ -165,6 +165,8 @@ See [Format Support](docs/en/format-support.md) for parser and editing details.
 - [Your First Object Ontology](docs/en/tutorial-5-object-ontology.md)
 - [Object Ontology × AI Agents](docs/en/tutorial-6-object-ontology-ai-agents.md)
 - [Semantic Web Ontologies × LLMs](docs/en/tutorial-7-semantic-web-llm.md)
+- [Run It with Claude Code — Object Ontology Agents](docs/en/tutorial-8-claude-code-object-ontology.md)
+- [Run It with Claude Code — Semantic Web Answers](docs/en/tutorial-9-claude-code-semantic-web.md)
 - [Choosing an Ontology Style](docs/en/choosing-ontology-style.md) · [Use Cases](docs/en/use-cases.md)
 - [Format Support](docs/en/format-support.md)
 - [Troubleshooting](docs/en/troubleshooting.md)

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "delivery-ops": {
+      "command": "node",
+      "args": [
+        "--experimental-strip-types",
+        "--no-warnings",
+        "../src/server.ts",
+        "."
+      ]
+    }
+  }
+}

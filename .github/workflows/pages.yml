@@ -1,0 +1,56 @@
+name: Publish primer to GitHub Pages
+
+# Publishes only examples/claude-code/guide (the illustrated primer for tutorials 8 and 9).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/claude-code/guide/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp -R examples/claude-code/guide/. _site/
+          # The site root sends readers to the page in their browser's language.
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Ontology × Claude Code Primer</title>
+          <script>
+            var ja = (navigator.languages || [navigator.language || ""]).some(function (l) { return /^ja\b/i.test(l); });
+            location.replace(ja ? "index.ja.html" : "index.en.html");
+          </script>
+          </head>
+          <body>
+          <p><a href="index.en.html">English</a> / <a href="index.ja.html">日本語</a></p>
+          </body>
+          </html>
+          HTML
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

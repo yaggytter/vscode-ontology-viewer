@@ -1,0 +1,83 @@
+# Northwind Freight Glossary — a bilingual (en/ja) business glossary as SKOS.
+# 北風フレイト用語集 — 英日バイリンガルの業務用語集（SKOS）です。
+# LLM/AI use: query expansion and terminology normalization for RAG — map synonyms,
+# abbreviations, and Japanese terms ("ETA", "到着予定時刻") to one canonical concept.
+#
+# The company, terms, and definitions are original and fictional.
+
+@prefix : <https://example.org/glossary-skos#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<https://example.org/glossary-skos> a owl:Ontology ;
+  rdfs:label "Northwind Freight Glossary"@en, "北風フレイト用語集"@ja ;
+  rdfs:comment "A bilingual business glossary for a fictional logistics company. Purpose: query expansion and terminology normalization for LLM/RAG — a retriever expands a user's term to its prefLabel, altLabels (synonyms, abbreviations), and the other language before searching."@en .
+
+:scheme a skos:ConceptScheme ;
+  skos:prefLabel "Northwind Freight Glossary"@en, "北風フレイト用語集"@ja ;
+  skos:hasTopConcept :shipment, :transport, :warehouse .
+
+# --- Top concepts ---
+:shipment a skos:Concept ; skos:inScheme :scheme ; skos:topConceptOf :scheme ;
+  skos:prefLabel "Shipment"@en, "出荷"@ja ;
+  skos:altLabel "Consignment"@en, "貨物"@ja ;
+  skos:definition "A set of goods moved together from one shipper to one consignee under a single booking."@en,
+    "1件の予約で荷主から荷受人へまとめて運ばれる貨物。"@ja ;
+  skos:narrower :parcel, :palletLoad .
+:transport a skos:Concept ; skos:inScheme :scheme ; skos:topConceptOf :scheme ;
+  skos:prefLabel "Transport"@en, "輸送"@ja ;
+  skos:definition "Moving shipments between locations."@en, "拠点間で貨物を運ぶこと。"@ja ;
+  skos:narrower :lineHaul, :lastMile .
+:warehouse a skos:Concept ; skos:inScheme :scheme ; skos:topConceptOf :scheme ;
+  skos:prefLabel "Warehouse"@en, "倉庫"@ja ;
+  skos:altLabel "DC"@en, "Distribution Center"@en, "物流センター"@ja ;
+  skos:definition "A facility where goods are received, stored, and dispatched."@en,
+    "貨物を入荷・保管・出荷する施設。"@ja ;
+  skos:narrower :crossDock .
+
+# --- Shipment types ---
+:parcel a skos:Concept ; skos:inScheme :scheme ; skos:broader :shipment ;
+  skos:prefLabel "Parcel"@en, "小口貨物"@ja ;
+  skos:altLabel "Package"@en, "小包"@ja ;
+  skos:definition "A shipment small enough to be handled by one person without equipment."@en .
+:palletLoad a skos:Concept ; skos:inScheme :scheme ; skos:broader :shipment ;
+  skos:prefLabel "Pallet Load"@en, "パレット貨物"@ja ;
+  skos:altLabel "LTL"@en, "Less Than Truckload"@en, "混載"@ja ;
+  skos:definition "A shipment on one or more pallets that shares a truck with other customers' freight."@en .
+
+# --- Transport legs ---
+:lineHaul a skos:Concept ; skos:inScheme :scheme ; skos:broader :transport ;
+  skos:prefLabel "Line Haul"@en, "幹線輸送"@ja ;
+  skos:altLabel "Trunk Route"@en ;
+  skos:definition "Long-distance transport between hubs."@en, "拠点間の長距離輸送。"@ja ;
+  skos:related :crossDock .
+:lastMile a skos:Concept ; skos:inScheme :scheme ; skos:broader :transport ;
+  skos:prefLabel "Last Mile"@en, "ラストワンマイル"@ja ;
+  skos:altLabel "Final Mile"@en, "Home Delivery"@en, "配達"@ja ;
+  skos:definition "The final leg from a local depot to the recipient's door."@en,
+    "最寄りの営業所から受取人の玄関までの最終区間。"@ja ;
+  skos:narrower :eta, :proofOfDelivery, :onTimeRate .
+:crossDock a skos:Concept ; skos:inScheme :scheme ; skos:broader :warehouse ;
+  skos:prefLabel "Cross-Dock"@en, "クロスドック"@ja ;
+  skos:altLabel "Transfer Center"@en, "通過型センター"@ja ;
+  skos:definition "A facility where inbound freight is transferred to outbound vehicles with little or no storage."@en .
+
+# --- Delivery metrics and documents ---
+:eta a skos:Concept ; skos:inScheme :scheme ; skos:broader :lastMile ;
+  skos:prefLabel "Estimated Time of Arrival"@en, "到着予定時刻"@ja ;
+  skos:altLabel "ETA"@en, "Arrival Estimate"@en, "到着予定"@ja ;
+  skos:definition "The predicted time a vehicle or shipment reaches its destination."@en,
+    "車両または貨物が目的地に着くと予測される時刻。"@ja ;
+  skos:related :onTimeRate .
+:proofOfDelivery a skos:Concept ; skos:inScheme :scheme ; skos:broader :lastMile ;
+  skos:prefLabel "Proof of Delivery"@en, "配達証明"@ja ;
+  skos:altLabel "POD"@en, "受領書"@ja ;
+  skos:definition "A signed or photographed record that the recipient received the shipment."@en,
+    "受取人が貨物を受け取ったことを示す署名または写真の記録。"@ja .
+:onTimeRate a skos:Concept ; skos:inScheme :scheme ; skos:broader :lastMile ;
+  skos:prefLabel "On-Time Delivery Rate"@en, "定時配達率"@ja ;
+  skos:altLabel "OTD"@en, "OTIF"@en, "時間内配達率"@ja ;
+  skos:definition "Share of shipments delivered within the promised window."@en,
+    "約束した時間帯内に届いた出荷の割合。"@ja ;
+  skos:related :eta .

@@ -60,6 +60,8 @@ VS Code Marketplace から **Ontology Viewer** をインストールします（
 - [チュートリアル5: はじめての Object Ontology](tutorial-5-object-ontology.md)
 - [チュートリアル6: Object Ontology × AI エージェント](tutorial-6-object-ontology-ai-agents.md)
 - [チュートリアル7: Semantic Web オントロジー × LLM](tutorial-7-semantic-web-llm.md)
+- [チュートリアル8: Claude Code で動かす — Object Ontology とエージェント](tutorial-8-claude-code-object-ontology.md)
+- [チュートリアル9: Claude Code で動かす — Semantic Web と根拠のある回答](tutorial-9-claude-code-semantic-web.md)
 - [オントロジー方式の選び方](choosing-ontology-style.md)・[ユースケース集](use-cases.md)
 - [対応形式](format-support.md)
 - [トラブルシューティング](troubleshooting.md)

@@ -1,0 +1,152 @@
+{
+  "source": {
+    "ontology": "Lumen Gadgets Support Desk",
+    "format": "object-ontology/1"
+  },
+  "tools": [
+    {
+      "name": "issueRefund",
+      "description": "Issue refund\nRefund a small amount immediately. Use requestRefundApproval for anything over 10,000 JPY.\nEffects: createObject Refund setting refundId, amountYen, reason, status; createLink refundOrder (Refund → Order); createLink refundTicket (Refund → Ticket).\nPreconditions (the call is rejected otherwise): The amount must not exceed what is left of the order total after earlier refunds. The order must have been placed within the last 30 days. The amount must be 10,000 JPY or less; larger refunds need requestRefundApproval.\nSide effects: The customer's original payment method is credited and a receipt is emailed.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "refundId": {
+            "type": "string"
+          },
+          "ticket": {
+            "type": "string",
+            "description": "Primary key (ticketId) of the Ticket"
+          },
+          "order": {
+            "type": "string",
+            "description": "Primary key (orderId) of the Order"
+          },
+          "amountYen": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "damaged",
+              "wrongItem",
+              "lateDelivery",
+              "other"
+            ]
+          }
+        },
+        "required": [
+          "refundId",
+          "ticket",
+          "order",
+          "amountYen",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "requestRefundApproval",
+      "description": "Request refund approval\nAsk a support lead to approve a refund over 10,000 JPY.\nEffects: createObject Refund setting refundId, amountYen, reason, status; createLink refundOrder (Refund → Order); createLink refundTicket (Refund → Ticket).\nPreconditions (the call is rejected otherwise): The amount must not exceed what is left of the order total after earlier refunds. The order must have been placed within the last 30 days.\nSide effects: A support lead is asked to approve or reject the refund. No money moves until they do.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "refundId": {
+            "type": "string"
+          },
+          "ticket": {
+            "type": "string",
+            "description": "Primary key (ticketId) of the Ticket"
+          },
+          "order": {
+            "type": "string",
+            "description": "Primary key (orderId) of the Order"
+          },
+          "amountYen": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "damaged",
+              "wrongItem",
+              "lateDelivery",
+              "other"
+            ]
+          }
+        },
+        "required": [
+          "refundId",
+          "ticket",
+          "order",
+          "amountYen",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "escalateTicket",
+      "description": "Escalate ticket\nEffects: createLink ticketAssignee (Ticket → SupportStaff); modifyObject Ticket setting status, priority.\nPreconditions (the call is rejected otherwise): Tickets can only be escalated to a support lead.\nSide effects: The lead is notified with the escalation note.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ticket": {
+            "type": "string",
+            "description": "Primary key (ticketId) of the Ticket"
+          },
+          "lead": {
+            "type": "string",
+            "description": "Primary key (staffId) of the SupportStaff"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticket",
+          "lead",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "replyToCustomer",
+      "description": "Reply to customer\nEffects: modifyObject Ticket setting status.\nPreconditions (the call is rejected otherwise): The ticket must not be closed.\nSide effects: The message is emailed to the customer who raised the ticket.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ticket": {
+            "type": "string",
+            "description": "Primary key (ticketId) of the Ticket"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticket",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "closeTicket",
+      "description": "Close ticket\nEffects: modifyObject Ticket setting status.\nPreconditions (the call is rejected otherwise): No refund on the ticket may still be waiting for approval.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ticket": {
+            "type": "string",
+            "description": "Primary key (ticketId) of the Ticket"
+          }
+        },
+        "required": [
+          "ticket"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

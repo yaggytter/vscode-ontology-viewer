@@ -4,6 +4,15 @@ All notable changes to the Ontology Viewer extension are documented in this file
 
 [日本語](CHANGELOG.ja.md)
 
+## [Unreleased]
+
+## [0.5.1] — Hands-on tutorials with Claude Code
+
+The extension itself is unchanged from 0.5.0; this release adds documentation and examples.
+
+- **Hands-on tutorials with Claude Code** — [Tutorial 8](docs/en/tutorial-8-claude-code-object-ontology.md) runs tutorial 6's delivery scenario with Claude Code as the agent and a ready-made MCP server (`examples/claude-code/object-ontology-mcp`). The server serves the exported action tools, checks every precondition, and refuses an action whose check is not implemented yet. [Tutorial 9](docs/en/tutorial-9-claude-code-semantic-web.md) has Claude Code answer tutorial 7's questions by writing and running SPARQL with a local command (`examples/claude-code/semantic-web-sparql`) that uses the same engine as the SPARQL panel. Every transcript comes from a real run. The examples have their own tests and CI job, a root test keeps their copies of the samples and exports in sync, and they are not included in the published extension.
+- **Illustrated primer for the hands-on tutorials** — `examples/claude-code/guide` explains the scenario, the problem and the steps of tutorials 8 and 9 with illustrations and diagrams, in English and Japanese, including an interactive view of the transitive-query trap and captioned videos of the tutorials' terminal parts with a guide to what to watch for. It is published on [GitHub Pages](https://yaggytter.github.io/vscode-ontology-viewer/), and tutorials 8 and 9 link to it.
+
 ## [0.5.0] — Object Ontology and AI-agent workflows
 
 - **Object Ontology documents** (`*.oont.yaml`, `*.oont.yml`, `*.oont.json`) — a new, object-centric ontology format inspired by operational platforms such as Palantir Foundry: object types with typed properties and primary keys, link types with cardinality (optionally foreign-key backed), interfaces, **action types** (parameters, logic rules, validations, side effects), and optional example objects. The format is this extension's own; it is not Palantir's file format. Files keep their YAML/JSON language mode and are recognized by file name (or, for an untitled document, by an `objectOntology:` first key), so ordinary YAML and JSON files are never claimed.

@@ -1,0 +1,26 @@
+{
+  "name": "ontology-viewer-example-semantic-web-sparql",
+  "private": true,
+  "version": "0.0.0",
+  "description": "A local SPARQL command for Claude Code: it runs queries over Turtle files with the same engine as the Ontology Viewer's SPARQL panel. Companion to tutorial 9.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "sparql": "node --experimental-strip-types --no-warnings src/sparql.ts",
+    "test": "node --experimental-strip-types --no-warnings --test test/*.test.ts",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@comunica/query-sparql-rdfjs": "4.5.0",
+    "n3": "2.1.1"
+  },
+  "devDependencies": {
+    "@rdfjs/types": "2.0.1",
+    "@types/n3": "1.26.1",
+    "@types/node": "22.20.1",
+    "typescript": "5.9.3"
+  }
+}

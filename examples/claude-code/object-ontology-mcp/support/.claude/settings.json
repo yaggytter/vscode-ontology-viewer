@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__support-desk__list_objects",
+      "mcp__support-desk__get_object",
+      "mcp__support-desk__follow_link"
+    ],
+    "deny": [
+      "Edit(./state.json)",
+      "Edit(./support-desk.tools.json)",
+      "Edit(./support-desk.oont.yaml)"
+    ]
+  }
+}

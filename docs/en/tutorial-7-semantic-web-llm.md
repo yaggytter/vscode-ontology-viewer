@@ -8,6 +8,8 @@ What the extension does and does not do matters here:
 - SPARQL runs against **the open document only** — one file at a time.
 - There is **no reasoner**. `owl:TransitiveProperty`, `owl:SymmetricProperty` and `owl:inverseOf` are stated in the samples, but nothing is inferred from them. A query must spell the consequences out with property paths such as `+`, `^`, or a `UNION`. This is the single most important thing to remember when an LLM writes SPARQL for you (see section 2).
 
+To run these scenarios with Claude Code as the assistant, see [Tutorial 9](tutorial-9-claude-code-semantic-web.md).
+
 Each sample opens with **Ontology Viewer: Create Sample Ontology...**; the picker name is given in each section. Results are shown with local names (`:chainR11`) to keep the tables short.
 
 ## 1. GraphRAG: answer from the graph, not from memory
@@ -293,6 +295,7 @@ One row: `markDelayed`, `eta`, `:eta`, 到着予定時刻. An agent that explain
 
 ## Next steps
 
+- [Tutorial 9: Run It with Claude Code — Semantic Web Answers](tutorial-9-claude-code-semantic-web.md) — let Claude Code write and run these queries, and check them in the viewer.
 - [Tutorial 4: Ask Questions with SPARQL](tutorial-4-sparql.md) — the SPARQL panel in detail.
 - [Tutorial 5: Your First Object Ontology](tutorial-5-object-ontology.md) and [Tutorial 6: Object Ontology × AI Agents](tutorial-6-object-ontology-ai-agents.md) — the operational side of the hybrid setup.
 - [Use Cases](use-cases.md) — which style fits which business scenario.

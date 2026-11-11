@@ -165,6 +165,8 @@ SPARQL による問い合わせは、この表のすべての形式で利用で�
 - [はじめての Object Ontology](docs/ja/tutorial-5-object-ontology.md)
 - [Object Ontology × AI エージェント](docs/ja/tutorial-6-object-ontology-ai-agents.md)
 - [Semantic Web オントロジー × LLM](docs/ja/tutorial-7-semantic-web-llm.md)
+- [Claude Code で動かす — Object Ontology とエージェント](docs/ja/tutorial-8-claude-code-object-ontology.md)
+- [Claude Code で動かす — Semantic Web と根拠のある回答](docs/ja/tutorial-9-claude-code-semantic-web.md)
 - [オントロジー方式の選び方](docs/ja/choosing-ontology-style.md)・[ユースケース集](docs/ja/use-cases.md)
 - [対応形式](docs/ja/format-support.md)
 - [トラブルシューティング](docs/ja/troubleshooting.md)
